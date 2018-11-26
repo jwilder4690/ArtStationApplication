@@ -462,10 +462,10 @@ public class ArtStationApplication extends PApplet{
         Circle(float x, float y, float r){
           super(x,y);
           //radius = r;   
-          widthHandleR = new Handle(r/2, new PVector(1,0));
-          widthHandleL = new Handle(r/2, new PVector(-1,0));
-          heightHandleB = new Handle(r/2, new PVector(0,1));
-          heightHandleT = new Handle(r/2, new PVector(0,-1));
+          widthHandleR = new Handle(this, r/2, new PVector(1,0));
+          widthHandleL = new Handle(this, r/2, new PVector(-1,0));
+          heightHandleB = new Handle(this, r/2, new PVector(0,1));
+          heightHandleT = new Handle(this, r/2, new PVector(0,-1));
         }
 
         @Override 
@@ -500,18 +500,11 @@ public class ArtStationApplication extends PApplet{
           popMatrix();
         }
         
-        void drawHandles(){
+        void drawHandles(){   
             widthHandleL.drawHandle();
-            float sx = screenX(widthHandleL.getX(), widthHandleL.getY());
-            float sy =  screenY(widthHandleL.getX(), widthHandleL.getY());
-                    println(sx +", " + sy);
-            widthHandleL.setPos(sx, sy);
             widthHandleR.drawHandle();
-            widthHandleR.setPos(screenX(widthHandleL.getX(), widthHandleL.getY()), screenY(widthHandleL.getX(), widthHandleL.getY()));
             heightHandleT.drawHandle();
-            heightHandleT.setPos(screenX(heightHandleT.getX(), heightHandleT.getY()), screenY(heightHandleT.getX(), heightHandleT.getY()));
-            heightHandleB.drawHandle();
-            heightHandleB.setPos(screenX(heightHandleT.getX(), heightHandleT.getY()), screenY(heightHandleT.getX(), heightHandleT.getY()));
+            heightHandleB.drawHandle();            
         }
         
         @Override
@@ -535,14 +528,14 @@ public class ArtStationApplication extends PApplet{
           
         @Override
         void checkHandles(PVector mouse){
-            if(widthHandleL.overHandle(PVector.sub(mouse,pos)) || widthHandleR.overHandle(PVector.sub(mouse,pos))){
+            if(widthHandleL.overHandle(mouse, rotation) || widthHandleR.overHandle(mouse,rotation)){
                 widthHandleL.setRadius(dist(pos.x, pos.y, mouse.x, mouse.y));
                 widthHandleR.setRadius(dist(pos.x, pos.y, mouse.x, mouse.y));
                 activeHandle[0] = widthHandleL;
                 activeHandle[1] = widthHandleR;
                 handling = true;
             }
-            if(heightHandleT.overHandle(PVector.sub(mouse,pos)) || heightHandleB.overHandle(PVector.sub(mouse,pos))){
+            if(heightHandleT.overHandle(mouse,rotation) || heightHandleB.overHandle(mouse,rotation)){
                 heightHandleT.setRadius(dist(pos.x, pos.y, mouse.x, mouse.y));
                 heightHandleB.setRadius(dist(pos.x, pos.y, mouse.x, mouse.y));
                 activeHandle[0] = heightHandleT;
@@ -744,37 +737,41 @@ public class ArtStationApplication extends PApplet{
       }
      
      class Handle{
-         PVector screenPos;
          float modifier = 1;
          float radius;
          float size = 15;
          int paint = color(255,255,0);
          PVector offset;
+         Shape parent;
+
          
-         Handle(float r, PVector pos){
+         Handle(Shape parent, float r, PVector which){
              radius = r;
-             offset = pos;
+             offset = which;
+             this.parent = parent;
         }
          
-         float getX(){
-             return radius*modifier*offset.x;
+         PVector getPosition(float rot){
+             
+             //TODO: if this works set the position in a PVector that manually updates on mouse release of rotation, to avoid doing this calculation constantly
+             float pointX = modifier*radius*offset.x;
+             float pointY = modifier*radius*offset.y;
+             println(rot < 0);
+             if (rot < 0) return new PVector(parent.getPosition().x + pointX*cos(rot) + pointY*sin(rot),parent.getPosition().y + pointX*sin(rot) + pointY*cos(rot));
+             else return new PVector(parent.getPosition().x + pointX*cos(rot) - pointY*sin(rot),parent.getPosition().y + pointX*sin(rot) + pointY*cos(rot));
          }
-         
-         float getY(){
-             return radius*modifier*offset.y;
-         }
-         
-         void setPos(float x, float y){
-             screenPos.set(x,y);
-         }
-         
+                  
          void setRadius(float r){
+             //TODO: change this to keep radius and only change modifier, maybe below?
+             //modifier = radius/r;
              radius = r;
          }
          
-         boolean overHandle(PVector m){
+         boolean overHandle(PVector m, float rot){
              //println("Handle comparing: "+ m +" vs " + getX() +", "+ getY());
-             return (dist(m.x, m.y, screenPos.x, screenPos.y) < size);
+             println("mouse " + m);
+             println("handle " + getPosition(rot));
+             return (m.dist(getPosition(rot)) < size);
          }
          
          float getRadius(){
@@ -785,7 +782,7 @@ public class ArtStationApplication extends PApplet{
              fill(paint);
              strokeWeight(1);
              stroke(0,0,0);
-             ellipse(getX(), getY(),size,size);
+             ellipse(modifier*radius*offset.x, modifier*radius*offset.y, size,size);
          }
      }
 }
