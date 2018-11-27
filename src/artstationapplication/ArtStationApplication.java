@@ -28,8 +28,10 @@ public class ArtStationApplication extends PApplet{
     
     enum ShapeType {CIR, REC, TRI, LIN}
     enum Mode {DRAW, EDIT}
+    enum Transformation {ROT, SCA, TRA, NON}
     ShapeType activeTool = ShapeType.CIR;
     Mode activeMode = Mode.DRAW;
+    Transformation subMode = Transformation.NON;
     CanvasArea pad = new CanvasArea(this,900,900);
     float scaleFactor;
     float verticalPadding = 0.05f;
@@ -38,7 +40,6 @@ public class ArtStationApplication extends PApplet{
     float horizontalScreenShare = 1 - 2*horizontalPadding;
     boolean[] keys = new boolean[255];
     boolean controlKey = false;
-    boolean handling = false;
     float canvasX;
     float canvasY;
     boolean shift = false;
@@ -139,7 +140,9 @@ public class ArtStationApplication extends PApplet{
                 else if(name.equals("Line")){
                     activeTool = ShapeType.LIN;
                 }
-                drawMode.fire();
+                //drawMode.fire() did nothing not sure why
+                activeMode = Mode.DRAW;
+                pad.toggleSelectShape(false);
                 canvas.requestFocus();
             }
         };
@@ -189,7 +192,7 @@ public class ArtStationApplication extends PApplet{
         //checkInput();
         background(55,55,55);
         drawCanvasArea();
-        //drawFrames();
+        drawFrames();
     }
        
     @Override
@@ -199,20 +202,22 @@ public class ArtStationApplication extends PApplet{
             pad.drawShape(canvasX, canvasY, activeTool);
           }
           else if(activeMode == Mode.EDIT){
-          //???
+            if(subMode == Transformation.NON){
+                subMode = pad.checkForTransformation(new PVector(canvasX, canvasY));
+            }
           }
         }
     }
     
     @Override
     public void mouseReleased(){ 
-        if(mouseOverCanvas()){
+        if(mouseOverCanvas()){ //prevents calling complete shape without any shapes
             if(activeMode == Mode.DRAW){
-                pad.completeShape();
+                pad.completeShape(); //this code doesn't appear to be doing anything any more
             }
-            else if(activeMode == Mode.EDIT){
-              handling = false;
-            }
+        }
+        if(activeMode == Mode.EDIT){
+            subMode = Transformation.NON;
         }
      }
 
@@ -310,6 +315,12 @@ public class ArtStationApplication extends PApplet{
         int getHeight() {
             return canvasHeight;
         }
+        
+        Transformation checkForTransformation(PVector mouse){
+            if(shapes.get(currentShapeIndex).checkHandles(mouse)) return Transformation.SCA;
+            else if(shapes.get(currentShapeIndex).mouseOver(mouse)) return Transformation.TRA;
+            else return Transformation.ROT;
+        }
 
         void drawCanvas(float mx, float my) {
             rectMode(CORNERS);
@@ -335,15 +346,10 @@ public class ArtStationApplication extends PApplet{
                         shapes.get(shapes.size() - 1).modify(mouse);
                     } break;
                 case EDIT:
-                    if(!handling){
-                        shapes.get(currentShapeIndex).checkHandles(mouse);
-                        if(!handling){ //redundant check is because the above function sets handling variable
-                            if(shapes.get(currentShapeIndex).mouseOver(mouse)) shapes.get(currentShapeIndex).manipulate(mouse); 
-                            else shapes.get(currentShapeIndex).changeRotation(mouse);
-                        }
-                    }
-                    else{
-                        shapes.get(currentShapeIndex).adjustActiveHandle(mouse);
+                    switch(subMode){
+                        case SCA: shapes.get(currentShapeIndex).adjustActiveHandle(mouse); break;
+                        case TRA: shapes.get(currentShapeIndex).manipulate(mouse); break;
+                        case ROT: shapes.get(currentShapeIndex).changeRotation(mouse); break;
                     } break;
             }
         }
@@ -379,6 +385,8 @@ public class ArtStationApplication extends PApplet{
             if(shapes.size() > 0){
                 shapes.get(shapes.size()-1).finishShape();
             }
+            activeMode = Mode.EDIT;
+            pad.toggleSelectShape(true);
         }
 
         void drawGrid() {
@@ -415,7 +423,7 @@ public class ArtStationApplication extends PApplet{
         PVector getPosition(){
             return pos;
         }
-        abstract void checkHandles(PVector mouse);
+        abstract boolean checkHandles(PVector mouse);
         abstract void adjustActiveHandle(PVector mouse);
         
         abstract void drawShape();
@@ -521,27 +529,21 @@ public class ArtStationApplication extends PApplet{
           widthHandleL.setRadius(radius);
           heightHandleT.setRadius(radius);
           heightHandleB.setRadius(radius);
-                       
-          //PVector orientation = (pos.x < mouse.x) ? PVector.sub(pos,mouse): PVector.sub(mouse,pos);
-          //rotation = PVector.angleBetween(orientation, new PVector(0,1));
         }
           
         @Override
-        void checkHandles(PVector mouse){
+        boolean checkHandles(PVector mouse){
             if(widthHandleL.overHandle(mouse, rotation) || widthHandleR.overHandle(mouse,rotation)){
-                widthHandleL.setRadius(dist(pos.x, pos.y, mouse.x, mouse.y));
-                widthHandleR.setRadius(dist(pos.x, pos.y, mouse.x, mouse.y));
                 activeHandle[0] = widthHandleL;
                 activeHandle[1] = widthHandleR;
-                handling = true;
+                return true;
             }
-            if(heightHandleT.overHandle(mouse,rotation) || heightHandleB.overHandle(mouse,rotation)){
-                heightHandleT.setRadius(dist(pos.x, pos.y, mouse.x, mouse.y));
-                heightHandleB.setRadius(dist(pos.x, pos.y, mouse.x, mouse.y));
+            else if (heightHandleT.overHandle(mouse,rotation) || heightHandleB.overHandle(mouse,rotation)){
                 activeHandle[0] = heightHandleT;
                 activeHandle[1] = heightHandleB;
-                handling = true;
+                return true;
             }
+            else return false;
         }     
      }
      
@@ -615,8 +617,8 @@ public class ArtStationApplication extends PApplet{
         }
         
         @Override
-        void checkHandles(PVector mouse){
-         
+        boolean checkHandles(PVector mouse){
+            return false;
         }
         
         @Override
@@ -661,8 +663,8 @@ public class ArtStationApplication extends PApplet{
         }
         
         @Override
-        void checkHandles(PVector mouse){
-         
+        boolean checkHandles(PVector mouse){
+            return false;
         }
         
         @Override
@@ -726,8 +728,8 @@ public class ArtStationApplication extends PApplet{
         }
         
         @Override
-        void checkHandles(PVector mouse){
-         
+        boolean checkHandles(PVector mouse){
+            return false;
         }
         
         @Override
@@ -762,9 +764,7 @@ public class ArtStationApplication extends PApplet{
          }
                   
          void setRadius(float r){
-             //TODO: change this to keep radius and only change modifier, maybe below?
-             //modifier = radius/r;
-             radius = r;
+             modifier = r/radius;
          }
          
          boolean overHandle(PVector m, float rot){
