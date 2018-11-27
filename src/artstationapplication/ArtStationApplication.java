@@ -274,6 +274,7 @@ public class ArtStationApplication extends PApplet{
         popMatrix();
     }
     
+    //Scales canvas based on how much of the central screen remains after padding is removed
     void scaleCanvas(float wide, float tall){
         scaleFactor = (horizontalScreenShare*wide)/(float)pad.getWidth();
         if( scaleFactor > (verticalScreenShare*tall)/(float)pad.getHeight()){
