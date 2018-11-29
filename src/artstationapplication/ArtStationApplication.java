@@ -17,8 +17,7 @@ import javafx.scene.image.*;
 import java.util.ArrayList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import static processing.core.PApplet.sq;
-import static processing.core.PApplet.sqrt;
+
 
 /**
  *
@@ -39,11 +38,12 @@ public class ArtStationApplication extends PApplet{
     float horizontalPadding = 0.05f;
     float horizontalScreenShare = 1 - 2*horizontalPadding;
     boolean[] keys = new boolean[255];
-    boolean controlKey = false;
     float canvasX;
     float canvasY;
-    boolean shift = false;
+    boolean shift =false;
     boolean alt = false;
+    boolean control = false;
+
     
     
     //GUI
@@ -65,6 +65,7 @@ public class ArtStationApplication extends PApplet{
         final Stage stage = (Stage) canvas.getScene().getWindow(); // stage is the window
 
         stage.setTitle("Processing/JavaFX Example");
+        stage.setMaximized(true);
         canvas.widthProperty().unbind();
         canvas.heightProperty().unbind();
         
@@ -169,7 +170,6 @@ public class ArtStationApplication extends PApplet{
         
         stage.widthProperty().addListener((obs, oldVal, newVal) -> {
             // Do whatever you want
-            println(stage.getWidth(),stage.getHeight());
             scaleCanvas((float)(stage.getWidth()-toolPane.getWidth()),(float)stage.getHeight());
         });
 
@@ -184,12 +184,13 @@ public class ArtStationApplication extends PApplet{
                 stage.setScene(newscene); // Replace the stage's scene with our new one.
             }
         });
+        canvas.requestFocus();
         return mySurface; 
     }
     
     @Override 
     public void draw(){
-        //checkInput();
+        checkInput();
         background(55,55,55);
         drawCanvasArea();
         drawFrames();
@@ -223,20 +224,27 @@ public class ArtStationApplication extends PApplet{
 
     @Override
     public void keyPressed(){
-        println("Pressed a key");
+        if(key < 255){
+            keys[key] = true;
+        }
         if(key == CODED){
             if(keyCode == SHIFT){
                 shift = true;
-                println("shift is true");
             }
             else if(keyCode == ALT){
                 alt = true;
+            }
+            else if(keyCode == CONTROL){
+                control = true;
             }
         }
     }
     
     @Override
     public void keyReleased(){
+        if(key < 255){
+            keys[key] = false;
+        }
         if(key == CODED){
             if(keyCode == SHIFT){
                 shift = false;
@@ -244,14 +252,25 @@ public class ArtStationApplication extends PApplet{
             else if(keyCode == ALT){
                 alt = false;
             }
+            else if(keyCode == CONTROL){
+                control = false;
+            }
         }
     }
     
-    boolean mouseOverCanvas(){
-        if(canvasX >= 0 && canvasY >= 0 && canvasX <= pad.getHeight() && canvasY <= pad.getWidth()){
-            return true;
+    void checkInput(){
+        if(keys['z'] && control){
+            //TODO: Undo function
         }
-        else return false;
+        if(keys[' ']){
+            activeMode = Mode.DRAW;
+            pad.toggleSelectShape(false);
+        }
+    
+    }
+    
+    boolean mouseOverCanvas(){
+        return (canvasX >= 0 && canvasY >= 0 && canvasX <= pad.getHeight() && canvasY <= pad.getWidth());
     }
     
     void drawFrames(){
@@ -288,10 +307,10 @@ public class ArtStationApplication extends PApplet{
         PApplet.runSketch(processingArgs, app);
     }
     
-     class CanvasArea {
-        private PApplet sketch;
-        final int CENT = 0;
-        final int CORN = 4;
+    class CanvasArea {
+        final private PApplet sketch;
+        final boolean CENT = true;
+        final boolean CORN = false;
         int canvasWidth;
         int canvasHeight;
         int background = color(245, 245, 245);
@@ -320,7 +339,10 @@ public class ArtStationApplication extends PApplet{
         Transformation checkForTransformation(PVector mouse){
             if(shapes.get(currentShapeIndex).checkHandles(mouse)) return Transformation.SCA;
             else if(shapes.get(currentShapeIndex).mouseOver(mouse)) return Transformation.TRA;
-            else return Transformation.ROT;
+            else{
+                shapes.get(currentShapeIndex).setStartingRotation(mouse);
+                return Transformation.ROT;
+            }
         }
 
         void drawCanvas(float mx, float my) {
@@ -344,13 +366,13 @@ public class ArtStationApplication extends PApplet{
             switch (activeMode) {
                 case DRAW:
                     if(!shapes.get(shapes.size() - 1).getFinished()){
-                        shapes.get(shapes.size() - 1).modify(mouse);
+                        shapes.get(shapes.size() - 1).modify(mouse, shift);
                     } break;
                 case EDIT:
                     switch(subMode){
                         case SCA: shapes.get(currentShapeIndex).adjustActiveHandle(mouse); break;
                         case TRA: shapes.get(currentShapeIndex).manipulate(mouse); break;
-                        case ROT: shapes.get(currentShapeIndex).changeRotation(mouse); break;
+                        case ROT: shapes.get(currentShapeIndex).changeRotation(mouse, shift); break;
                     } break;
             }
         }
@@ -360,25 +382,27 @@ public class ArtStationApplication extends PApplet{
             currentShapeIndex = numberOfShapes - 1;
             switch (type) {
                 case CIR:
-                    shapes.add(new Circle(x, y, 50));
+                    shapes.add(new Circle(sketch, x, y, 50));
                     break;
                 case REC:
-                    shapes.add(new Rectangle(x, y, 50, CENT));
+                    shapes.add(new Rectangle(sketch, x, y, 50, CENT));
                     break;
                 case TRI:
-                    shapes.add(new Triangle(x, y, 50));
+                    shapes.add(new Triangle(sketch, x, y, 50));
                     break;
                 case LIN:
-                    shapes.add(new Line(x, y, 50, 50));
+                    shapes.add(new Line(sketch, x, y, 50, 50));
                     break;
             }
         }
 
         void toggleSelectShape(boolean toggleOn) {
-            if (toggleOn) {
-                shapes.get(currentShapeIndex).select();
-            } else {
-                shapes.get(currentShapeIndex).deselect();
+            if(shapes.size() > 0){
+                if (toggleOn) {
+                    shapes.get(currentShapeIndex).select();
+                } else {
+                    shapes.get(currentShapeIndex).deselect();
+                }
             }
         }
 
@@ -403,387 +427,4 @@ public class ArtStationApplication extends PApplet{
             }
         }
     }
-     
-     abstract class Shape{
-        PVector pos;
-        float rotation = 0;
-        int paint = color(255,0,255);
-        int editColor = color(255,255,0);
-        float lineThickness = 1;
-        boolean finished = false;
-        boolean selected = false;
-  
-        Shape(float x, float y){
-          pos = new PVector(x,y);
-        }
-        
-        boolean getFinished(){
-            return finished;
-        }
-        
-        PVector getPosition(){
-            return pos;
-        }
-        abstract boolean checkHandles(PVector mouse);
-        abstract void adjustActiveHandle(PVector mouse);
-        
-        abstract void drawShape();
-
-        abstract void modify(PVector mouse);
-        
-        abstract boolean mouseOver(PVector mouse);
-
-        void manipulate(PVector mouse){
-          pos.set(mouse);
-        }
-        
-        void changeRotation(PVector mouse){
-          PVector orientation = (pos.x < mouse.x) ? PVector.sub(pos,mouse): PVector.sub(mouse,pos);
-          rotation = PVector.angleBetween(orientation, new PVector(0,1));
-          if(shift){
-              float leftover = rotation % QUARTER_PI;
-              leftover = round(leftover);
-              rotation = floor(rotation/QUARTER_PI)*QUARTER_PI+(leftover*QUARTER_PI);
-          }
-        }
-
-        void finishShape(){
-          finished = true;
-        }
-
-        void select(){
-          selected = true;
-        }   
-
-        void deselect(){
-          selected = false;
-        }
-     }
-     
-     class Circle extends Shape{
-        //float radius; //needed? Info contained in handle now
-        Handle widthHandleR;
-        Handle widthHandleL;
-        Handle heightHandleT;
-        Handle heightHandleB;
-        Handle[] activeHandle = new Handle[2];
-
-        Circle(float x, float y, float r){
-          super(x,y);
-          //radius = r;   
-          widthHandleR = new Handle(this, r/2, new PVector(1,0));
-          widthHandleL = new Handle(this, r/2, new PVector(-1,0));
-          heightHandleB = new Handle(this, r/2, new PVector(0,1));
-          heightHandleT = new Handle(this, r/2, new PVector(0,-1));
-        }
-
-        @Override 
-        boolean mouseOver(PVector mouse){
-            if(dist(pos.x, pos.y, mouse.x, mouse.y) < widthHandleL.getRadius()/2 || dist(pos.x, pos.y, mouse.x, mouse.y) < heightHandleT.getRadius()/2){
-                return true;
-            }
-            return false;
-        }
-        
-        @Override
-        void drawShape(){
-          fill(paint);
-          if(lineThickness == 0){
-            noStroke();
-          }
-          else{
-            stroke(0,0,0);
-            strokeWeight(lineThickness);
-          }
-          pushMatrix();
-          translate(pos.x, pos.y);
-          rotate(rotation);
-          ellipse(0,0, widthHandleL.getRadius(), heightHandleT.getRadius());
-          if(selected){
-            noFill();
-            strokeWeight(3);
-            stroke(editColor);
-            ellipse(0,0, widthHandleL.getRadius(), heightHandleT.getRadius());
-            drawHandles();
-          }
-          popMatrix();
-        }
-        
-        void drawHandles(){   
-            widthHandleL.drawHandle();
-            widthHandleR.drawHandle();
-            heightHandleT.drawHandle();
-            heightHandleB.drawHandle();            
-        }
-        
-        @Override
-        void adjustActiveHandle(PVector mouse){
-            activeHandle[0].setRadius(dist(pos.x, pos.y, mouse.x, mouse.y));  
-            activeHandle[1].setRadius(dist(pos.x, pos.y, mouse.x, mouse.y)); 
-        }
-
-        @Override
-        void modify(PVector mouse){
-          float radius = dist(mouse.x, mouse.y, pos.x, pos.y);
-          rotation = 0;
-          widthHandleR.setRadius(radius);
-          widthHandleL.setRadius(radius);
-          heightHandleT.setRadius(radius);
-          heightHandleB.setRadius(radius);
-        }
-          
-        @Override
-        boolean checkHandles(PVector mouse){
-            if(widthHandleL.overHandle(mouse, rotation) || widthHandleR.overHandle(mouse,rotation)){
-                activeHandle[0] = widthHandleL;
-                activeHandle[1] = widthHandleR;
-                return true;
-            }
-            else if (heightHandleT.overHandle(mouse,rotation) || heightHandleB.overHandle(mouse,rotation)){
-                activeHandle[0] = heightHandleT;
-                activeHandle[1] = heightHandleB;
-                return true;
-            }
-            else return false;
-        }     
-     }
-     
-     class Rectangle extends Shape{
-        final int CENT = 0;
-        final int CORN = 4;
-        float radius;
-        float widthModifier = 1;
-        float heightModifier = 1;
-        PVector corner;
-        int type;
-  
-        Rectangle(float a, float b, float c, int style){ 
-          super(a,b);
-          radius = c;
-          type = style;
-          corner = new PVector(a+1,b+1); //default corner, will not be displayed 
-        }
-
-        @Override 
-        boolean mouseOver(PVector mouse){
-            return false;
-        }
-        
-        @Override
-        void drawShape(){
-          fill(paint);
-          if(lineThickness == 0){
-            noStroke();
-          }
-          else{
-            strokeWeight(lineThickness);
-          }
-          pushMatrix();
-          translate(pos.x, pos.y);
-          rotate(rotation);
-          if(type == CENT){
-            rectMode(CENTER);
-            rect(0,0, radius*widthModifier, radius*heightModifier);
-            if(selected){
-                noFill();
-                strokeWeight(3);
-                stroke(255,255, 0);
-                rect(0,0, radius*widthModifier, radius*heightModifier);
-              }
-          }
-          else if(type == CORN){
-            rectMode(CORNERS);
-            rect(0,0, corner.x, corner.y);
-            if(selected){
-                noFill();
-                strokeWeight(3);
-                stroke(255,255, 0);
-                rect(0,0, corner.x, corner.y);
-              }
-          }
-          popMatrix();
-        }
-
-        @Override
-        void modify(PVector mouse){
-          if(type == CENT) radius = 2*dist(mouse.x, mouse.y, pos.x, pos.y);
-          else if(type == CORN) corner.set(mouse.x, mouse.y);
-          PVector orientation = (pos.x < mouse.x) ? PVector.sub(pos,mouse): PVector.sub(mouse,pos);
-          rotation = PVector.angleBetween(orientation, new PVector(0,1));
-          if(shift){
-              float leftover = rotation % QUARTER_PI;
-              leftover = round(leftover);
-              rotation = floor(rotation/QUARTER_PI)*QUARTER_PI+(leftover*QUARTER_PI);
-          }
-        }
-        
-        @Override
-        boolean checkHandles(PVector mouse){
-            return false;
-        }
-        
-        @Override
-        void adjustActiveHandle(PVector mouse){
-            
-        }
-      }
-     
-     class Line extends Shape{
-        PVector tail;
-
-        Line(float x, float y, float x2, float y2){
-          super(x,y);
-          tail = new PVector(x2,y2);
-        }
-
-        @Override 
-        boolean mouseOver(PVector mouse){
-            return false;
-        }
-        
-        @Override
-        void drawShape(){
-          fill(paint);
-          strokeWeight(lineThickness);
-          pushMatrix();
-          translate(pos.x, pos.y);
-          line(0,0, tail.x, tail.y);
-          if(selected){
-            noFill();
-            strokeWeight(3);
-            stroke(255,255, 0);
-            line(0,0, tail.x, tail.y);
-          }
-          popMatrix();
-        }
-
-        @Override
-        void modify(PVector mouse){
-          tail.set(mouse.x, mouse.y);
-          tail.sub(pos);
-        }
-        
-        @Override
-        boolean checkHandles(PVector mouse){
-            return false;
-        }
-        
-        @Override
-        void adjustActiveHandle(PVector mouse){
-            
-        }
-      }
-     
-     class Triangle extends Shape{
-        float altitude = 1;
-        float side = 1;
-        float heightModifier = 1;
-        float leftModifier = 1;
-        float rightModifier = 1;
-
-        Triangle(float x, float y, float tall){
-          super(x,y);
-          altitude = tall;
-          side = sqrt((float)(4.0/3.0)*sq(altitude));
-        }
-
-        @Override 
-        boolean mouseOver(PVector mouse){
-            return false;
-        }
-        
-        @Override
-        void drawShape(){
-          fill(paint);
-          if(lineThickness == 0){
-            noStroke();
-          }
-          else{
-            strokeWeight(lineThickness);
-          }
-          pushMatrix();
-          translate(pos.x, pos.y);
-          rotate(rotation);
-          triangle(0, heightModifier*(-2*altitude/3), leftModifier*(-side/2), altitude/3, rightModifier*(side/2), altitude/3); 
-          if(selected){
-            noFill();
-            strokeWeight(3);
-            stroke(255,255, 0);
-            triangle(0, heightModifier*(-2*altitude/3), leftModifier*(-side/2), altitude/3, rightModifier*(side/2), altitude/3); 
-          }
-          popMatrix();
-        }
-
-        @Override
-        void modify(PVector mouse){
-          altitude = 3*dist(pos.x, pos.y, mouse.x, mouse.y);
-          side = sqrt((float)(4.0/3.0)*sq(altitude));
-          PVector orientation = PVector.sub(pos,mouse);
-          rotation = (pos.x < mouse.x) ? PVector.angleBetween(orientation, new PVector(0,1)):  PI + PVector.angleBetween(orientation, new PVector(0,-1));
-          rotation -= radians(60);
-          if(shift){
-              float leftover = rotation % radians(30);
-              leftover = round(leftover);
-              rotation = floor(rotation/radians(30))*radians(30)+(leftover*radians(30));
-          }
-        }
-        
-        @Override
-        boolean checkHandles(PVector mouse){
-            return false;
-        }
-        
-        @Override
-        void adjustActiveHandle(PVector mouse){
-            
-        }
-      }
-     
-     class Handle{
-         float modifier = 1;
-         float radius;
-         float size = 15;
-         int paint = color(255,255,0);
-         PVector offset;
-         Shape parent;
-
-         
-         Handle(Shape parent, float r, PVector which){
-             radius = r;
-             offset = which;
-             this.parent = parent;
-        }
-         
-         PVector getPosition(float rot){
-             
-             //TODO: if this works set the position in a PVector that manually updates on mouse release of rotation, to avoid doing this calculation constantly
-             float pointX = modifier*radius*offset.x;
-             float pointY = modifier*radius*offset.y;
-             println(rot < 0);
-             if (rot < 0) return new PVector(parent.getPosition().x + pointX*cos(rot) + pointY*sin(rot),parent.getPosition().y + pointX*sin(rot) + pointY*cos(rot));
-             else return new PVector(parent.getPosition().x + pointX*cos(rot) - pointY*sin(rot),parent.getPosition().y + pointX*sin(rot) + pointY*cos(rot));
-         }
-                  
-         void setRadius(float r){
-             modifier = r/radius;
-         }
-         
-         boolean overHandle(PVector m, float rot){
-             //println("Handle comparing: "+ m +" vs " + getX() +", "+ getY());
-             println("mouse " + m);
-             println("handle " + getPosition(rot));
-             return (m.dist(getPosition(rot)) < size);
-         }
-         
-         float getRadius(){
-             return 2*radius*modifier;
-         }
-         
-         void drawHandle(){
-             fill(paint);
-             strokeWeight(1);
-             stroke(0,0,0);
-             ellipse(modifier*radius*offset.x, modifier*radius*offset.y, size,size);
-         }
-     }
 }
