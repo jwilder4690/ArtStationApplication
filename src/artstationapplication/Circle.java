@@ -21,11 +21,10 @@ class Circle extends Shape{
 
     Circle(PApplet drawingSpace, float x, float y, float r){
       super(drawingSpace,x,y);
-      //radius = r;   
-      widthHandleR = new Handle(drawingSpace, this, r/2, new PVector(1,0));
-      widthHandleL = new Handle(drawingSpace, this, r/2, new PVector(-1,0));
-      heightHandleB = new Handle(drawingSpace, this, r/2, new PVector(0,1));
-      heightHandleT = new Handle(drawingSpace, this, r/2, new PVector(0,-1));
+      widthHandleR = new Handle(drawingSpace, this, r, new PVector(1,0));
+      widthHandleL = new Handle(drawingSpace, this, r, new PVector(-1,0));
+      heightHandleB = new Handle(drawingSpace, this, r, new PVector(0,1));
+      heightHandleT = new Handle(drawingSpace, this, r, new PVector(0,-1));
     }
 
     @Override 
@@ -49,12 +48,12 @@ class Circle extends Shape{
       app.pushMatrix();
       app.translate(pos.x, pos.y);
       app.rotate(rotation);
-      app.ellipse(0,0, widthHandleL.getRadius(), heightHandleT.getRadius());
+      app.ellipse(0,0, 2*widthHandleL.getRadius(), 2*heightHandleT.getRadius());
       if(selected){
         app.noFill();
         app.strokeWeight(3);
         app.stroke(editColor);
-        app.ellipse(0,0, widthHandleL.getRadius(), heightHandleT.getRadius());
+        app.ellipse(0,0, 2*widthHandleL.getRadius(), 2*heightHandleT.getRadius());
         drawHandles();
       }
       app.popMatrix();
@@ -67,11 +66,7 @@ class Circle extends Shape{
         heightHandleB.drawHandle();            
     }
 
-    @Override
-    void adjustActiveHandle(PVector mouse){
-        activeHandle[0].setRadius(app.dist(pos.x, pos.y, mouse.x, mouse.y));  
-        activeHandle[1].setRadius(app.dist(pos.x, pos.y, mouse.x, mouse.y)); 
-    }
+
 
     @Override
     void modify(PVector mouse, boolean shift){
@@ -96,5 +91,11 @@ class Circle extends Shape{
             return true;
         }
         else return false;
-    }     
+    }    
+    
+    @Override
+    void adjustActiveHandle(PVector mouse){
+        activeHandle[0].setRadius(app.dist(pos.x, pos.y, mouse.x, mouse.y));  
+        activeHandle[1].setRadius(app.dist(pos.x, pos.y, mouse.x, mouse.y)); 
+    }
  }

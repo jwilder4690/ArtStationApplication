@@ -17,7 +17,7 @@ abstract class Shape{
     final float QUARTER_PI = app.QUARTER_PI;
     final float PI = app.PI;
     PVector startingRotation;
-    float angularChange = 0;
+    float offset = 0;
     float rotation = 0;
     int paint;
     int editColor;
@@ -46,7 +46,7 @@ abstract class Shape{
     }
 
     void setStartingRotation(PVector mouse) {
-        startingRotation = PVector.sub(mouse, pos);
+        offset = rotation - app.atan2(mouse.y - pos.y, mouse.x - pos.x);
     }
 
     abstract boolean checkHandles(PVector mouse);
@@ -63,14 +63,9 @@ abstract class Shape{
         pos.set(mouse);
     }
 
-    void changeRotation(PVector mouse, boolean shiftKey) {
-        PVector orientation = PVector.sub(mouse,pos);
-        rotation = PVector.angleBetween(orientation, startingRotation);
-        //angleBetween is giving us the correct angle, but once it goes past PI it begins shrinking, causing the rotation to reverse. 
-        if(PI - rotation < 0.05){
-            setStartingRotation(mouse);
-        }
-
+    void changeRotation(PVector mouse, boolean shiftKey) {         
+          rotation = app.atan2(mouse.y - pos.y, mouse.x - pos.x);
+          rotation += offset;
         if (shiftKey) {
             float leftover = rotation % QUARTER_PI;
             leftover = app.round(leftover);

@@ -42,11 +42,12 @@ import processing.core.*;
          }
          
          boolean overHandle(PVector m, float rot){
+             //new rotation method causes this check to fail?
              return (m.dist(getPosition(rot)) < size);
          }
          
          float getRadius(){
-             return 2*radius*modifier;
+             return radius*modifier;
          }
          
          void drawHandle(){
