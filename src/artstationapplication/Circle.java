@@ -29,10 +29,12 @@ class Circle extends Shape{
 
     @Override 
     boolean mouseOver(PVector mouse){
+        //TODO: Proper ellipse testing
         if(app.dist(pos.x, pos.y, mouse.x, mouse.y) < widthHandleL.getRadius()/2 || app.dist(pos.x, pos.y, mouse.x, mouse.y) < heightHandleT.getRadius()/2){
             return true;
         }
         return false;
+
     }
 
     @Override

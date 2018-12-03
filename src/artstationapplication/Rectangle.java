@@ -17,9 +17,6 @@ import processing.core.*;
     Handle heightHandleT;
     Handle heightHandleB;
     Handle[] activeHandle = new Handle[2];
-//        float radius;
-//        float widthModifier = 1;
-//        float heightModifier = 1;
     PVector corner;
     boolean centerType;
 
@@ -35,9 +32,11 @@ import processing.core.*;
 
     @Override 
     boolean mouseOver(PVector mouse){
-        if(mouse.x > pos.x + widthHandleL.getRadius() || mouse.x < pos.x - widthHandleL.getRadius()) return false;
-        if(mouse.y > pos.y + heightHandleT.getRadius() || mouse.y < pos.y - heightHandleT.getRadius()) return false;
-        return true;
+        float deltaX = mouse.x - pos.x;
+        float deltaY = mouse.y - pos.y;
+        float rotX = deltaX*app.cos(-rotation) - deltaY*app.sin(-rotation);
+        float rotY = deltaY*app.cos(-rotation) + deltaX*app.sin(-rotation);
+        return (app.abs(rotX) < widthHandleL.getRadius() && app.abs(rotY) < heightHandleT.getRadius());
     }
 
     @Override

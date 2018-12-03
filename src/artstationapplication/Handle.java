@@ -33,8 +33,9 @@ import processing.core.*;
              //TODO: if this works set the position in a PVector that manually updates on mouse release of rotation, to avoid doing this calculation constantly
              float pointX = modifier*radius*offset.x;
              float pointY = modifier*radius*offset.y;
-             if (rot < 0) return new PVector(parent.getPosition().x + pointX*app.cos(rot) + pointY*app.sin(rot),parent.getPosition().y + pointX*app.sin(rot) + pointY*app.cos(rot));
-             else return new PVector(parent.getPosition().x + pointX*app.cos(rot) - pointY*app.sin(rot),parent.getPosition().y + pointX*app.sin(rot) + pointY*app.cos(rot));
+             //still not returning correct
+             //return new PVector(parent.getPosition().x + pointX * app.cos(rot) + pointY*app.sin(rot), parent.getPosition().y - pointX*app.sin(rot) + pointY*app.cos(rot));
+             return new PVector(parent.getPosition().x + pointX * app.cos(rot) - pointY*app.sin(rot), parent.getPosition().y + pointX*app.sin(rot) + pointY*app.cos(rot));
          }
                   
          void setRadius(float r){
