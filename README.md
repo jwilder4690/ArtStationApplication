@@ -12,8 +12,8 @@ First commits are merges of code developed in my "ArtStation-Halted" repository.
 - [x] Implement edit mode transformations (Transformation, Rotation, Scaling)
 - [ ] Apply all transformations to each shape
     - [x] Circle
-    - [ ] Triangle
-    - [ ] Rectangle
+    - [x] Triangle
+    - [x] Rectangle
     - [ ] Line 
 - [ ] GUI element shape list (Observable list)
     * Reorder
