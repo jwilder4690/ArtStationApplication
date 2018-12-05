@@ -18,6 +18,7 @@ class Circle extends Shape{
     Handle heightHandleT;
     Handle heightHandleB;
     Handle[] activeHandle = new Handle[2];
+    Handle[] inactiveHandle = new Handle[2];
 
     Circle(PApplet drawingSpace, float x, float y, float r){
       super(drawingSpace,x,y);
@@ -71,7 +72,7 @@ class Circle extends Shape{
 
 
     @Override
-    void modify(PVector mouse, boolean shift){
+    void modify(PVector mouse){
       float radius = app.dist(mouse.x, mouse.y, pos.x, pos.y);
       rotation = 0;
       widthHandleR.setRadius(radius);
@@ -85,11 +86,15 @@ class Circle extends Shape{
         if(widthHandleL.overHandle(mouse, rotation) || widthHandleR.overHandle(mouse,rotation)){
             activeHandle[0] = widthHandleL;
             activeHandle[1] = widthHandleR;
+            inactiveHandle[0] = heightHandleT;
+            inactiveHandle[1] = heightHandleB;
             return true;
         }
         else if (heightHandleT.overHandle(mouse,rotation) || heightHandleB.overHandle(mouse,rotation)){
             activeHandle[0] = heightHandleT;
             activeHandle[1] = heightHandleB;
+            inactiveHandle[0] = widthHandleL;
+            inactiveHandle[1] = widthHandleR;
             return true;
         }
         else return false;
@@ -97,7 +102,17 @@ class Circle extends Shape{
     
     @Override
     void adjustActiveHandle(PVector mouse){
-        activeHandle[0].setRadius(app.dist(pos.x, pos.y, mouse.x, mouse.y));  
-        activeHandle[1].setRadius(app.dist(pos.x, pos.y, mouse.x, mouse.y)); 
+        float delta = (activeHandle[0].getRadius() - inactiveHandle[0].getRadius())/activeHandle[0].getRadius();
+        float dist = app.dist(pos.x, pos.y, mouse.x, mouse.y);
+        if(shift){       
+            activeHandle[0].setRadius(dist); 
+            activeHandle[1].setRadius(dist);
+            inactiveHandle[0].setRadius(dist - dist * delta);  
+            inactiveHandle[1].setRadius(dist - dist * delta);
+        }
+        else{
+            activeHandle[0].setRadius(dist);  
+            activeHandle[1].setRadius(dist);
+        }
     }
  }

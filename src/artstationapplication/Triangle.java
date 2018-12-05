@@ -16,6 +16,7 @@ import processing.core.*;
     Handle widthHandleR;
     Handle heightHandleT;
     Handle activeHandle;
+    Handle[] inactiveHandle = new Handle[2];
 
 
     Triangle(PApplet drawingSpace, float x, float y, float tall){
@@ -75,16 +76,12 @@ import processing.core.*;
     }
 
     @Override
-    void modify(PVector mouse, boolean shift){
-      //altitude = 3*app.dist(pos.x, pos.y, mouse.x, mouse.y);
-      //side = app.sqrt((float)(4.0/3.0)*app.sq(altitude));
+    void modify(PVector mouse){
       float radius = app.dist(pos.x, pos.y, mouse.x, mouse.y);
       heightHandleT.setRadius(radius);
       widthHandleL.setRadius(app.sqrt((float)(4.0/3.0)*app.sq(radius))/2);
       widthHandleR.setRadius(app.sqrt((float)(4.0/3.0)*app.sq(radius))/2);
-//      PVector orientation = PVector.sub(pos,mouse);
-//      rotation = (pos.x < mouse.x) ? PVector.angleBetween(orientation, new PVector(0,1)):  PI + PVector.angleBetween(orientation, new PVector(0,-1));
-//      rotation -= app.radians(60);
+
       rotation = app.atan2(mouse.y - pos.y, mouse.x - pos.x);
       rotation += offset;
       if(shift){ //implement shift
@@ -98,14 +95,20 @@ import processing.core.*;
     boolean checkHandles(PVector mouse){
         if(widthHandleL.overHandle(mouse, rotation)){
             activeHandle = widthHandleL;
+            inactiveHandle[0] = heightHandleT;
+            inactiveHandle[1] = widthHandleR;
             return true;
         }
         else if (heightHandleT.overHandle(mouse,rotation)){
             activeHandle = heightHandleT;
+            inactiveHandle[0] = widthHandleL;
+            inactiveHandle[1] = widthHandleR;
             return true;
         }
         else if(widthHandleR.overHandle(mouse, rotation)){
             activeHandle = widthHandleR;
+            inactiveHandle[0] = heightHandleT;
+            inactiveHandle[1] = widthHandleL;
             return true;
         }
         else return false;
@@ -113,7 +116,18 @@ import processing.core.*;
 
     @Override
     void adjustActiveHandle(PVector mouse){
-        float radius = app.dist(pos.x, pos.y, mouse.x, mouse.y);  
-        activeHandle.setRadius(radius);
+        float delta1 = (activeHandle.getRadius() - inactiveHandle[0].getRadius())/activeHandle.getRadius();
+        float delta2 = (activeHandle.getRadius() - inactiveHandle[1].getRadius())/activeHandle.getRadius();
+        float dist = app.dist(pos.x, pos.y, mouse.x, mouse.y);
+        if(shift){       
+            activeHandle.setRadius(dist); 
+            inactiveHandle[0].setRadius(dist - dist * delta1);  
+            inactiveHandle[1].setRadius(dist - dist * delta2);  
+        }
+        else{
+            activeHandle.setRadius(dist);  
+        }
+//        float radius = app.dist(pos.x, pos.y, mouse.x, mouse.y);  
+//        activeHandle.setRadius(radius);
     }
   }

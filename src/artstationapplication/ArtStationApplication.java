@@ -337,10 +337,14 @@ public class ArtStationApplication extends PApplet{
         }
         
         Transformation checkForTransformation(PVector mouse){
-            if(shapes.get(currentShapeIndex).checkHandles(mouse)) return Transformation.SCA;
+            if(shapes.get(currentShapeIndex).checkHandles(mouse)){
+                shapes.get(currentShapeIndex).setShift(shift);
+                return Transformation.SCA;
+            }
             else if(shapes.get(currentShapeIndex).mouseOver(mouse)) return Transformation.TRA;
             else{
                 shapes.get(currentShapeIndex).setStartingRotation(mouse);
+                shapes.get(currentShapeIndex).setShift(shift);
                 return Transformation.ROT;
             }
         }
@@ -366,13 +370,15 @@ public class ArtStationApplication extends PApplet{
             switch (activeMode) {
                 case DRAW:
                     if(!shapes.get(shapes.size() - 1).getFinished()){
-                        shapes.get(shapes.size() - 1).modify(mouse, shift);
+                        shapes.get(currentShapeIndex).setShift(shift);
+                        shapes.get(shapes.size() - 1).modify(mouse);
                     } break;
                 case EDIT:
                     switch(subMode){
                         case SCA: shapes.get(currentShapeIndex).adjustActiveHandle(mouse); break;
                         case TRA: shapes.get(currentShapeIndex).manipulate(mouse); break;
-                        case ROT: shapes.get(currentShapeIndex).changeRotation(mouse, shift); break;
+                        case ROT: shapes.get(currentShapeIndex).changeRotation(mouse);
+                            break;
                     } break;
             }
         }

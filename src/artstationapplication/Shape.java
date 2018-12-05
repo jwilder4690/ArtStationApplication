@@ -15,6 +15,7 @@ abstract class Shape{
     PApplet app;
     PVector pos;
     final float QUARTER_PI = app.QUARTER_PI;
+    final float HALF_PI = app.HALF_PI;
     final float PI = app.PI;
     PVector startingRotation;
     float offset = 0;
@@ -55,7 +56,7 @@ abstract class Shape{
 
     abstract void drawShape();
 
-    abstract void modify(PVector mouse, boolean shift);
+    abstract void modify(PVector mouse);
 
     abstract boolean mouseOver(PVector mouse);
 
@@ -63,10 +64,10 @@ abstract class Shape{
         pos.set(mouse);
     }
 
-    void changeRotation(PVector mouse, boolean shiftKey) {         
+    void changeRotation(PVector mouse) {         
           rotation = app.atan2(mouse.y - pos.y, mouse.x - pos.x);
           rotation += offset;
-        if (shiftKey) {
+        if (shift) {
             float leftover = rotation % QUARTER_PI;
             leftover = app.round(leftover);
             rotation = app.floor(rotation / QUARTER_PI) * QUARTER_PI + (leftover * QUARTER_PI);
