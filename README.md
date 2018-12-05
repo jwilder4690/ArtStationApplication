@@ -20,7 +20,10 @@ First commits are merges of code developed in my "ArtStation-Halted" repository.
     * Delete
 - [ ] Add features (Arcs, polygon, curves)
 - [ ] Add feature groups
-- [ ] Add features (Fill color, stroke weight, stroke color, alpha)
+- [ ] Add features
+     - [ ] Fill color and alpha
+     - [ ] Stroke weigt and color
+     - [ ] Canvas sizing
 - [ ] Improve usability (crtl z, shift)
 - [ ] Output
     - [ ] Image file (support alpha)
