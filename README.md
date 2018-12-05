@@ -14,14 +14,14 @@ First commits are merges of code developed in my "ArtStation-Halted" repository.
     - [x] Circle
     - [x] Triangle
     - [x] Rectangle
-    - [ ] Line 
+    - [x] Line 
 - [ ] GUI element shape list (Observable list)
     * Reorder
     * Delete
 - [ ] Add features (Arcs, polygon, curves)
 - [ ] Add feature groups
 - [ ] Add features (Fill color, stroke weight, stroke color, alpha)
-- [ ] Improve usability (crtl z)
+- [ ] Improve usability (crtl z, shift)
 - [ ] Output
     - [ ] Image file (support alpha)
     - [ ] Processing Code 
