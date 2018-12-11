@@ -30,11 +30,9 @@ import processing.core.*;
          
          PVector getPosition(float rot){
              
-             //TODO: if this works set the position in a PVector that manually updates on mouse release of rotation, to avoid doing this calculation constantly
+             //Optional TODO: if this works set the position in a PVector that manually updates on mouse release of rotation, to avoid doing this calculation constantly
              float pointX = modifier*radius*offset.x;
              float pointY = modifier*radius*offset.y;
-             //still not returning correct
-             //return new PVector(parent.getPosition().x + pointX * app.cos(rot) + pointY*app.sin(rot), parent.getPosition().y - pointX*app.sin(rot) + pointY*app.cos(rot));
              return new PVector(parent.getPosition().x + pointX * app.cos(rot) - pointY*app.sin(rot), parent.getPosition().y + pointX*app.sin(rot) + pointY*app.cos(rot));
          }
                   
@@ -43,7 +41,6 @@ import processing.core.*;
          }
          
          boolean overHandle(PVector m, float rot){
-             //new rotation method causes this check to fail?
              return (m.dist(getPosition(rot)) < size);
          }
          

@@ -30,12 +30,9 @@ class Circle extends Shape{
 
     @Override 
     boolean mouseOver(PVector mouse){
-        //TODO: Proper ellipse testing
-        if(app.dist(pos.x, pos.y, mouse.x, mouse.y) < widthHandleL.getRadius()/2 || app.dist(pos.x, pos.y, mouse.x, mouse.y) < heightHandleT.getRadius()/2){
-            return true;
-        }
-        return false;
-
+        //This equation checks for point inside rotated ellipse. No changes needed to be made to account for y down coordinate system. 
+        if(app.sq(app.cos(rotation)*(mouse.x - pos.x)+ app.sin(rotation)*(mouse.y - pos.y))/app.sq(widthHandleR.getRadius()) + app.sq(app.sin(rotation)*(mouse.x - pos.x)- app.cos(rotation)*(mouse.y - pos.y))/app.sq(heightHandleT.getRadius()) >= 1) return false;
+        else return true;
     }
 
     @Override

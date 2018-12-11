@@ -92,18 +92,21 @@ import processing.core.*;
             angle = app.floor(angle/QUARTER_PI)*QUARTER_PI+(leftover*QUARTER_PI);  
             
             if(angle == 0 || angle % PI == 0){
-                System.out.println("Horizonal");
                 activeHandle.setPosition(new PVector(mouse.x, inactiveHandle.getPosition().y));
             }
             else if(angle % HALF_PI == 0 ){
-                System.out.println("Vertical");
                 activeHandle.setPosition(new PVector(inactiveHandle.getPosition().x, mouse.y));
             }
             else {
-                System.out.println("Diagonal");
                 float dist = mouse.dist(inactiveHandle.getPosition());
-                //TODO: calculate vector of diagonal, scale by dist, and add to inactive pos
-                //activeHandle.setPosition(new PVector(mouse.x, mouse.x));
+                int direction;
+                if(mouse.y > inactiveHandle.getPosition().y){
+                    direction = 1;
+                }
+                else direction = -1;
+                PVector newAngle = new PVector(app.cos(angle), direction*app.sin(angle));
+                newAngle.mult(dist);
+                activeHandle.setPosition(PVector.add(newAngle, inactiveHandle.getPosition()));
             }
         }
         else{

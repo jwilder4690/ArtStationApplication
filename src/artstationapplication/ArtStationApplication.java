@@ -17,6 +17,9 @@ import javafx.scene.image.*;
 import java.util.ArrayList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.collections.*;
+import javafx.beans.value.*;
+import javafx.scene.paint.Color;
 
 
 /**
@@ -25,7 +28,7 @@ import javafx.event.EventHandler;
  */
 public class ArtStationApplication extends PApplet{
     
-    enum ShapeType {CIR, REC, TRI, LIN}
+    enum ShapeType {CIR, REC, TRI, LIN, POL}
     enum Mode {DRAW, EDIT}
     enum Transformation {ROT, SCA, TRA, NON}
     ShapeType activeTool = ShapeType.CIR;
@@ -43,17 +46,23 @@ public class ArtStationApplication extends PApplet{
     boolean shift =false;
     boolean alt = false;
     boolean control = false;
+    int toolBarWidth = 50;
+    int controlBarWidth = 100;
+    int spacing = 5;
+    Region strut = new Region();
 
     
     
     //GUI
     ToggleGroup toolGroup;
     ToggleGroup modeGroup;
+    ListView<String> shapeViewer;
 
     @Override
     public void settings(){
-        size(displayWidth,displayHeight, FX2D);
-        //size(1280,720, FX2D);
+        
+        size(displayWidth - toolBarWidth - controlBarWidth,displayHeight, FX2D);
+        
     }
     
     @Override
@@ -63,12 +72,70 @@ public class ArtStationApplication extends PApplet{
         final PSurfaceFX FXSurface = (PSurfaceFX) mySurface;
         final Canvas canvas = (Canvas) FXSurface.getNative(); // canvas is the processing drawing
         final Stage stage = (Stage) canvas.getScene().getWindow(); // stage is the window
-
-        stage.setTitle("Processing/JavaFX Example");
-        stage.setMaximized(true);
-        canvas.widthProperty().unbind();
-        canvas.heightProperty().unbind();
         
+        //Dummy Menu Bar from Practice//////////////////////////////////////////
+        MenuBar mb = new MenuBar();
+
+        Menu fileMenu = new Menu("File");
+        MenuItem open = new MenuItem("Open");
+        MenuItem close = new MenuItem("Close");
+        MenuItem save = new MenuItem("Save");
+        MenuItem exit = new MenuItem("Exit");
+        fileMenu.getItems().addAll(open, close, save, new SeparatorMenuItem(), exit);
+        mb.getMenus().add(fileMenu);
+
+        Menu optionsMenu = new Menu("Options");
+
+        Menu inDevicesMenu = new Menu("Input Devices");
+        MenuItem keyboard = new MenuItem("Keyboard");
+        MenuItem mouse = new MenuItem("Mouse");
+        MenuItem touchscreen = new MenuItem("Touchscreen");
+        inDevicesMenu.getItems().addAll(keyboard,mouse,touchscreen);
+        optionsMenu.getItems().add(inDevicesMenu);
+
+        Menu clockMenu = new Menu("Clock Style");
+        MenuItem analog = new MenuItem("Analog");
+        MenuItem digital = new MenuItem("Digital");
+        clockMenu.getItems().addAll(analog,digital);
+        optionsMenu.getItems().add(clockMenu);
+
+        optionsMenu.getItems().add(new SeparatorMenuItem());
+
+        MenuItem reset = new MenuItem("Reset");
+        optionsMenu.getItems().add(reset);
+
+        mb.getMenus().add(optionsMenu);
+
+        Menu helpMenu = new Menu("Help");
+        MenuItem about = new MenuItem("About");
+        helpMenu.getItems().add(about);
+
+        mb.getMenus().add(helpMenu);
+
+        EventHandler<ActionEvent> MenuHandler = new EventHandler<ActionEvent>(){ 
+            public void handle(ActionEvent ae){ 
+                String name = ((MenuItem)ae.getTarget()).getText();
+                //all menu Handling done here
+                if(name.equals("Exit")) Platform.exit();
+
+                //response.setText(name + " selected.");
+            }
+        };
+        
+        open.setOnAction(MenuHandler);
+        close.setOnAction(MenuHandler);
+        save.setOnAction(MenuHandler);
+        exit.setOnAction(MenuHandler);
+        keyboard.setOnAction(MenuHandler);
+        mouse.setOnAction(MenuHandler);
+        touchscreen.setOnAction(MenuHandler);
+        analog.setOnAction(MenuHandler);
+        digital.setOnAction(MenuHandler);
+        reset.setOnAction(MenuHandler);
+        about.setOnAction(MenuHandler);
+        
+        
+        //Mode buttons//////////////////////////////////////////////////////////
         modeGroup = new ToggleGroup();
         
         RadioButton drawMode = new RadioButton("Draw");
@@ -92,9 +159,10 @@ public class ArtStationApplication extends PApplet{
                 canvas.requestFocus();
             }
         });  
-        
         drawMode.setSelected(true);
         
+        
+        //Tool Buttons//////////////////////////////////////////////////////////
         toolGroup = new ToggleGroup();
         
         Image imageCircle = new Image(getClass().getResource("data/btnCircle.png").toExternalForm());
@@ -125,6 +193,13 @@ public class ArtStationApplication extends PApplet{
         btnLine.setToggleGroup(toolGroup);
         btnLine.setTooltip(new Tooltip("Click for first point and drag to second point."));
         
+        Image imagePoly = new Image(getClass().getResource("data/btnPoly.png").toExternalForm());
+        ToggleButton btnPoly = new ToggleButton("Poly", new ImageView(imagePoly));
+        btnPoly.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        btnPoly.setStyle("-fx-padding:0");
+        btnPoly.setToggleGroup(toolGroup);
+        btnPoly.setTooltip(new Tooltip("Single click for each vertex, SPACE to complete."));
+        
         EventHandler<ActionEvent> ToolHandler = new EventHandler<ActionEvent>(){
             public void handle(ActionEvent ae){
                 String name = ((ToggleButton)ae.getTarget()).getText();
@@ -141,7 +216,9 @@ public class ArtStationApplication extends PApplet{
                 else if(name.equals("Line")){
                     activeTool = ShapeType.LIN;
                 }
-                //drawMode.fire() did nothing not sure why
+                else if(name.equals("Poly")){
+                    activeTool = ShapeType.POL;
+                }
                 activeMode = Mode.DRAW;
                 pad.toggleSelectShape(false);
                 canvas.requestFocus();
@@ -152,31 +229,65 @@ public class ArtStationApplication extends PApplet{
         btnRectangle.setOnAction(ToolHandler);
         btnLine.setOnAction(ToolHandler);
         btnTriangle.setOnAction(ToolHandler);
+        btnPoly.setOnAction(ToolHandler);
         
-        final VBox modes = new VBox(5);      
+        //Observable List///////////////////////////////////////////////////////
+        ObservableList<String> shapeTypes = FXCollections.observableArrayList("Circle", "Rectangle", "Triangle", "Line", "Polygon");
+        shapeViewer = new ListView<String>(shapeTypes);
+        shapeViewer.setPrefSize(controlBarWidth, controlBarWidth*5);
+        MultipleSelectionModel<String> selectionModel = shapeViewer.getSelectionModel();
+        
+        selectionModel.selectedItemProperty().addListener(new ChangeListener<String>(){
+            public void changed(ObservableValue<? extends String> changed, String oldVal, String newVal){
+            
+            }
+        });
+        
+        //Processing Canvas/////////////////////////////////////////////////////
+        canvas.widthProperty().unbind();
+        canvas.heightProperty().unbind();
+        
+        
         final BorderPane rootNode = new BorderPane();
+        final VBox controls = new VBox(spacing);
+        final VBox modes = new VBox(spacing);      
         final TilePane toolPane = new TilePane(2,2);
+        
         //toolPane.setBackground(new Background(new BackgroundFill(Color.CADETBLUE, new CornerRadii(0),new Insets(0))));
-        modes.getChildren().addAll(drawMode, editMode, new Separator(Orientation.HORIZONTAL));
-        toolPane.getChildren().addAll(modes, btnCircle, btnRectangle, btnTriangle, btnLine);
+        //strut.setPrefHeight(1);
+        controls.getChildren().add(shapeViewer);
+        modes.getChildren().addAll(new Separator(Orientation.HORIZONTAL),drawMode, editMode, new Separator(Orientation.HORIZONTAL));
+        toolPane.getChildren().addAll(modes, btnCircle, btnRectangle, btnTriangle, btnLine, btnPoly);
         toolPane.setPrefColumns(1);
         toolPane.setHgap(5);
         toolPane.setVgap(5);
-        //rootNode.setTop(mb);
-        rootNode.setLeft(toolPane);
+        
         rootNode.setMargin(toolPane, new Insets(5));
+        rootNode.setTop(mb);
+        rootNode.setLeft(toolPane);
+        rootNode.setRight(controls);
         rootNode.setCenter(canvas);
+                
         final Scene newscene = new Scene(rootNode); // Create a scene from the elements
         
+        
+
+        //Window Properties/////////////////////////////////////////////////////
+        stage.setTitle("Art Station");
+        stage.setMaximized(true);
+
         stage.widthProperty().addListener((obs, oldVal, newVal) -> {
             // Do whatever you want
             scaleCanvas((float)(stage.getWidth()-toolPane.getWidth()),(float)stage.getHeight());
+            canvas.setWidth(stage.getWidth()-toolBarWidth - controlBarWidth);
         });
 
         stage.heightProperty().addListener((obs, oldVal, newVal) -> {
              // Do whatever you want
              scaleCanvas((float)(stage.getWidth()-toolPane.getWidth()),(float)stage.getHeight());
+             //canvas.setHeight(stage.getHeight()-toolBarWidth - controlBarWidth);
         });
+        
         
         Platform.runLater(new Runnable() {
             @Override
@@ -198,15 +309,20 @@ public class ArtStationApplication extends PApplet{
        
     @Override
     public void mousePressed(){
-        if(mouseOverCanvas()){
-          if(activeMode == Mode.DRAW){
-            pad.drawShape(canvasX, canvasY, activeTool);
-          }
-          else if(activeMode == Mode.EDIT){
-            if(subMode == Transformation.NON){
-                subMode = pad.checkForTransformation(new PVector(canvasX, canvasY));
+        if(mouseButton == LEFT){
+            if(mouseOverCanvas()){
+              if(activeMode == Mode.DRAW){
+                pad.drawShape(canvasX, canvasY, activeTool);
+              }
+              else if(activeMode == Mode.EDIT){
+                if(subMode == Transformation.NON){
+                    subMode = pad.checkForTransformation(new PVector(canvasX, canvasY));
+                }
+              }
             }
-          }
+        }
+        if(mouseButton == RIGHT){
+            pad.completeShape(); 
         }
     }
     
@@ -214,7 +330,12 @@ public class ArtStationApplication extends PApplet{
     public void mouseReleased(){ 
         if(mouseOverCanvas()){ //prevents calling complete shape without any shapes
             if(activeMode == Mode.DRAW){
-                pad.completeShape(); //this code doesn't appear to be doing anything any more
+                if(activeTool == ShapeType.POL){
+                    pad.completeVertex(canvasX, canvasY);
+                }
+                else{
+                    pad.completeShape(); 
+                }
             }
         }
         if(activeMode == Mode.EDIT){
@@ -228,14 +349,10 @@ public class ArtStationApplication extends PApplet{
             keys[key] = true;
         }
         if(key == CODED){
-            if(keyCode == SHIFT){
-                shift = true;
-            }
-            else if(keyCode == ALT){
-                alt = true;
-            }
-            else if(keyCode == CONTROL){
-                control = true;
+            switch(keyCode){
+                case SHIFT: shift = true; break;
+                case ALT: alt = true; break;
+                case CONTROL: control = true; break;
             }
         }
     }
@@ -246,14 +363,10 @@ public class ArtStationApplication extends PApplet{
             keys[key] = false;
         }
         if(key == CODED){
-            if(keyCode == SHIFT){
-                shift = false;
-            }
-            else if(keyCode == ALT){
-                alt = false;
-            }
-            else if(keyCode == CONTROL){
-                control = false;
+            switch(keyCode){
+                case SHIFT: shift = false; break;
+                case ALT: alt = false; break;
+                case CONTROL: control = false; break;
             }
         }
     }
@@ -320,6 +433,7 @@ public class ArtStationApplication extends PApplet{
         ArrayList<Shape> shapes = new ArrayList<>();
         int numberOfShapes = 0;
         int currentShapeIndex = 0;
+        boolean modifying = false; //true while creating polygon so that user can click points for vertices
 
         CanvasArea(PApplet sketch, int w, int h) {
             this.sketch = sketch;
@@ -356,7 +470,12 @@ public class ArtStationApplication extends PApplet{
             stroke(0, 0, 0);
             rect(0, 0, canvasWidth, canvasHeight);
             if (mousePressed && shapes.size() > 0){
-                update(new PVector(mx, my));
+                if(modifying){
+                    ellipse(mx, my, 10, 10);
+                }
+                else{
+                    update(new PVector(mx, my));
+                }
             }
             for (int i = 0; i < shapes.size(); i++) {
                 shapes.get(i).drawShape();
@@ -384,8 +503,10 @@ public class ArtStationApplication extends PApplet{
         }
 
         void drawShape(float x, float y, ShapeType type) {
-            numberOfShapes++;
-            currentShapeIndex = numberOfShapes - 1;
+            if(!modifying){
+                numberOfShapes++;
+                currentShapeIndex = numberOfShapes - 1;
+            }
             switch (type) {
                 case CIR:
                     shapes.add(new Circle(sketch, x, y, 50));
@@ -399,6 +520,12 @@ public class ArtStationApplication extends PApplet{
                 case LIN:
                     shapes.add(new Line(sketch, x, y, 50, 50));
                     break;
+                case POL:
+                    if(!modifying){
+                        modifying = true;
+                        shapes.add(new Polygon(sketch, x, y));
+                    }
+                    break;
             }
         }
 
@@ -411,13 +538,18 @@ public class ArtStationApplication extends PApplet{
                 }
             }
         }
+        
+        void completeVertex(float x, float y){
+            shapes.get(shapes.size()-1).modify(new PVector(x,y));
+        }
 
         void completeShape() {
             if(shapes.size() > 0){
                 shapes.get(shapes.size()-1).finishShape();
+                activeMode = Mode.EDIT;
+                toggleSelectShape(true);
+                modifying = false;
             }
-            activeMode = Mode.EDIT;
-            pad.toggleSelectShape(true);
         }
 
         void drawGrid() {

@@ -42,6 +42,10 @@ abstract class Shape{
         return pos;
     }
     
+    void setPosition(float x, float y){
+        pos.set(x,y);
+    }
+    
     void setShift(boolean turn){
         shift = turn;
     }
@@ -62,6 +66,7 @@ abstract class Shape{
 
     void manipulate(PVector mouse) {
         pos.set(mouse);
+        
     }
 
     void changeRotation(PVector mouse) {         

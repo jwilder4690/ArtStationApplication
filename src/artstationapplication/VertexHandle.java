@@ -32,8 +32,16 @@ public class VertexHandle {
         return pos;
     }
     
+    float[] getPositionFloats(){
+        return new float[] {pos.x, pos.y};
+    }
+    
     void setPosition(PVector point){
         pos = point.copy();
+    }
+    
+    void shift(PVector shift){
+        pos.sub(shift);
     }
     
     boolean overHandle(PVector mouse){
