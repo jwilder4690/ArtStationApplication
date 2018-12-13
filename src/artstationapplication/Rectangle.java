@@ -16,8 +16,8 @@ import processing.core.*;
     Handle widthHandleL;
     Handle heightHandleT;
     Handle heightHandleB;
-    Handle[] activeHandle = new Handle[2];
-    Handle[] inactiveHandle = new Handle[2];
+    Handle activeHandle;
+    Handle[] inactiveHandle = new Handle[3];
     PVector corner;
     boolean centerType;
 
@@ -53,16 +53,18 @@ import processing.core.*;
       app.translate(pos.x, pos.y);
       app.rotate(rotation);
       if(centerType){
-        app.rectMode(CENTER);
-        app.rect(0,0, 2*widthHandleL.getRadius(), 2*heightHandleT.getRadius());
+        //Still uses corners drawing mode in order to enable assymetric scaling
+        app.rectMode(CORNERS);
+        app.rect(-widthHandleL.getRadius(), -heightHandleT.getRadius(), widthHandleR.getRadius(), heightHandleB.getRadius());
         if(selected){
             app.noFill();
             app.strokeWeight(3);
             app.stroke(255,255, 0);
-            app.rect(0,0, 2*widthHandleL.getRadius(), 2*heightHandleT.getRadius());
+            app.rect(-widthHandleL.getRadius(), -heightHandleT.getRadius(), widthHandleR.getRadius(), heightHandleB.getRadius());
             drawHandles();
           }
       }
+      //Currently not using, alt draw mode maybe?
       else if(!centerType){
         app.rectMode(CORNERS);
         app.rect(0,0, corner.x, corner.y);
@@ -105,18 +107,32 @@ import processing.core.*;
 
     @Override
     boolean checkHandles(PVector mouse){
-        if(widthHandleL.overHandle(mouse, rotation) || widthHandleR.overHandle(mouse,rotation)){
-            activeHandle[0] = widthHandleL;
-            activeHandle[1] = widthHandleR;
-            inactiveHandle[0] = heightHandleT;
-            inactiveHandle[1] = heightHandleB;
+        if(widthHandleL.overHandle(mouse, rotation) ){
+            activeHandle = widthHandleL;
+            inactiveHandle[0] = widthHandleR;
+            inactiveHandle[1] = heightHandleT;
+            inactiveHandle[2] = heightHandleB;
             return true;
         }
-        else if (heightHandleT.overHandle(mouse,rotation) || heightHandleB.overHandle(mouse,rotation)){
-            activeHandle[0] = heightHandleT;
-            activeHandle[1] = heightHandleB;
+        else if (widthHandleR.overHandle(mouse,rotation)){
+            activeHandle = widthHandleR;
             inactiveHandle[0] = widthHandleL;
-            inactiveHandle[1] = widthHandleR;
+            inactiveHandle[1] = heightHandleT;
+            inactiveHandle[2] = heightHandleB;
+            return true;
+        }
+        else if(heightHandleT.overHandle(mouse,rotation)){
+            activeHandle = heightHandleT;
+            inactiveHandle[0] = heightHandleB;
+            inactiveHandle[1] = widthHandleL;
+            inactiveHandle[2] = widthHandleR;
+            return true;
+        }
+        else if(heightHandleB.overHandle(mouse,rotation)){
+            activeHandle = heightHandleB;
+            inactiveHandle[0] = heightHandleT;
+            inactiveHandle[1] = widthHandleL;
+            inactiveHandle[2] = widthHandleR;
             return true;
         }
         else return false;
@@ -124,19 +140,18 @@ import processing.core.*;
 
     @Override
     void adjustActiveHandle(PVector mouse){
-        float delta = (activeHandle[0].getRadius() - inactiveHandle[0].getRadius())/activeHandle[0].getRadius();
         float dist = app.dist(pos.x, pos.y, mouse.x, mouse.y);
-        if(shift){       
-            activeHandle[0].setRadius(dist); 
-            activeHandle[1].setRadius(dist);
-            inactiveHandle[0].setRadius(dist - dist * delta);  
-            inactiveHandle[1].setRadius(dist - dist * delta);
+        if(shift){      
+            float delta0 = (activeHandle.getRadius() - inactiveHandle[0].getRadius())/activeHandle.getRadius();
+            float delta1 = (activeHandle.getRadius() - inactiveHandle[1].getRadius())/activeHandle.getRadius();
+            float delta2 = (activeHandle.getRadius() - inactiveHandle[2].getRadius())/activeHandle.getRadius();
+            activeHandle.setRadius(dist); 
+            inactiveHandle[0].setRadius(dist - dist * delta0);  
+            inactiveHandle[1].setRadius(dist - dist * delta1);
+            inactiveHandle[2].setRadius(dist - dist * delta2);
         }
         else{
-            activeHandle[0].setRadius(dist);  
-            activeHandle[1].setRadius(dist);
+            activeHandle.setRadius(dist);  
         }
-//        activeHandle[0].setRadius(app.dist(pos.x, pos.y, mouse.x, mouse.y));  
-//        activeHandle[1].setRadius(app.dist(pos.x, pos.y, mouse.x, mouse.y)); 
     }
   }

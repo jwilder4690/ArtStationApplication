@@ -20,7 +20,11 @@ import javafx.event.EventHandler;
 import javafx.collections.*;
 import javafx.beans.value.*;
 import javafx.scene.paint.Color;
-
+import javafx.beans.Observable;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.util.Callback;
+import javafx.beans.property.StringProperty;
 
 /**
  *
@@ -47,7 +51,7 @@ public class ArtStationApplication extends PApplet{
     boolean alt = false;
     boolean control = false;
     int toolBarWidth = 50;
-    int controlBarWidth = 100;
+    int controlBarWidth = 150;
     int spacing = 5;
     Region strut = new Region();
 
@@ -56,13 +60,13 @@ public class ArtStationApplication extends PApplet{
     //GUI
     ToggleGroup toolGroup;
     ToggleGroup modeGroup;
-    ListView<String> shapeViewer;
+    ListView<Shape> shapeViewer;
+    ObservableList<Shape> shapes;
+    int listIndex = -1;
 
     @Override
     public void settings(){
-        
         size(displayWidth - toolBarWidth - controlBarWidth,displayHeight, FX2D);
-        
     }
     
     @Override
@@ -221,7 +225,7 @@ public class ArtStationApplication extends PApplet{
                 }
                 activeMode = Mode.DRAW;
                 pad.toggleSelectShape(false);
-                canvas.requestFocus();
+                //canvas.requestFocus(); not needed? 
             }
         };
         
@@ -232,14 +236,32 @@ public class ArtStationApplication extends PApplet{
         btnPoly.setOnAction(ToolHandler);
         
         //Observable List///////////////////////////////////////////////////////
-        ObservableList<String> shapeTypes = FXCollections.observableArrayList("Circle", "Rectangle", "Triangle", "Line", "Polygon");
-        shapeViewer = new ListView<String>(shapeTypes);
-        shapeViewer.setPrefSize(controlBarWidth, controlBarWidth*5);
-        MultipleSelectionModel<String> selectionModel = shapeViewer.getSelectionModel();
+               
+        shapes = FXCollections.observableArrayList(   //Don't really understand this, did not achieve what I thought
+                new Callback<Shape, Observable[]>(){
+                    @Override
+                    public Observable[] call(Shape param){
+                        return new Observable[]{
+                                param.nameProperty()
+                    };
+                }
+            }
+        );
         
-        selectionModel.selectedItemProperty().addListener(new ChangeListener<String>(){
-            public void changed(ObservableValue<? extends String> changed, String oldVal, String newVal){
-            
+        ObservableList<Shape> shapeTypes = shapes;
+
+        shapeViewer = new ListView<>(shapeTypes);
+        shapeViewer.setMaxSize(controlBarWidth -7*spacing, controlBarWidth*5);
+        shapeViewer.setPrefHeight(controlBarWidth*2);
+        MultipleSelectionModel<Shape> selectionModel = shapeViewer.getSelectionModel();
+        
+        selectionModel.selectedIndexProperty().addListener(new ChangeListener<Number>(){
+            public void changed(ObservableValue<? extends Number> changed, Number oldVal, Number newVal){
+                activeMode = Mode.EDIT;
+                pad.deselectShape(listIndex);
+                listIndex = (int)newVal;
+                pad.selectShape(listIndex);
+                canvas.requestFocus();
             }
         });
         
@@ -262,7 +284,8 @@ public class ArtStationApplication extends PApplet{
         toolPane.setHgap(5);
         toolPane.setVgap(5);
         
-        rootNode.setMargin(toolPane, new Insets(5));
+        rootNode.setMargin(toolPane, new Insets(spacing));
+        rootNode.setMargin(controls, new Insets(spacing));
         rootNode.setTop(mb);
         rootNode.setLeft(toolPane);
         rootNode.setRight(controls);
@@ -278,13 +301,13 @@ public class ArtStationApplication extends PApplet{
 
         stage.widthProperty().addListener((obs, oldVal, newVal) -> {
             // Do whatever you want
-            scaleCanvas((float)(stage.getWidth()-toolPane.getWidth()),(float)stage.getHeight());
+            scaleCanvas((float)(stage.getWidth()-toolBarWidth - controlBarWidth),(float)(stage.getHeight() - 2*mb.getHeight()));
             canvas.setWidth(stage.getWidth()-toolBarWidth - controlBarWidth);
         });
 
         stage.heightProperty().addListener((obs, oldVal, newVal) -> {
              // Do whatever you want
-             scaleCanvas((float)(stage.getWidth()-toolPane.getWidth()),(float)stage.getHeight());
+             scaleCanvas((float)(stage.getWidth()-toolBarWidth - controlBarWidth),(float)(stage.getHeight() - 2*mb.getHeight()));
              //canvas.setHeight(stage.getHeight()-toolBarWidth - controlBarWidth);
         });
         
@@ -309,7 +332,7 @@ public class ArtStationApplication extends PApplet{
        
     @Override
     public void mousePressed(){
-        if(mouseButton == LEFT){
+        //if(mouseButton == LEFT){
             if(mouseOverCanvas()){
               if(activeMode == Mode.DRAW){
                 pad.drawShape(canvasX, canvasY, activeTool);
@@ -320,31 +343,43 @@ public class ArtStationApplication extends PApplet{
                 }
               }
             }
-        }
+       // }
         if(mouseButton == RIGHT){
-            pad.completeShape(); 
+//            if(activeMode == Mode.EDIT){
+//                activeMode = Mode.DRAW;
+//                pad.toggleSelectShape(false);
+//            }
+            if(activeMode == Mode.DRAW){
+               pad.completeShape();  
+           }
         }
     }
     
     @Override
     public void mouseReleased(){ 
-        if(mouseOverCanvas()){ //prevents calling complete shape without any shapes
-            if(activeMode == Mode.DRAW){
-                if(activeTool == ShapeType.POL){
-                    pad.completeVertex(canvasX, canvasY);
-                }
-                else{
-                    pad.completeShape(); 
+        //if(mouseButton == LEFT){
+            if(mouseOverCanvas()){ //prevents calling complete shape without any shapes
+                if(activeMode == Mode.DRAW){
+                    if(activeTool == ShapeType.POL){
+                        pad.completeVertex(canvasX, canvasY);
+                    }
+                    else{
+                        pad.completeShape(); 
+                    }
                 }
             }
-        }
-        if(activeMode == Mode.EDIT){
-            subMode = Transformation.NON;
-        }
-     }
+            if(activeMode == Mode.EDIT){
+                subMode = Transformation.NON;
+            }
+       // }
+//        else if(mouseButton == RIGHT){
+//            
+//        }
+    }
 
     @Override
     public void keyPressed(){
+                    println("here");
         if(key < 255){
             keys[key] = true;
         }
@@ -352,7 +387,7 @@ public class ArtStationApplication extends PApplet{
             switch(keyCode){
                 case SHIFT: shift = true; break;
                 case ALT: alt = true; break;
-                case CONTROL: control = true; break;
+                case CONTROL: control = true; break;                   
             }
         }
     }
@@ -378,6 +413,14 @@ public class ArtStationApplication extends PApplet{
         if(keys[' ']){
             activeMode = Mode.DRAW;
             pad.toggleSelectShape(false);
+            keys[' '] = false;
+        }
+        if(keys[DELETE]){
+            if(activeMode == Mode.EDIT && !shapes.isEmpty()){
+                shapes.remove(listIndex);
+                listIndex = shapes.size()-1;
+            }
+            keys[DELETE] = false;
         }
     
     }
@@ -430,9 +473,7 @@ public class ArtStationApplication extends PApplet{
         int gridDensity = 10; //must be less than canvasWidth if int division is used
         float gridSpacing;
         boolean gridOn = true;
-        ArrayList<Shape> shapes = new ArrayList<>();
-        int numberOfShapes = 0;
-        int currentShapeIndex = 0;
+        //ArrayList<Shape> shapes = new ArrayList<>();
         boolean modifying = false; //true while creating polygon so that user can click points for vertices
 
         CanvasArea(PApplet sketch, int w, int h) {
@@ -451,14 +492,14 @@ public class ArtStationApplication extends PApplet{
         }
         
         Transformation checkForTransformation(PVector mouse){
-            if(shapes.get(currentShapeIndex).checkHandles(mouse)){
-                shapes.get(currentShapeIndex).setShift(shift);
+            if(shapes.get(listIndex).checkHandles(mouse)){
+                shapes.get(listIndex).setShift(shift);
                 return Transformation.SCA;
             }
-            else if(shapes.get(currentShapeIndex).mouseOver(mouse)) return Transformation.TRA;
+            else if(shapes.get(listIndex).mouseOver(mouse)) return Transformation.TRA;
             else{
-                shapes.get(currentShapeIndex).setStartingRotation(mouse);
-                shapes.get(currentShapeIndex).setShift(shift);
+                shapes.get(listIndex).setStartingRotation(mouse);
+                shapes.get(listIndex).setShift(shift);
                 return Transformation.ROT;
             }
         }
@@ -489,52 +530,70 @@ public class ArtStationApplication extends PApplet{
             switch (activeMode) {
                 case DRAW:
                     if(!shapes.get(shapes.size() - 1).getFinished()){
-                        shapes.get(currentShapeIndex).setShift(shift);
+                        shapes.get(listIndex).setShift(shift);
                         shapes.get(shapes.size() - 1).modify(mouse);
                     } break;
                 case EDIT:
                     switch(subMode){
-                        case SCA: shapes.get(currentShapeIndex).adjustActiveHandle(mouse); break;
-                        case TRA: shapes.get(currentShapeIndex).manipulate(mouse); break;
-                        case ROT: shapes.get(currentShapeIndex).changeRotation(mouse);
+                        case SCA: shapes.get(listIndex).adjustActiveHandle(mouse); break;
+                        case TRA: shapes.get(listIndex).manipulate(mouse); break;
+                        case ROT: shapes.get(listIndex).changeRotation(mouse);
                             break;
                     } break;
             }
         }
 
         void drawShape(float x, float y, ShapeType type) {
-            if(!modifying){
-                numberOfShapes++;
-                currentShapeIndex = numberOfShapes - 1;
-            }
+//            if(!modifying){
+//                numberOfShapes++;
+//                currnetShapeIndex = numberOfShapes - 1;
+//            }
             switch (type) {
                 case CIR:
                     shapes.add(new Circle(sketch, x, y, 50));
+                    //shapeViewer.getItems().add("Shape("+shapeViewer.getItems().size() + ")-Circle");
                     break;
                 case REC:
                     shapes.add(new Rectangle(sketch, x, y, 50, CENT));
+                    //shapeViewer.getItems().add("Shape("+shapeViewer.getItems().size() + ")-Rectangle");
                     break;
                 case TRI:
                     shapes.add(new Triangle(sketch, x, y, 50));
+                    //shapeViewer.getItems().add("Shape("+shapeViewer.getItems().size() + ")-Triangle");
                     break;
                 case LIN:
                     shapes.add(new Line(sketch, x, y, 50, 50));
+                    //shapeViewer.getItems().add("Shape("+shapeViewer.getItems().size() + ")-Line");
                     break;
                 case POL:
                     if(!modifying){
                         modifying = true;
                         shapes.add(new Polygon(sketch, x, y));
+                        //shapeViewer.getItems().add("Shape("+shapeViewer.getItems().size() + ")-Polygon");
                     }
                     break;
+            }
+            listIndex = shapeViewer.getItems().size()-1;
+        }
+        
+        void selectShape(int index){
+            if(index > -1 && index < shapes.size()){
+                shapes.get(index).select();
+            }
+        }
+        
+        void deselectShape(int index){
+            if(index > -1 && index < shapes.size()){
+                shapes.get(index).deselect();
             }
         }
 
         void toggleSelectShape(boolean toggleOn) {
             if(shapes.size() > 0){
                 if (toggleOn) {
-                    shapes.get(currentShapeIndex).select();
+                    shapes.get(listIndex).select();
                 } else {
-                    shapes.get(currentShapeIndex).deselect();
+                    shapes.get(listIndex).deselect();
                 }
             }
         }
