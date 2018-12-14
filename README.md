@@ -10,15 +10,16 @@ First commits are merges of code developed in my "ArtStation-Halted" repository.
     * Shape creation supported (Circle, Square, Triangle, Line)
 - [x] Tie GUI elements to canvas features
 - [x] Implement edit mode transformations (Transformation, Rotation, Scaling)
-- [ ] Apply all transformations to each shape
+- [x] Apply all transformations to each shape
     - [x] Circle
     - [x] Triangle
     - [x] Rectangle
     - [x] Line 
 - [ ] GUI element shape list (Observable list)
-    * Reorder
-    * Delete
+    - [ ] Reorder
+    - [x] Delete
 - [ ] Add features (Arcs, polygon, curves)
+    - [x] Polygons
 - [ ] Add feature groups
 - [ ] Add features
      - [ ] Fill color and alpha
