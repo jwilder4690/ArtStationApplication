@@ -22,8 +22,10 @@ public class Polygon extends Shape{
     float[] boundingBox = new float[4]; // Index 0 is smallest x, 1 is smallest y, 2 is greatest x, 3 is greatest y  
 
     
-    Polygon(PApplet drawingSpace, float x, float y){
+    Polygon(PApplet drawingSpace, float x, float y, int id){
         super(drawingSpace, x,y);
+        name = "Polygon";
+        index = id;
         origin = new VertexHandle(app, 0,0);
     }
     

@@ -15,10 +15,12 @@ import processing.core.*;
     VertexHandle activeHandle;
     VertexHandle inactiveHandle;
 
-    Line(PApplet drawingSpace,float x, float y, float x2, float y2){
+    Line(PApplet drawingSpace,float x, float y, int id){
       super(drawingSpace, x,y);
+      name = "Line";
+      index = id;
       start = new VertexHandle(drawingSpace, x,y);
-      PVector point = new PVector(x2,y2);
+      PVector point = new PVector(50,50);
       point.sub(new PVector(x,y));
       end = new VertexHandle(drawingSpace, point);
     }

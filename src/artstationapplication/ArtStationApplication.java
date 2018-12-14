@@ -10,7 +10,9 @@ import javafx.scene.*;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.stage.Stage;
+import javafx.stage.*;
+import javafx.event.*;
+import javafx.scene.input.*;
 import processing.core.*;
 import processing.javafx.PSurfaceFX;
 import javafx.scene.image.*;
@@ -19,12 +21,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.collections.*;
 import javafx.beans.value.*;
-import javafx.scene.paint.Color;
-import javafx.beans.Observable;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.util.Callback;
-import javafx.beans.property.StringProperty;
+
 
 /**
  *
@@ -225,7 +222,7 @@ public class ArtStationApplication extends PApplet{
                 }
                 activeMode = Mode.DRAW;
                 pad.toggleSelectShape(false);
-                //canvas.requestFocus(); not needed? 
+                canvas.requestFocus(); 
             }
         };
         
@@ -237,16 +234,17 @@ public class ArtStationApplication extends PApplet{
         
         //Observable List///////////////////////////////////////////////////////
                
-        shapes = FXCollections.observableArrayList(   //Don't really understand this, did not achieve what I thought
-                new Callback<Shape, Observable[]>(){
-                    @Override
-                    public Observable[] call(Shape param){
-                        return new Observable[]{
-                                param.nameProperty()
-                    };
-                }
-            }
-        );
+        shapes = FXCollections.observableArrayList();
+        //Don't really understand this, did not achieve what I thought
+//                new Callback<Shape, Observable[]>(){
+//                    @Override
+//                    public Observable[] call(Shape param){
+//                        return new Observable[]{
+//                                param.nameProperty()
+//                    };
+//                }
+//            }
+//        );
         
         ObservableList<Shape> shapeTypes = shapes;
 
@@ -271,6 +269,18 @@ public class ArtStationApplication extends PApplet{
         
         
         final BorderPane rootNode = new BorderPane();
+        
+        //Key Events for full scene
+        rootNode.addEventFilter(KeyEvent.KEY_RELEASED, event->{
+            if(event.getCode() == KeyCode.DELETE){
+                System.out.println("Deleting shit");
+                if(activeMode == Mode.EDIT && !shapes.isEmpty()){
+                    shapes.remove(listIndex);
+                    listIndex = shapes.size()-1;
+                }
+            }
+        });
+        
         final VBox controls = new VBox(spacing);
         final VBox modes = new VBox(spacing);      
         final TilePane toolPane = new TilePane(2,2);
@@ -293,7 +303,29 @@ public class ArtStationApplication extends PApplet{
                 
         final Scene newscene = new Scene(rootNode); // Create a scene from the elements
         
+
         
+        
+        
+//        newscene.setOnKeyTyped(new EventHandler<KeyEvent>(){
+//            public void handle(KeyEvent ke){
+//                switch(ke.getCharacter()){
+//                    case " ": break;
+//                    case "Z": break;
+//                        
+//                }
+//            }
+//        });
+//        
+//        newscene.setOnKeyPressed(new EventHandler<KeyEvent>() {
+//            public void handle(KeyEvent ke){
+//                switch(ke.getCode()){
+//                    case ALT:
+//                    case CONTROL:
+//                    case SHIFT:
+//                }
+//            }
+//        })
 
         //Window Properties/////////////////////////////////////////////////////
         stage.setTitle("Art Station");
@@ -415,13 +447,13 @@ public class ArtStationApplication extends PApplet{
             pad.toggleSelectShape(false);
             keys[' '] = false;
         }
-        if(keys[DELETE]){
-            if(activeMode == Mode.EDIT && !shapes.isEmpty()){
-                shapes.remove(listIndex);
-                listIndex = shapes.size()-1;
-            }
-            keys[DELETE] = false;
-        }
+//        if(keys[DELETE]){
+//            if(activeMode == Mode.EDIT && !shapes.isEmpty()){
+//                shapes.remove(listIndex);
+//                listIndex = shapes.size()-1;
+//            }
+//            keys[DELETE] = false;
+//        }
     
     }
     
@@ -544,36 +576,27 @@ public class ArtStationApplication extends PApplet{
         }
 
         void drawShape(float x, float y, ShapeType type) {
-//            if(!modifying){
-//                numberOfShapes++;
-//                currnetShapeIndex = numberOfShapes - 1;
-//            }
+            listIndex = shapeViewer.getItems().size();
             switch (type) {
                 case CIR:
-                    shapes.add(new Circle(sketch, x, y, 50));
-                    //shapeViewer.getItems().add("Shape("+shapeViewer.getItems().size() + ")-Circle");
+                    shapes.add(new Circle(sketch, x, y, listIndex));
                     break;
                 case REC:
-                    shapes.add(new Rectangle(sketch, x, y, 50, CENT));
-                    //shapeViewer.getItems().add("Shape("+shapeViewer.getItems().size() + ")-Rectangle");
+                    shapes.add(new Rectangle(sketch, x, y, listIndex, CENT));
                     break;
                 case TRI:
-                    shapes.add(new Triangle(sketch, x, y, 50));
-                    //shapeViewer.getItems().add("Shape("+shapeViewer.getItems().size() + ")-Triangle");
+                    shapes.add(new Triangle(sketch, x, y, listIndex));
                     break;
                 case LIN:
-                    shapes.add(new Line(sketch, x, y, 50, 50));
-                    //shapeViewer.getItems().add("Shape("+shapeViewer.getItems().size() + ")-Line");
+                    shapes.add(new Line(sketch, x, y, listIndex));
                     break;
                 case POL:
                     if(!modifying){
                         modifying = true;
-                        shapes.add(new Polygon(sketch, x, y));
-                        //shapeViewer.getItems().add("Shape("+shapeViewer.getItems().size() + ")-Polygon");
+                        shapes.add(new Polygon(sketch, x, y,listIndex));
                     }
                     break;
             }
-            listIndex = shapeViewer.getItems().size()-1;
         }
         
         void selectShape(int index){
@@ -605,6 +628,7 @@ public class ArtStationApplication extends PApplet{
         void completeShape() {
             if(shapes.size() > 0){
                 shapes.get(shapes.size()-1).finishShape();
+                listIndex = shapes.size()-1;
                 activeMode = Mode.EDIT;
                 toggleSelectShape(true);
                 modifying = false;

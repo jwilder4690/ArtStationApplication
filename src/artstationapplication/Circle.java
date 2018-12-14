@@ -20,12 +20,14 @@ class Circle extends Shape{
     Handle[] activeHandle = new Handle[2];
     Handle[] inactiveHandle = new Handle[2];
 
-    Circle(PApplet drawingSpace, float x, float y, float r){
+    Circle(PApplet drawingSpace, float x, float y, int id){
       super(drawingSpace,x,y);
-      widthHandleR = new Handle(drawingSpace, this, r, new PVector(1,0));
-      widthHandleL = new Handle(drawingSpace, this, r, new PVector(-1,0));
-      heightHandleB = new Handle(drawingSpace, this, r, new PVector(0,1));
-      heightHandleT = new Handle(drawingSpace, this, r, new PVector(0,-1));
+      name = "Circle";
+      index = id;
+      widthHandleR = new Handle(drawingSpace, this, 50, new PVector(1,0));
+      widthHandleL = new Handle(drawingSpace, this, 50, new PVector(-1,0));
+      heightHandleB = new Handle(drawingSpace, this, 50, new PVector(0,1));
+      heightHandleT = new Handle(drawingSpace, this, 50, new PVector(0,-1));
     }
 
     @Override 

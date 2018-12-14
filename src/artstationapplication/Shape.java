@@ -5,9 +5,8 @@
  */
 package artstationapplication;
 
-import javafx.beans.property.SimpleStringProperty;
 import processing.core.*;
-import javafx.beans.property.StringProperty;
+
 
 /**
  *
@@ -28,8 +27,8 @@ abstract class Shape{
     boolean completed = false;
     boolean selected = false;
     boolean shift = false;
-    StringProperty nameProp = new SimpleStringProperty("shape");
     String name = "shape";
+    int index;
 
     Shape(PApplet drawingSpace, float x, float y) {
         app = drawingSpace;
@@ -58,13 +57,10 @@ abstract class Shape{
         offset = rotation - app.atan2(mouse.y - pos.y, mouse.x - pos.x);
     }
     
-    StringProperty nameProperty(){
-        return nameProp;
-    }
     
     @Override
     public String toString(){
-        return name;
+        return "("+index+") - " +name;
     }
 
     abstract boolean checkHandles(PVector mouse);

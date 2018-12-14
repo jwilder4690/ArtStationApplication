@@ -19,12 +19,14 @@ import processing.core.*;
     Handle[] inactiveHandle = new Handle[2];
 
 
-    Triangle(PApplet drawingSpace, float x, float y, float tall){
+    Triangle(PApplet drawingSpace, float x, float y, int id){
       super(drawingSpace, x,y);
-      widthHandleR = new Handle(drawingSpace, this, tall, new PVector(1,0));
-      widthHandleL = new Handle(drawingSpace, this, tall, new PVector(-1,0));
-      heightHandleT = new Handle(drawingSpace, this, tall, new PVector(0,-1));
-      altitude = tall;
+      name = "Triangle";
+      index = id;
+      widthHandleR = new Handle(drawingSpace, this, 50, new PVector(1,0));
+      widthHandleL = new Handle(drawingSpace, this, 50, new PVector(-1,0));
+      heightHandleT = new Handle(drawingSpace, this, 50, new PVector(0,-1));
+      altitude = 50;
       side = app.sqrt((float)(4.0/3.0)*app.sq(altitude));
     }
 
