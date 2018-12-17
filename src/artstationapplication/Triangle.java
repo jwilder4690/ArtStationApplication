@@ -5,6 +5,8 @@
  */
 package artstationapplication;
 import processing.core.*;
+import javafx.scene.paint.Color;
+
 /**
  *
  * @author wilder4690
@@ -19,8 +21,9 @@ import processing.core.*;
     Handle[] inactiveHandle = new Handle[2];
 
 
-    Triangle(PApplet drawingSpace, float x, float y, int id){
-      super(drawingSpace, x,y);
+    Triangle(PApplet drawingSpace, int paint, int outline, float thickness, float x, float y, int id){
+      super(drawingSpace, paint, outline, x,y);
+      strokeWeight = thickness;
       name = "Triangle";
       index = id;
       widthHandleR = new Handle(drawingSpace, this, 50, new PVector(1,0));
@@ -50,12 +53,18 @@ import processing.core.*;
 
     @Override
     void drawShape(){
-      app.fill(paint);
-      if(lineThickness == 0){
+      if(fillColor == NONE){
+          app.noFill();
+      }
+      else{
+        app.fill(fillColor);
+      }
+      if(strokeWeight == 0){
         app.noStroke();
       }
       else{
-        app.strokeWeight(lineThickness);
+        app.stroke(strokeColor);
+        app.strokeWeight(strokeWeight);
       }
       app.pushMatrix();
       app.translate(pos.x, pos.y);

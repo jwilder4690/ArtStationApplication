@@ -6,6 +6,7 @@
 package artstationapplication;
 import java.util.ArrayList;
 import processing.core.*;
+import javafx.scene.paint.Color;
 
 /**
  *
@@ -22,8 +23,9 @@ public class Polygon extends Shape{
     float[] boundingBox = new float[4]; // Index 0 is smallest x, 1 is smallest y, 2 is greatest x, 3 is greatest y  
 
     
-    Polygon(PApplet drawingSpace, float x, float y, int id){
-        super(drawingSpace, x,y);
+    Polygon(PApplet drawingSpace, int paint, int outline, float thickness, float x, float y, int id){
+        super(drawingSpace, paint, outline, x,y);
+        strokeWeight = thickness;
         name = "Polygon";
         index = id;
         origin = new VertexHandle(app, 0,0);
@@ -137,22 +139,37 @@ public class Polygon extends Shape{
 
     @Override
     void drawShape(){
+        if(fillColor == NONE){
+            app.noFill();
+        }
+        else{
+          app.fill(fillColor);
+        }
+        if(strokeWeight == 0){
+          app.noStroke();
+        }
+        else{
+          app.stroke(strokeColor);
+          app.strokeWeight(strokeWeight);
+        }
         app.pushMatrix();
         app.translate(pos.x, pos.y);
         app.rotate(rotation);
         if(completed){
-            app.fill(paint);
             app.beginShape();
             for(int i = 0; i < vertices.size(); i++){
                 app.vertex(vertices.get(i).getPositionFloats());
             }
             app.endShape(app.CLOSE);
             app.noFill();
+            app.stroke(0,0,0);
+            app.strokeWeight(1);
             app.rectMode(app.CORNERS);
             app.rect(boundingBox[SMALLEST_X], boundingBox[SMALLEST_Y], boundingBox[GREATEST_X], boundingBox[GREATEST_Y]);
         }
         if(!completed){
             app.noFill();
+            app.strokeWeight(1);
             app.beginShape();
             for(int i = 0; i < vertices.size(); i++){
                 app.vertex(vertices.get(i).getPositionFloats());
@@ -170,7 +187,7 @@ public class Polygon extends Shape{
             for(int i = 0; i < vertices.size(); i++){
                 app.vertex(vertices.get(i).getPositionFloats());
             }
-            app.endShape(); 
+            app.endShape(app.CLOSE); 
             drawHandles();
         }
         app.fill(0,255,0);

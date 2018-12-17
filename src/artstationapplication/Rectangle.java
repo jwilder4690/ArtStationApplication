@@ -5,6 +5,7 @@
  */
 package artstationapplication;
 import processing.core.*;
+import javafx.scene.paint.Color;
 /**
  *
  * @author wilder4690
@@ -21,8 +22,9 @@ import processing.core.*;
     PVector corner;
     boolean centerType;
 
-    Rectangle(PApplet drawingSpace, float a, float b, int id, boolean style){ 
-        super(drawingSpace, a,b);
+    Rectangle(PApplet drawingSpace, int paint, int outline, float thickness, float a, float b, int id, boolean style){ 
+        super(drawingSpace, paint, outline, a,b);
+        strokeWeight = thickness;
         name = "Rectangle";
         index = id;
         widthHandleR = new Handle(drawingSpace, this, 50/2, new PVector(1,0));
@@ -44,12 +46,18 @@ import processing.core.*;
 
     @Override
     void drawShape(){
-      app.fill(paint);
-      if(lineThickness == 0){
+      if(fillColor == NONE){
+          app.noFill();
+      }
+      else{
+        app.fill(fillColor);
+      }
+      if(strokeWeight == 0){
         app.noStroke();
       }
       else{
-        app.strokeWeight(lineThickness);
+        app.stroke(strokeColor);
+        app.strokeWeight(strokeWeight);
       }
       app.pushMatrix();
       app.translate(pos.x, pos.y);

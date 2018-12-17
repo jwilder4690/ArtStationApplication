@@ -5,6 +5,8 @@
  */
 package artstationapplication;
 import processing.core.*;
+import javafx.scene.paint.Color;
+
 /**
  *
  * @author wilder4690
@@ -15,8 +17,9 @@ import processing.core.*;
     VertexHandle activeHandle;
     VertexHandle inactiveHandle;
 
-    Line(PApplet drawingSpace,float x, float y, int id){
-      super(drawingSpace, x,y);
+    Line(PApplet drawingSpace, int paint, int outline, float thickness, float x, float y, int id){
+      super(drawingSpace, paint, outline, x,y);
+      strokeWeight = thickness;
       name = "Line";
       index = id;
       start = new VertexHandle(drawingSpace, x,y);
@@ -45,10 +48,14 @@ import processing.core.*;
 
     @Override
     void drawShape(){
-      app.fill(paint);
-      app.strokeWeight(lineThickness);
+      if(strokeWeight == 0){
+          app.noStroke();
+      }
+      else{
+        app.stroke(strokeColor);
+        app.strokeWeight(strokeWeight);
+      }
       app.pushMatrix();
-      //app.translate(pos.x, pos.y);
       app.line(start.getPosition().x, start.getPosition().y, end.getPosition().x, end.getPosition().y);
       if(selected){
         app.noFill();

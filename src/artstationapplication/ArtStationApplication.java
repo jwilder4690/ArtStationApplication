@@ -16,11 +16,12 @@ import javafx.scene.input.*;
 import processing.core.*;
 import processing.javafx.PSurfaceFX;
 import javafx.scene.image.*;
-import java.util.ArrayList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.collections.*;
 import javafx.beans.value.*;
+import javafx.scene.control.ColorPicker;
+import javafx.scene.paint.Color;
 
 
 /**
@@ -48,10 +49,15 @@ public class ArtStationApplication extends PApplet{
     boolean alt = false;
     boolean control = false;
     int toolBarWidth = 50;
-    int controlBarWidth = 150;
+    int controlBarWidth = 275;
     int spacing = 5;
     Region strut = new Region();
-
+    CheckBox cbNoFill;
+    CheckBox cbNoStroke;
+    final int NONE = -777;
+    int currentFillColor = color(255,255,255); 
+    int currentStrokeColor = color(0,0,0);
+    float currentStrokeWeight = 1;
     
     
     //GUI
@@ -220,6 +226,7 @@ public class ArtStationApplication extends PApplet{
                 else if(name.equals("Poly")){
                     activeTool = ShapeType.POL;
                 }
+                drawMode.setSelected(true);
                 activeMode = Mode.DRAW;
                 pad.toggleSelectShape(false);
                 canvas.requestFocus(); 
@@ -232,34 +239,161 @@ public class ArtStationApplication extends PApplet{
         btnTriangle.setOnAction(ToolHandler);
         btnPoly.setOnAction(ToolHandler);
         
-        //Observable List///////////////////////////////////////////////////////
+        //Fill & Stroke Pane////////////////////////////////////////////////////////
+        final GridPane colorPane = new GridPane();
                
-        shapes = FXCollections.observableArrayList();
-        //Don't really understand this, did not achieve what I thought
-//                new Callback<Shape, Observable[]>(){
-//                    @Override
-//                    public Observable[] call(Shape param){
-//                        return new Observable[]{
-//                                param.nameProperty()
-//                    };
-//                }
-//            }
-//        );
+        final Label lblColor = new Label("Color");
+        final Label lblFill = new Label("Fill:");
+        final Label lblStroke = new Label("Stroke:");
+        final Label lblWeight = new Label("Weight");
+        final Label lblNone = new Label("None");
         
-        ObservableList<Shape> shapeTypes = shapes;
+        final ColorPicker colorPickerFill = new ColorPicker(Color.WHITE);
+        final ColorPicker colorPickerStroke = new ColorPicker(Color.BLACK);
+        cbNoFill = new CheckBox();
+        cbNoStroke = new CheckBox();
+        final Slider weightSlider = new Slider(0, 10, 1);
+        final TextField weightTextField = new TextField("1");
+        
+        colorPane.setVgap(spacing/2);
+        colorPane.setHgap(spacing);
+        colorPane.setHalignment(lblFill, HPos.RIGHT);
+        colorPane.setHalignment(lblColor, HPos.CENTER);
+        colorPane.setHalignment(cbNoStroke, HPos.CENTER);
+        colorPane.setHalignment(cbNoFill, HPos.CENTER);
+        lblColor.setUnderline(true);
+        lblNone.setUnderline(true);
+        weightTextField.setPrefColumnCount(3);
 
+        cbNoFill.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent ae){
+                if(cbNoFill.isSelected()){
+                    currentFillColor = NONE;
+                    colorPickerFill.setDisable(true);
+                }
+                else{
+                    currentFillColor = convertColorToInt(colorPickerFill.getValue());
+                    colorPickerFill.setDisable(false);
+                }
+                if(activeMode == Mode.EDIT){
+                    shapes.get(listIndex).setFillColor(currentFillColor);
+                }
+                canvas.requestFocus(); 
+            }
+        });
+        
+        cbNoStroke.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent ae){
+                if(cbNoStroke.isSelected()){
+                    currentStrokeWeight = 0;
+                    colorPickerStroke.setDisable(true);
+                    weightSlider.setDisable(true);
+                    weightTextField.setDisable(true);
+                }
+                else{
+                    currentStrokeWeight = (float)convertStringToDouble(weightTextField.getText());
+                    currentStrokeColor = convertColorToInt(colorPickerStroke.getValue());
+                    colorPickerStroke.setDisable(false);
+                    weightSlider.setDisable(false);
+                    weightTextField.setDisable(false);
+                }
+                if(activeMode == Mode.EDIT){
+                    shapes.get(listIndex).setStrokeWeight(currentStrokeWeight);
+                }
+                canvas.requestFocus(); 
+            }
+        });
+        
+        colorPickerFill.setOnAction(new EventHandler() {
+            public void handle(Event t) {
+                currentFillColor = convertColorToInt(colorPickerFill.getValue());
+                if(activeMode == Mode.DRAW){     
+                    //canvas.requestFocus(); 
+                }
+                else{
+                    shapes.get(listIndex).setFillColor(currentFillColor);
+                }
+                canvas.requestFocus(); 
+            }
+        });
+        
+        colorPickerStroke.setOnAction(new EventHandler() {
+            public void handle(Event t) {
+                currentStrokeColor = convertColorToInt(colorPickerStroke.getValue());
+                if(activeMode == Mode.DRAW){     
+                    //canvas.requestFocus(); 
+                }
+                else{
+                    shapes.get(listIndex).setStrokeColor(currentStrokeColor);
+                }
+                canvas.requestFocus();  
+            }
+        });
+        
+        weightSlider.valueProperty().addListener(new ChangeListener<Number>(){
+            public void changed(ObservableValue<? extends Number> changed, Number oldVal, Number newVal){
+                weightTextField.setText(Double.toString(newVal.floatValue()));
+                currentStrokeWeight = (float)newVal.floatValue();
+                if(activeMode == Mode.EDIT){
+                    shapes.get(listIndex).setStrokeWeight(newVal.floatValue());
+                }
+            }
+        });
+        
+        weightTextField.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent ae){
+                double newValue = convertStringToDouble(weightTextField.getText());
+                if(newValue == -1){
+                    newValue = weightSlider.getValue();
+                    weightTextField.setText(Double.toString(weightSlider.getValue()));
+                }
+                else if(newValue < 0){
+                    newValue = 0;
+                    weightSlider.setValue(0);
+                    weightTextField.setText("0");
+                }
+                else if(newValue > 100){
+                    weightSlider.setValue(100);
+                }
+                else{
+                    weightSlider.setValue(newValue);
+                }
+                currentStrokeWeight = (float)newValue;
+                if(activeMode == Mode.EDIT){
+                    shapes.get(listIndex).setStrokeWeight(currentStrokeWeight);
+                }
+            }
+        });
+
+        colorPane.setMaxWidth(controlBarWidth -7*spacing);
+        colorPane.add(lblColor, 1,0);
+        colorPane.add(lblNone, 2,0);
+        colorPane.add(lblFill, 0,1);
+        colorPane.add(colorPickerFill, 1,1);
+        colorPane.add(cbNoFill, 2,1);
+        colorPane.add(lblStroke, 0,2);
+        colorPane.add(colorPickerStroke, 1,2);
+        colorPane.add(cbNoStroke, 2,2);
+        colorPane.add(lblWeight, 0, 3);
+        colorPane.add(weightSlider, 1, 3);
+        colorPane.add(weightTextField, 2,3);
+        
+        //Observable List///////////////////////////////////////////////////////           
+        shapes = FXCollections.observableArrayList();   
+        ObservableList<Shape> shapeTypes = shapes;
         shapeViewer = new ListView<>(shapeTypes);
+        
         shapeViewer.setMaxSize(controlBarWidth -7*spacing, controlBarWidth*5);
         shapeViewer.setPrefHeight(controlBarWidth*2);
         MultipleSelectionModel<Shape> selectionModel = shapeViewer.getSelectionModel();
         
         selectionModel.selectedIndexProperty().addListener(new ChangeListener<Number>(){
             public void changed(ObservableValue<? extends Number> changed, Number oldVal, Number newVal){
+                editMode.setSelected(true);
                 activeMode = Mode.EDIT;
                 pad.deselectShape(listIndex);
                 listIndex = (int)newVal;
                 pad.selectShape(listIndex);
-                canvas.requestFocus();
             }
         });
         
@@ -269,14 +403,25 @@ public class ArtStationApplication extends PApplet{
         
         
         final BorderPane rootNode = new BorderPane();
+        rootNode.setPadding(new Insets(0,8*spacing,0,0));
         
         //Key Events for full scene
         rootNode.addEventFilter(KeyEvent.KEY_RELEASED, event->{
             if(event.getCode() == KeyCode.DELETE){
-                System.out.println("Deleting shit");
                 if(activeMode == Mode.EDIT && !shapes.isEmpty()){
                     shapes.remove(listIndex);
                     listIndex = shapes.size()-1;
+                }
+            }
+            else if(event.getCode() == KeyCode.SPACE){
+                if(activeMode == Mode.DRAW){
+                    editMode.setSelected(true);
+                    pad.completeShape();  
+                }
+                else{
+                    drawMode.setSelected(true);
+                    activeMode = Mode.DRAW;
+                    pad.toggleSelectShape(false);   
                 }
             }
         });
@@ -287,58 +432,34 @@ public class ArtStationApplication extends PApplet{
         
         //toolPane.setBackground(new Background(new BackgroundFill(Color.CADETBLUE, new CornerRadii(0),new Insets(0))));
         //strut.setPrefHeight(1);
-        controls.getChildren().add(shapeViewer);
-        modes.getChildren().addAll(new Separator(Orientation.HORIZONTAL),drawMode, editMode, new Separator(Orientation.HORIZONTAL));
+        controls.setPadding(new Insets(spacing, 2*spacing, spacing, spacing));
+        controls.getChildren().addAll(colorPane,shapeViewer);
+        modes.getChildren().addAll(drawMode, editMode, new Separator(Orientation.HORIZONTAL));
+        modes.setPadding(new Insets(spacing, 0,0,0));
+        toolPane.setPadding(new Insets(0,spacing,0,spacing));
         toolPane.getChildren().addAll(modes, btnCircle, btnRectangle, btnTriangle, btnLine, btnPoly);
         toolPane.setPrefColumns(1);
         toolPane.setHgap(5);
         toolPane.setVgap(5);
         
-        rootNode.setMargin(toolPane, new Insets(spacing));
-        rootNode.setMargin(controls, new Insets(spacing));
+        //rootNode.setMargin(toolPane, new Insets(spacing));
         rootNode.setTop(mb);
         rootNode.setLeft(toolPane);
         rootNode.setRight(controls);
         rootNode.setCenter(canvas);
                 
         final Scene newscene = new Scene(rootNode); // Create a scene from the elements
-        
-
-        
-        
-        
-//        newscene.setOnKeyTyped(new EventHandler<KeyEvent>(){
-//            public void handle(KeyEvent ke){
-//                switch(ke.getCharacter()){
-//                    case " ": break;
-//                    case "Z": break;
-//                        
-//                }
-//            }
-//        });
-//        
-//        newscene.setOnKeyPressed(new EventHandler<KeyEvent>() {
-//            public void handle(KeyEvent ke){
-//                switch(ke.getCode()){
-//                    case ALT:
-//                    case CONTROL:
-//                    case SHIFT:
-//                }
-//            }
-//        })
 
         //Window Properties/////////////////////////////////////////////////////
         stage.setTitle("Art Station");
         stage.setMaximized(true);
 
         stage.widthProperty().addListener((obs, oldVal, newVal) -> {
-            // Do whatever you want
             scaleCanvas((float)(stage.getWidth()-toolBarWidth - controlBarWidth),(float)(stage.getHeight() - 2*mb.getHeight()));
             canvas.setWidth(stage.getWidth()-toolBarWidth - controlBarWidth);
         });
 
         stage.heightProperty().addListener((obs, oldVal, newVal) -> {
-             // Do whatever you want
              scaleCanvas((float)(stage.getWidth()-toolBarWidth - controlBarWidth),(float)(stage.getHeight() - 2*mb.getHeight()));
              //canvas.setHeight(stage.getHeight()-toolBarWidth - controlBarWidth);
         });
@@ -411,7 +532,6 @@ public class ArtStationApplication extends PApplet{
 
     @Override
     public void keyPressed(){
-                    println("here");
         if(key < 255){
             keys[key] = true;
         }
@@ -438,15 +558,36 @@ public class ArtStationApplication extends PApplet{
         }
     }
     
+    int convertColorToInt(Color col){
+        int r = (int)(col.getRed()*255);
+        int g = (int)(col.getGreen()*255);
+        int b = (int)(col.getBlue()*255);
+        int a = (int)(col.getOpacity()*255);
+        
+        return color(r,g,b,a);
+    }
+    
+    double convertStringToDouble(String number){
+        double result;
+        try{
+            result = Double.parseDouble(number);
+        }
+        catch (NumberFormatException e){
+            result = -1;
+        }
+        return result; 
+    }
+    
     void checkInput(){
         if(keys['z'] && control){
             //TODO: Undo function
         }
-        if(keys[' ']){
-            activeMode = Mode.DRAW;
-            pad.toggleSelectShape(false);
-            keys[' '] = false;
-        }
+//        if(keys[' ']){
+//            System.out.println("Filtered before getting herer?");
+//            activeMode = Mode.DRAW;
+//            pad.toggleSelectShape(false);
+//            keys[' '] = false;
+//        }
 //        if(keys[DELETE]){
 //            if(activeMode == Mode.EDIT && !shapes.isEmpty()){
 //                shapes.remove(listIndex);
@@ -505,7 +646,6 @@ public class ArtStationApplication extends PApplet{
         int gridDensity = 10; //must be less than canvasWidth if int division is used
         float gridSpacing;
         boolean gridOn = true;
-        //ArrayList<Shape> shapes = new ArrayList<>();
         boolean modifying = false; //true while creating polygon so that user can click points for vertices
 
         CanvasArea(PApplet sketch, int w, int h) {
@@ -577,23 +717,29 @@ public class ArtStationApplication extends PApplet{
 
         void drawShape(float x, float y, ShapeType type) {
             listIndex = shapeViewer.getItems().size();
+            if(cbNoFill.isSelected()){
+                currentFillColor = NONE;
+            }
+            if(cbNoStroke.isSelected()){
+                currentStrokeColor = NONE;
+            }
             switch (type) {
                 case CIR:
-                    shapes.add(new Circle(sketch, x, y, listIndex));
+                    shapes.add(new Circle(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex));
                     break;
                 case REC:
-                    shapes.add(new Rectangle(sketch, x, y, listIndex, CENT));
+                    shapes.add(new Rectangle(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex, CENT));
                     break;
                 case TRI:
-                    shapes.add(new Triangle(sketch, x, y, listIndex));
+                    shapes.add(new Triangle(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex));
                     break;
                 case LIN:
-                    shapes.add(new Line(sketch, x, y, listIndex));
+                    shapes.add(new Line(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex));
                     break;
                 case POL:
                     if(!modifying){
                         modifying = true;
-                        shapes.add(new Polygon(sketch, x, y,listIndex));
+                        shapes.add(new Polygon(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y,listIndex));
                     }
                     break;
             }

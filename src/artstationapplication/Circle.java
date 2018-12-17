@@ -6,6 +6,7 @@
 package artstationapplication;
 
 import processing.core.*;
+import javafx.scene.paint.Color;
 
 /**
  *
@@ -20,8 +21,9 @@ class Circle extends Shape{
     Handle[] activeHandle = new Handle[2];
     Handle[] inactiveHandle = new Handle[2];
 
-    Circle(PApplet drawingSpace, float x, float y, int id){
-      super(drawingSpace,x,y);
+    Circle(PApplet drawingSpace, int paint, int outline, float thickness, float x, float y, int id){
+      super(drawingSpace,paint,outline,x,y);
+      strokeWeight = thickness;
       name = "Circle";
       index = id;
       widthHandleR = new Handle(drawingSpace, this, 50, new PVector(1,0));
@@ -39,13 +41,18 @@ class Circle extends Shape{
 
     @Override
     void drawShape(){
-      app.fill(paint);
-      if(lineThickness == 0){
+      if(fillColor == NONE){
+          app.noFill();
+      }
+      else{
+        app.fill(fillColor);
+      }
+      if(strokeWeight == 0){
         app.noStroke();
       }
       else{
-        app.stroke(0,0,0);
-        app.strokeWeight(lineThickness);
+        app.stroke(strokeColor);
+        app.strokeWeight(strokeWeight);
       }
       app.pushMatrix();
       app.translate(pos.x, pos.y);

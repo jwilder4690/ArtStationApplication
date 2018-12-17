@@ -6,7 +6,7 @@
 package artstationapplication;
 
 import processing.core.*;
-
+import javafx.scene.paint.Color;
 
 /**
  *
@@ -17,24 +17,47 @@ abstract class Shape{
     PVector pos;
     final float QUARTER_PI = app.QUARTER_PI;
     final float HALF_PI = app.HALF_PI;
+    final int NONE = -777;
     final float PI = app.PI;
     PVector startingRotation;
     float offset = 0;
     float rotation = 0;
-    int paint;
+    int fillColor;
+    int strokeColor;
     int editColor;
-    float lineThickness = 1;
+    float strokeWeight = 1;
     boolean completed = false;
     boolean selected = false;
     boolean shift = false;
     String name = "shape";
     int index;
 
-    Shape(PApplet drawingSpace, float x, float y) {
+    Shape(PApplet drawingSpace, int paint, int outline, float x, float y) {
         app = drawingSpace;
         pos = new PVector(x, y);
-        paint = app.color(255, 0, 255);
+        fillColor = paint;
+        strokeColor = outline;
         editColor = app.color(255, 255, 0);
+    }
+    
+    int getFillColor(){
+        return fillColor;
+    }
+    
+    int getStrokeColor(){
+        return strokeColor;
+    }
+    
+    void setFillColor(int newColor){
+        fillColor = newColor;
+    }
+    
+    void setStrokeColor(int newColor){
+        strokeColor = newColor;
+    }
+    
+    void setStrokeWeight(float weight){
+        strokeWeight = weight;
     }
 
     boolean getFinished() {
