@@ -22,8 +22,8 @@ First commits are merges of code developed in my "ArtStation-Halted" repository.
     - [x] Polygons
 - [ ] Add feature groups
 - [ ] Add features
-     - [ ] Fill color and alpha
-     - [ ] Stroke weigt and color
+     - [x] Fill color and alpha
+     - [x] Stroke weigt and color
      - [ ] Canvas sizing
 - [ ] Improve usability (crtl z, shift)
 - [ ] Output
