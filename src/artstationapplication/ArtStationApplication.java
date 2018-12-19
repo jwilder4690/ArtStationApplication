@@ -48,13 +48,7 @@ public class ArtStationApplication extends PApplet{
     boolean shift =false;
     boolean alt = false;
     boolean control = false;
-    int toolBarWidth = 50;
-    int controlBarWidth = 275;
-    int spacing = 5;
-    Region strut = new Region();
-    CheckBox cbNoFill;
-    CheckBox cbNoStroke;
-    final int NONE = -777;
+    int activeButton;
     int currentFillColor = color(255,255,255); 
     int currentStrokeColor = color(0,0,0);
     float currentStrokeWeight = 1;
@@ -65,7 +59,12 @@ public class ArtStationApplication extends PApplet{
     ToggleGroup modeGroup;
     ListView<Shape> shapeViewer;
     ObservableList<Shape> shapes;
+    final int NONE = -777; //Used for no fill color
     int listIndex = -1;
+    int toolBarWidth = 50;
+    int controlBarWidth = 275;
+    int spacing = 5;
+    Region strut = new Region();
 
     @Override
     public void settings(){
@@ -239,7 +238,85 @@ public class ArtStationApplication extends PApplet{
         btnTriangle.setOnAction(ToolHandler);
         btnPoly.setOnAction(ToolHandler);
         
-        //Fill & Stroke Pane////////////////////////////////////////////////////////
+        //Canvas Pane///////////////////////////////////////////////////////////
+        final VBox canvasPane = new VBox();
+        final GridPane gridSettings = new GridPane();
+        final Label lblGrid = new Label("Grid");
+        final Label lblGridOn = new Label("On");
+        final Label lblGridSnap = new Label("Snap");
+        final TextField gridTextField = new TextField("10");
+        final CheckBox cbGridOn = new CheckBox();
+        final CheckBox cbGridSnap = new CheckBox();
+        Slider gridSlider = new Slider(0, 100, 10);
+        
+        canvasPane.setMaxWidth(controlBarWidth -7*spacing);
+        lblGrid.setUnderline(true);
+        lblGridOn.setUnderline(true);
+        lblGridSnap.setUnderline(true);
+        gridTextField.setPrefColumnCount(3);
+        gridSlider.setShowTickMarks(true);
+        gridSlider.setMajorTickUnit(100/4);
+        gridSlider.setMinorTickCount(100/4-1);
+        gridSlider.setSnapToTicks(true);
+        gridSlider.setShowTickLabels(true);
+        gridSettings.setPrefWidth(controlBarWidth -7*spacing);
+        gridSettings.setHgap(2*spacing);
+        gridSettings.setAlignment(Pos.CENTER);
+        gridSettings.setHalignment(lblGrid, HPos.CENTER);
+        gridSettings.setHalignment(cbGridOn, HPos.CENTER);
+        gridSettings.setHalignment(cbGridSnap, HPos.CENTER);
+        cbGridOn.setSelected(true);
+        
+        gridSlider.valueProperty().addListener(new ChangeListener<Number>(){
+            public void changed(ObservableValue<? extends Number> changed, Number oldVal, Number newVal){
+                int output = newVal.intValue();
+                gridTextField.setText(Integer.toString(output));
+                pad.setGridDensity(output);
+            }
+        });
+        
+        gridTextField.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent ae){
+                int newValue = convertStringToInt(gridTextField.getText());
+                if(newValue == -1){
+                    newValue = (int)gridSlider.getValue();
+                    gridTextField.setText(Integer.toString((int)gridSlider.getValue()));
+                }
+                else if(newValue < 0){
+                    newValue = 0;
+                    gridTextField.setText("0");
+                }
+                else if(newValue > 100){
+                    newValue = 100;
+                    gridTextField.setText(Integer.toString(newValue));
+                }
+                gridSlider.setValue(newValue);
+            }
+        });
+        
+        cbGridOn.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent ae){
+                pad.toggleGrid(cbGridOn.isSelected());
+                canvas.requestFocus(); 
+            }
+        });
+        
+        cbGridSnap.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent ae){
+                //pad.toggleSnap(cbGridSnap.isSelected());
+                canvas.requestFocus(); 
+            }
+        });
+        
+        gridSettings.add(lblGrid, 0,0);
+        gridSettings.add(lblGridOn, 1, 0);
+        gridSettings.add(lblGridSnap, 2,0);
+        gridSettings.add(gridTextField, 0,1);
+        gridSettings.add(cbGridOn, 1,1);
+        gridSettings.add(cbGridSnap, 2,1);
+        canvasPane.getChildren().addAll(gridSettings, gridSlider);
+        
+        //Fill & Stroke Pane////////////////////////////////////////////////////
         final GridPane colorPane = new GridPane();
                
         final Label lblColor = new Label("Color");
@@ -250,8 +327,8 @@ public class ArtStationApplication extends PApplet{
         
         final ColorPicker colorPickerFill = new ColorPicker(Color.WHITE);
         final ColorPicker colorPickerStroke = new ColorPicker(Color.BLACK);
-        cbNoFill = new CheckBox();
-        cbNoStroke = new CheckBox();
+        final CheckBox cbNoFill = new CheckBox();
+        final CheckBox cbNoStroke = new CheckBox();
         final Slider weightSlider = new Slider(0, 10, 1);
         final TextField weightTextField = new TextField("1");
         
@@ -433,7 +510,7 @@ public class ArtStationApplication extends PApplet{
         //toolPane.setBackground(new Background(new BackgroundFill(Color.CADETBLUE, new CornerRadii(0),new Insets(0))));
         //strut.setPrefHeight(1);
         controls.setPadding(new Insets(spacing, 2*spacing, spacing, spacing));
-        controls.getChildren().addAll(colorPane,shapeViewer);
+        controls.getChildren().addAll(canvasPane, colorPane,shapeViewer);
         modes.getChildren().addAll(drawMode, editMode, new Separator(Orientation.HORIZONTAL));
         modes.setPadding(new Insets(spacing, 0,0,0));
         toolPane.setPadding(new Insets(0,spacing,0,spacing));
@@ -485,7 +562,8 @@ public class ArtStationApplication extends PApplet{
        
     @Override
     public void mousePressed(){
-        //if(mouseButton == LEFT){
+        activeButton = mouseButton; //stores a copy because mouseButton drops value before triggering mouseReleased/mouseClicked
+        if(mouseButton == LEFT){
             if(mouseOverCanvas()){
               if(activeMode == Mode.DRAW){
                 pad.drawShape(canvasX, canvasY, activeTool);
@@ -496,38 +574,35 @@ public class ArtStationApplication extends PApplet{
                 }
               }
             }
-       // }
-        if(mouseButton == RIGHT){
-//            if(activeMode == Mode.EDIT){
-//                activeMode = Mode.DRAW;
-//                pad.toggleSelectShape(false);
-//            }
-            if(activeMode == Mode.DRAW){
-               pad.completeShape();  
-           }
         }
     }
     
+        
     @Override
+    //Check mouse LEFT vs RIGHT against "activeButton" because mouseButton variable drops its value before these checks run
     public void mouseReleased(){ 
-        //if(mouseButton == LEFT){
-            if(mouseOverCanvas()){ //prevents calling complete shape without any shapes
-                if(activeMode == Mode.DRAW){
-                    if(activeTool == ShapeType.POL){
-                        pad.completeVertex(canvasX, canvasY);
-                    }
-                    else{
-                        pad.completeShape(); 
-                    }
+        if(activeButton == LEFT){
+            if(activeMode == Mode.DRAW){
+                if(activeTool == ShapeType.POL){
+                    pad.completeVertex(canvasX, canvasY);
+                }
+                else{
+                    pad.completeShape(); 
                 }
             }
-            if(activeMode == Mode.EDIT){
-                subMode = Transformation.NON;
+        }
+        else if(activeButton == RIGHT){
+            if(activeMode == Mode.DRAW){
+               pad.completeShape();  
+           }
+            else{  
+                activeMode = Mode.DRAW;
+                pad.toggleSelectShape(false);  
             }
-       // }
-//        else if(mouseButton == RIGHT){
-//            
-//        }
+        }
+        if(activeMode == Mode.EDIT){
+            subMode = Transformation.NON;
+        }
     }
 
     @Override
@@ -578,24 +653,21 @@ public class ArtStationApplication extends PApplet{
         return result; 
     }
     
+    int convertStringToInt(String number){
+        int result;
+        try{
+            result = Integer.parseInt(number);
+        }
+        catch (NumberFormatException e){
+            result = -1;
+        }
+        return result; 
+    }
+    
     void checkInput(){
         if(keys['z'] && control){
             //TODO: Undo function
         }
-//        if(keys[' ']){
-//            System.out.println("Filtered before getting herer?");
-//            activeMode = Mode.DRAW;
-//            pad.toggleSelectShape(false);
-//            keys[' '] = false;
-//        }
-//        if(keys[DELETE]){
-//            if(activeMode == Mode.EDIT && !shapes.isEmpty()){
-//                shapes.remove(listIndex);
-//                listIndex = shapes.size()-1;
-//            }
-//            keys[DELETE] = false;
-//        }
-    
     }
     
     boolean mouseOverCanvas(){
@@ -706,23 +778,17 @@ public class ArtStationApplication extends PApplet{
                         shapes.get(shapes.size() - 1).modify(mouse);
                     } break;
                 case EDIT:
+                    shapes.get(listIndex).setShift(shift);
                     switch(subMode){
                         case SCA: shapes.get(listIndex).adjustActiveHandle(mouse); break;
                         case TRA: shapes.get(listIndex).manipulate(mouse); break;
-                        case ROT: shapes.get(listIndex).changeRotation(mouse);
-                            break;
+                        case ROT: shapes.get(listIndex).changeRotation(mouse); break;
                     } break;
             }
         }
 
         void drawShape(float x, float y, ShapeType type) {
             listIndex = shapeViewer.getItems().size();
-            if(cbNoFill.isSelected()){
-                currentFillColor = NONE;
-            }
-            if(cbNoStroke.isSelected()){
-                currentStrokeColor = NONE;
-            }
             switch (type) {
                 case CIR:
                     shapes.add(new Circle(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex));
@@ -779,6 +845,15 @@ public class ArtStationApplication extends PApplet{
                 toggleSelectShape(true);
                 modifying = false;
             }
+        }
+        
+        void toggleGrid(boolean flip){
+            gridOn = flip;
+        }
+        
+        void setGridDensity(int newDensity){
+            gridDensity = newDensity;
+            gridSpacing = canvasWidth / (float)gridDensity;
         }
 
         void drawGrid() {
