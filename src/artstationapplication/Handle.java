@@ -12,7 +12,7 @@ import processing.core.*;
      class Handle{
          PApplet app;
          float modifier = 1;
-         float radius;
+         float radius = 50;
          float size = 15;
          int paint;
          PVector offset;
@@ -20,9 +20,8 @@ import processing.core.*;
          
 
          
-         Handle(PApplet drawingSpace, Shape parent, float r, PVector which){
+         Handle(PApplet drawingSpace, Shape parent, PVector which){
              app = drawingSpace;
-             radius = r;
              offset = which;
              this.parent = parent;
              paint = app.color(255,255,0);

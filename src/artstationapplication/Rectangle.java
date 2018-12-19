@@ -27,10 +27,10 @@ import javafx.scene.paint.Color;
         strokeWeight = thickness;
         name = "Rectangle";
         index = id;
-        widthHandleR = new Handle(drawingSpace, this, 50/2, new PVector(1,0));
-        widthHandleL = new Handle(drawingSpace, this, 50/2, new PVector(-1,0));
-        heightHandleB = new Handle(drawingSpace, this, 50/2, new PVector(0,1));
-        heightHandleT = new Handle(drawingSpace, this, 50/2, new PVector(0,-1));
+        widthHandleR = new Handle(drawingSpace, this, new PVector(1,0));
+        widthHandleL = new Handle(drawingSpace, this, new PVector(-1,0));
+        heightHandleB = new Handle(drawingSpace, this, new PVector(0,1));
+        heightHandleT = new Handle(drawingSpace, this, new PVector(0,-1));
         centerType = style;
         corner = new PVector(a+1,b+1); //default corner, will not be displayed 
     }

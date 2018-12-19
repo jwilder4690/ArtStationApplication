@@ -26,10 +26,10 @@ class Circle extends Shape{
       strokeWeight = thickness;
       name = "Circle";
       index = id;
-      widthHandleR = new Handle(drawingSpace, this, 50, new PVector(1,0));
-      widthHandleL = new Handle(drawingSpace, this, 50, new PVector(-1,0));
-      heightHandleB = new Handle(drawingSpace, this, 50, new PVector(0,1));
-      heightHandleT = new Handle(drawingSpace, this, 50, new PVector(0,-1));
+      widthHandleR = new Handle(drawingSpace, this, new PVector(1,0));
+      widthHandleL = new Handle(drawingSpace, this, new PVector(-1,0));
+      heightHandleB = new Handle(drawingSpace, this, new PVector(0,1));
+      heightHandleT = new Handle(drawingSpace, this, new PVector(0,-1));
     }
 
     @Override 

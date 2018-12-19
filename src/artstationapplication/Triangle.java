@@ -26,9 +26,9 @@ import javafx.scene.paint.Color;
       strokeWeight = thickness;
       name = "Triangle";
       index = id;
-      widthHandleR = new Handle(drawingSpace, this, 50, new PVector(1,0));
-      widthHandleL = new Handle(drawingSpace, this, 50, new PVector(-1,0));
-      heightHandleT = new Handle(drawingSpace, this, 50, new PVector(0,-1));
+      widthHandleR = new Handle(drawingSpace, this, new PVector(1,0));
+      widthHandleL = new Handle(drawingSpace, this, new PVector(-1,0));
+      heightHandleT = new Handle(drawingSpace, this, new PVector(0,-1));
       altitude = 50;
       side = app.sqrt((float)(4.0/3.0)*app.sq(altitude));
     }
