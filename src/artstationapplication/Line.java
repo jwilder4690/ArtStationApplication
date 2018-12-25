@@ -57,14 +57,18 @@ import javafx.scene.paint.Color;
       }
       app.pushMatrix();
       app.line(start.getPosition().x, start.getPosition().y, end.getPosition().x, end.getPosition().y);
-      if(selected){
+      app.popMatrix();
+    }
+    
+    @Override
+    void drawSelected(){
+        app.pushMatrix();
         app.noFill();
         app.strokeWeight(3);
         app.stroke(255,255, 0);
         app.line(start.getPosition().x, start.getPosition().y, end.getPosition().x, end.getPosition().y);
         drawHandles();
-      }
-      app.popMatrix();
+        app.popMatrix();
     }
     
     void drawHandles(){
@@ -121,5 +125,10 @@ import javafx.scene.paint.Color;
         else{
             activeHandle.setPosition(mouse);
         }
+    }
+    
+        @Override
+    void finishHandles(){
+        //pass
     }
   }

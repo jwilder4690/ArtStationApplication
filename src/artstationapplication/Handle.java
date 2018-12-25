@@ -35,8 +35,13 @@ import processing.core.*;
              return new PVector(parent.getPosition().x + pointX * app.cos(rot) - pointY*app.sin(rot), parent.getPosition().y + pointX*app.sin(rot) + pointY*app.cos(rot));
          }
                   
-         void setRadius(float r){
+         void setModifier(float r){
              modifier = r/radius;
+         }
+         
+         void setRadius(){
+             radius = radius*modifier;
+             modifier = 1;
          }
          
          boolean overHandle(PVector m, float rot){
@@ -52,5 +57,9 @@ import processing.core.*;
              app.strokeWeight(1);
              app.stroke(0,0,0);
              app.ellipse(modifier*radius*offset.x, modifier*radius*offset.y, size,size);
+         }
+         
+         void reset(){
+             modifier = 1;
          }
      }

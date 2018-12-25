@@ -58,14 +58,20 @@ class Circle extends Shape{
       app.translate(pos.x, pos.y);
       app.rotate(rotation);
       app.ellipse(0,0, 2*widthHandleL.getRadius(), 2*heightHandleT.getRadius());
-      if(selected){
+      app.popMatrix();
+    }
+    
+    @Override
+    void drawSelected(){
+        app.pushMatrix();
+        app.translate(pos.x, pos.y);
+        app.rotate(rotation);
         app.noFill();
         app.strokeWeight(3);
         app.stroke(editColor);
         app.ellipse(0,0, 2*widthHandleL.getRadius(), 2*heightHandleT.getRadius());
         drawHandles();
-      }
-      app.popMatrix();
+        app.popMatrix();
     }
 
     void drawHandles(){   
@@ -75,16 +81,14 @@ class Circle extends Shape{
         heightHandleB.drawHandle();            
     }
 
-
-
     @Override
     void modify(PVector mouse){
       float radius = app.dist(mouse.x, mouse.y, pos.x, pos.y);
       rotation = 0;
-      widthHandleR.setRadius(radius);
-      widthHandleL.setRadius(radius);
-      heightHandleT.setRadius(radius);
-      heightHandleB.setRadius(radius);
+      widthHandleR.setModifier(radius);
+      widthHandleL.setModifier(radius);
+      heightHandleT.setModifier(radius);
+      heightHandleB.setModifier(radius);
     }
 
     @Override
@@ -111,14 +115,30 @@ class Circle extends Shape{
         float delta = (activeHandle[0].getRadius() - inactiveHandle[0].getRadius())/activeHandle[0].getRadius();
         float dist = app.dist(pos.x, pos.y, mouse.x, mouse.y);
         if(shift){       
-            activeHandle[0].setRadius(dist); 
-            activeHandle[1].setRadius(dist);
-            inactiveHandle[0].setRadius(dist - dist * delta);  
-            inactiveHandle[1].setRadius(dist - dist * delta);
+            activeHandle[0].setModifier(dist); 
+            activeHandle[1].setModifier(dist);
+            inactiveHandle[0].setModifier(dist - dist * delta);  
+            inactiveHandle[1].setModifier(dist - dist * delta);
         }
         else{
-            activeHandle[0].setRadius(dist);  
-            activeHandle[1].setRadius(dist);
+            activeHandle[0].setModifier(dist);  
+            activeHandle[1].setModifier(dist);
         }
+    }
+    
+    @Override
+    void finishHandles(){
+        widthHandleL.setRadius();
+        widthHandleR.setRadius();
+        heightHandleT.setRadius();
+        heightHandleB.setRadius();
+    }
+    
+    void reset(){
+        rotation = 0;
+        widthHandleL.reset();
+        widthHandleR.reset();
+        heightHandleT.reset();
+        heightHandleB.reset();
     }
  }

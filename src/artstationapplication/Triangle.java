@@ -70,14 +70,20 @@ import javafx.scene.paint.Color;
       app.translate(pos.x, pos.y);
       app.rotate(rotation);
       app.triangle(0, -heightHandleT.getRadius(), -widthHandleL.getRadius(), 0, widthHandleR.getRadius(),0); 
-      if(selected){
+      app.popMatrix();
+    }
+    
+        @Override
+    void drawSelected(){
+        app.pushMatrix();
+        app.translate(pos.x, pos.y);
+        app.rotate(rotation); 
         app.noFill();
         app.strokeWeight(3);
         app.stroke(255,255, 0);
         app.triangle(0, -heightHandleT.getRadius(), -widthHandleL.getRadius(), 0, widthHandleR.getRadius(),0); 
         drawHandles();
-      }
-      app.popMatrix();
+        app.popMatrix();
     }
     
     void drawHandles(){   
@@ -89,9 +95,9 @@ import javafx.scene.paint.Color;
     @Override
     void modify(PVector mouse){
       float radius = app.dist(pos.x, pos.y, mouse.x, mouse.y);
-      heightHandleT.setRadius(radius);
-      widthHandleL.setRadius(app.sqrt((float)(4.0/3.0)*app.sq(radius))/2);
-      widthHandleR.setRadius(app.sqrt((float)(4.0/3.0)*app.sq(radius))/2);
+      heightHandleT.setModifier(radius);
+      widthHandleL.setModifier(app.sqrt((float)(4.0/3.0)*app.sq(radius))/2);
+      widthHandleR.setModifier(app.sqrt((float)(4.0/3.0)*app.sq(radius))/2);
 
       rotation = app.atan2(mouse.y - pos.y, mouse.x - pos.x);
       rotation += offset;
@@ -131,14 +137,29 @@ import javafx.scene.paint.Color;
         float delta2 = (activeHandle.getRadius() - inactiveHandle[1].getRadius())/activeHandle.getRadius();
         float dist = app.dist(pos.x, pos.y, mouse.x, mouse.y);
         if(shift){       
-            activeHandle.setRadius(dist); 
-            inactiveHandle[0].setRadius(dist - dist * delta1);  
-            inactiveHandle[1].setRadius(dist - dist * delta2);  
+            activeHandle.setModifier(dist); 
+            inactiveHandle[0].setModifier(dist - dist * delta1);  
+            inactiveHandle[1].setModifier(dist - dist * delta2);  
         }
         else{
-            activeHandle.setRadius(dist);  
+            activeHandle.setModifier(dist);  
         }
 //        float radius = app.dist(pos.x, pos.y, mouse.x, mouse.y);  
-//        activeHandle.setRadius(radius);
+//        activeHandle.setModifier(radius);
     }
+    
+    @Override
+    void finishHandles(){
+        widthHandleL.setRadius();
+        widthHandleR.setRadius();
+        heightHandleT.setRadius();
+    }
+    
+    void reset(){
+        rotation = 0;
+        widthHandleL.reset();
+        widthHandleR.reset();
+        heightHandleT.reset();
+    }
+    
   }

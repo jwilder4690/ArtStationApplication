@@ -27,7 +27,6 @@ abstract class Shape{
     int editColor;
     float strokeWeight = 1;
     boolean completed = false;
-    boolean selected = false;
     boolean shift = false;
     String name = "shape";
     int index;
@@ -91,10 +90,14 @@ abstract class Shape{
     abstract void adjustActiveHandle(PVector mouse);
 
     abstract void drawShape();
+    
+    abstract void drawSelected();
 
     abstract void modify(PVector mouse);
 
     abstract boolean mouseOver(PVector mouse);
+    
+    abstract void finishHandles();
 
     void manipulate(PVector mouse) {
         pos.set(mouse);
@@ -112,14 +115,19 @@ abstract class Shape{
     }
 
     void finishShape() {
+        finishHandles();
         completed = true;
     }
 
-    void select() {
-        selected = true;
-    }
-
-    void deselect() {
-        selected = false;
+//    void select() {
+//        selected = true;
+//    }
+//
+//    void deselect() {
+//        selected = false;
+//    }
+    
+    void reset(){
+        //pass
     }
 }

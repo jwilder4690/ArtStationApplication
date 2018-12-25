@@ -179,21 +179,29 @@ public class Polygon extends Shape{
                 vertices.get(i).drawHandle();
             }
         }
-        if(selected){
-            app.noFill();
-            app.strokeWeight(3);
-            app.stroke(255,255, 0);
-            app.beginShape();
-            for(int i = 0; i < vertices.size(); i++){
-                app.vertex(vertices.get(i).getPositionFloats());
-            }
-            app.endShape(app.CLOSE); 
-            drawHandles();
+        app.fill(0,255,0);
+        app.ellipse(0,0, 15,15);
+        app.popMatrix();    
+    }
+    
+        @Override
+    void drawSelected(){
+        app.pushMatrix();
+        app.translate(pos.x, pos.y);
+        app.rotate(rotation);
+        app.noFill();
+        app.strokeWeight(3);
+        app.stroke(255,255, 0);
+        app.beginShape();
+        for(int i = 0; i < vertices.size(); i++){
+            app.vertex(vertices.get(i).getPositionFloats());
         }
+        app.endShape(app.CLOSE); 
+        drawHandles();
+        //pivot point
         app.fill(0,255,0);
         app.ellipse(0,0, 15,15);
         app.popMatrix();
-        
     }
 
     void drawHandles(){
@@ -207,6 +215,8 @@ public class Polygon extends Shape{
         addVertex(mouse);
     }
 
-   
-    
+    @Override
+    void finishHandles(){
+        //pass
+    }
 }

@@ -66,24 +66,36 @@ import javafx.scene.paint.Color;
         //Still uses corners drawing mode in order to enable assymetric scaling
         app.rectMode(CORNERS);
         app.rect(-widthHandleL.getRadius(), -heightHandleT.getRadius(), widthHandleR.getRadius(), heightHandleB.getRadius());
-        if(selected){
-            app.noFill();
-            app.strokeWeight(3);
-            app.stroke(255,255, 0);
-            app.rect(-widthHandleL.getRadius(), -heightHandleT.getRadius(), widthHandleR.getRadius(), heightHandleB.getRadius());
-            drawHandles();
-          }
       }
       //Currently not using, alt draw mode maybe?
       else if(!centerType){
         app.rectMode(CORNERS);
         app.rect(0,0, corner.x, corner.y);
-        if(selected){
-            app.noFill();
-            app.strokeWeight(3);
-            app.stroke(255,255, 0);
-            app.rect(0,0, corner.x, corner.y);
-          }
+      }
+      app.popMatrix();
+    }
+    
+    @Override
+    void drawSelected(){
+      app.pushMatrix();
+      app.translate(pos.x, pos.y);
+      app.rotate(rotation);
+      if(centerType){
+        //Still uses corners drawing mode in order to enable assymetric scaling
+        app.rectMode(CORNERS);
+        app.noFill();
+        app.strokeWeight(3);
+        app.stroke(255,255, 0);
+        app.rect(-widthHandleL.getRadius(), -heightHandleT.getRadius(), widthHandleR.getRadius(), heightHandleB.getRadius());
+        drawHandles();
+      }
+      //Currently not using, alt draw mode maybe?
+      else if(!centerType){
+        app.rectMode(CORNERS);
+        app.noFill();
+        app.strokeWeight(3);
+        app.stroke(255,255, 0);
+        app.rect(0,0, corner.x, corner.y);
       }
       app.popMatrix();
     }
@@ -100,10 +112,10 @@ import javafx.scene.paint.Color;
         float radius;
         if(centerType){
             radius = app.dist(mouse.x, mouse.y, pos.x, pos.y);
-            widthHandleR.setRadius(radius);
-            widthHandleL.setRadius(radius);
-            heightHandleT.setRadius(radius);
-            heightHandleB.setRadius(radius);
+            widthHandleR.setModifier(radius);
+            widthHandleL.setModifier(radius);
+            heightHandleT.setModifier(radius);
+            heightHandleB.setModifier(radius);
         }
         else if(!centerType) corner.set(mouse.x, mouse.y);
         rotation = app.atan2(mouse.y - pos.y, mouse.x - pos.x);
@@ -155,13 +167,30 @@ import javafx.scene.paint.Color;
             float delta0 = (activeHandle.getRadius() - inactiveHandle[0].getRadius())/activeHandle.getRadius();
             float delta1 = (activeHandle.getRadius() - inactiveHandle[1].getRadius())/activeHandle.getRadius();
             float delta2 = (activeHandle.getRadius() - inactiveHandle[2].getRadius())/activeHandle.getRadius();
-            activeHandle.setRadius(dist); 
-            inactiveHandle[0].setRadius(dist - dist * delta0);  
-            inactiveHandle[1].setRadius(dist - dist * delta1);
-            inactiveHandle[2].setRadius(dist - dist * delta2);
+            activeHandle.setModifier(dist); 
+            inactiveHandle[0].setModifier(dist - dist * delta0);  
+            inactiveHandle[1].setModifier(dist - dist * delta1);
+            inactiveHandle[2].setModifier(dist - dist * delta2);
         }
         else{
-            activeHandle.setRadius(dist);  
+            activeHandle.setModifier(dist);  
         }
+    }
+    
+    @Override
+    void finishHandles(){
+        widthHandleL.setRadius();
+        widthHandleR.setRadius();
+        heightHandleT.setRadius();
+        heightHandleB.setRadius();
+    }
+    
+    @Override
+    void reset(){
+        rotation = 0;
+        widthHandleL.reset();
+        widthHandleR.reset();
+        heightHandleT.reset();
+        heightHandleB.reset();
     }
   }
