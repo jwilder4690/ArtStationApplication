@@ -176,14 +176,14 @@ public class ArtStationApplication extends PApplet{
         btnRectangle.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         btnRectangle.setStyle("-fx-padding:0");
         btnRectangle.setToggleGroup(toolGroup);
-        btnRectangle.setTooltip(new Tooltip("Click in center, drag to size. Hold SHIFT to snap rotation to 45 degree increments. "));
+        btnRectangle.setTooltip(new Tooltip("Click in center, drag to size. Hold SHIFT to snap rotation to 45 degree increments."));
         
         Image imageTriangle = new Image(getClass().getResource("data/btnTriangle.png").toExternalForm());
         ToggleButton btnTriangle = new ToggleButton("Triangle", new ImageView(imageTriangle));
         btnTriangle.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         btnTriangle.setStyle("-fx-padding:0");
         btnTriangle.setToggleGroup(toolGroup);
-        btnTriangle.setTooltip(new Tooltip("Click in center, drag to size."));
+        btnTriangle.setTooltip(new Tooltip("Click in center, drag to size. Hold SHIFT to snap rotation to 30 degree increments."));
         
         Image imageLine = new Image(getClass().getResource("data/btnLine.png").toExternalForm());
         ToggleButton btnLine = new ToggleButton("Line", new ImageView(imageLine));
@@ -197,7 +197,7 @@ public class ArtStationApplication extends PApplet{
         btnPoly.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         btnPoly.setStyle("-fx-padding:0");
         btnPoly.setToggleGroup(toolGroup);
-        btnPoly.setTooltip(new Tooltip("Single click for each vertex, SPACE to complete."));
+        btnPoly.setTooltip(new Tooltip("Single click for each vertex, SPACE or right click to complete."));
         
         EventHandler<ActionEvent> ToolHandler = new EventHandler<ActionEvent>(){
             public void handle(ActionEvent ae){
@@ -231,11 +231,55 @@ public class ArtStationApplication extends PApplet{
         btnTriangle.setOnAction(ToolHandler);
         btnPoly.setOnAction(ToolHandler);
         
+        //Canvas Menu///////////////////////////////////////////////////////////
+        final HBox dimensionPane = new HBox(spacing);
+        final MenuButton dimensionMenuButton = new MenuButton("Canvas Dimensions");
+        final CustomMenuItem dimensionMenu = new CustomMenuItem(dimensionPane);
+        dimensionMenuButton.getItems().add(dimensionMenu);
+        final TextField widthTextField = new TextField(Integer.toString(pad.getWidth()));
+        final TextField heightTextField = new TextField(Integer.toString(pad.getHeight()));
+        final Label lblWidth = new Label("Width:");
+        final Label lblHeight = new Label("Height:");
+        
+        dimensionMenu.setHideOnClick(false);
+        dimensionMenuButton.setPrefWidth(controlBarWidth/2);
+        dimensionPane.setPrefWidth(controlBarWidth -7*spacing);
+        widthTextField.setPrefColumnCount(5);
+        heightTextField.setPrefColumnCount(5);
+                
+        EventHandler<ActionEvent> textHandler = new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent ae){
+                int newWidthVal = convertStringToInt(widthTextField.getText());
+                int newHeightVal = convertStringToInt(heightTextField.getText());
+                if(newWidthVal <= 0){   //Resets textfield back to current value if user input is invalid
+                    widthTextField.setText(Integer.toString(pad.getWidth()));
+                }
+                else if(newHeightVal <= 0){  //Resets textfield back to current value if user input is invalid
+                    heightTextField.setText(Integer.toString(pad.getHeight()));
+                }
+                else{
+                    pad.setWidth(newWidthVal);
+                    pad.setHeight(newHeightVal);
+                    scaleCanvas((float)(stage.getWidth()-toolBarWidth - controlBarWidth),(float)(stage.getHeight() - 2*mb.getHeight()));
+                    canvas.setWidth(stage.getWidth()-toolBarWidth - controlBarWidth);
+                    pad.setGridDensity();
+                    canvas.requestFocus();
+                }
+            }
+        };
+        
+        widthTextField.setOnAction(textHandler);
+        heightTextField.setOnAction(textHandler);
+        
+        //dimensionPane.setOnMouseExited(e -> canvas.requestFocus());
+        
+        dimensionPane.getChildren().addAll(lblWidth, widthTextField, lblHeight, heightTextField);
+                
         //Grid Menu///////////////////////////////////////////////////////////
         int gridMax = 100;
-        final VBox canvasPane = new VBox();
+        final VBox gridPane = new VBox();
         final MenuButton gridMenuButton = new MenuButton("Grid Options");
-        final CustomMenuItem gridMenu = new CustomMenuItem(canvasPane);
+        final CustomMenuItem gridMenu = new CustomMenuItem(gridPane);
         gridMenuButton.getItems().add(gridMenu);
         final GridPane gridSettings = new GridPane();
         final Label lblGrid = new Label("Grid");
@@ -245,9 +289,9 @@ public class ArtStationApplication extends PApplet{
         final CheckBox cbGridOn = new CheckBox();
         final CheckBox cbGridSnap = new CheckBox();
         Slider gridSlider = new Slider(0, gridMax, 10);
-
-
-        canvasPane.setMaxWidth(controlBarWidth -7*spacing);
+        
+        gridMenuButton.setPrefWidth(controlBarWidth/2);
+        gridPane.setMaxWidth(controlBarWidth -7*spacing);
         lblGrid.setUnderline(true);
         lblGridOn.setUnderline(true);
         lblGridSnap.setUnderline(true);
@@ -313,7 +357,7 @@ public class ArtStationApplication extends PApplet{
         });
         
         //maybe... get User Input
-        canvasPane.setOnMouseExited(e -> canvas.requestFocus());
+        //gridPane.setOnMouseExited(e -> canvas.requestFocus());
         
         gridSettings.add(lblGrid, 0,0);
         gridSettings.add(lblGridOn, 1, 0);
@@ -321,7 +365,7 @@ public class ArtStationApplication extends PApplet{
         gridSettings.add(gridTextField, 0,1);
         gridSettings.add(cbGridOn, 1,1);
         gridSettings.add(cbGridSnap, 2,1);
-        canvasPane.getChildren().addAll(gridSettings, gridSlider);
+        gridPane.getChildren().addAll(gridSettings, gridSlider);
 
         
         //Fill & Stroke Pane////////////////////////////////////////////////////
@@ -476,16 +520,19 @@ public class ArtStationApplication extends PApplet{
         Button btnUpArrow = new Button("Up", new ImageView(imageUpArrow));
         btnUpArrow.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         btnUpArrow.setStyle("-fx-padding:0; ");
-        btnUpArrow.setTooltip(new Tooltip("Click to move selected shape backward."));
+        btnUpArrow.setTooltip(new Tooltip("Moves selected shape backward."));
         
         Image imageDownArrow = new Image(getClass().getResource("data/btnDownArrow.png").toExternalForm());
         Button btnDownArrow = new Button("Down", new ImageView(imageDownArrow));
         btnDownArrow.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         btnDownArrow.setStyle("-fx-padding:0; ");
-        btnDownArrow.setTooltip(new Tooltip("Click to move selected shape forward."));
+        btnDownArrow.setTooltip(new Tooltip("Moves selected shape forward."));
         
         Button btnDelete = new Button("Delete");
+        btnDelete.setTooltip(new Tooltip("Deletes current shape."));
+                
         Button btnReset = new Button("Reset");
+        btnReset.setTooltip(new Tooltip("Removes all rotation and scaling from current shape."));
         
         btnUpArrow.setOnAction(event -> swapElements(listIndex, listIndex-1));
         btnDownArrow.setOnAction(event -> swapElements(listIndex, listIndex+1));
@@ -546,13 +593,16 @@ public class ArtStationApplication extends PApplet{
             }
         });
         
+        
+        
         final VBox controls = new VBox(spacing);
         final VBox modes = new VBox(spacing);      
         final TilePane toolPane = new TilePane();
         
 
         controls.setPadding(new Insets(spacing, 2*spacing, spacing, spacing));
-        controls.getChildren().addAll(gridMenuButton, colorPane,listPanel);
+        controls.setMinWidth(controlBarWidth -4*spacing);
+        controls.getChildren().addAll(dimensionMenuButton, gridMenuButton, colorPane,listPanel);
         modes.getChildren().addAll(drawMode, editMode, new Separator(Orientation.HORIZONTAL));
         modes.setPadding(new Insets(spacing, 0,0,0));
         toolPane.setPadding(new Insets(0,spacing,0,spacing));
@@ -572,6 +622,7 @@ public class ArtStationApplication extends PApplet{
         //Window Properties/////////////////////////////////////////////////////
         stage.setTitle("Art Station");
         stage.setMaximized(true);
+        stage.setMinWidth(controlBarWidth + toolBarWidth);
 
         stage.widthProperty().addListener((obs, oldVal, newVal) -> {
             scaleCanvas((float)(stage.getWidth()-toolBarWidth - controlBarWidth),(float)(stage.getHeight() - 2*mb.getHeight()));
@@ -599,6 +650,8 @@ public class ArtStationApplication extends PApplet{
         background(55,55,55);
         drawCanvasArea();
         drawFrames();
+        fill(155);
+        text( "X: "+canvasX + ", Y: "+ canvasY,mouseX, mouseY-5);
     }
        
     @Override
@@ -685,7 +738,10 @@ public class ArtStationApplication extends PApplet{
             shapes.remove(listIndex);
             listIndex = shapes.size() - 1;
             shapeViewer.getSelectionModel().select(listIndex);
-            if(listIndex < 0) listIndex = 0;
+            if(listIndex < 0){
+                listIndex = 0;
+                activeMode = Mode.DRAW; //switches back to draw mode if no other shapes to edit. 
+            }
         }
     }
     
@@ -782,6 +838,14 @@ public class ArtStationApplication extends PApplet{
             canvasWidth = w;
             canvasHeight = h;
             gridSpacing = canvasWidth / (float)gridDensity;
+        }
+        
+        void setWidth(int wide){
+            canvasWidth = wide;
+        }
+        
+        void setHeight(int tall){
+            canvasHeight = tall;
         }
         
         void setShift(boolean val){
@@ -935,6 +999,10 @@ public class ArtStationApplication extends PApplet{
         
         void setGridDensity(int newDensity){
             gridDensity = newDensity;
+            gridSpacing = canvasWidth / (float)gridDensity;
+        }
+        
+        void setGridDensity(){ //Width changed, not density
             gridSpacing = canvasWidth / (float)gridDensity;
         }
         
