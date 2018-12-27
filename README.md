@@ -12,12 +12,11 @@ First commits are merges of code developed in my "ArtStation-Halted" repository.
 - [x] GUI element shape list (Observable list)
 - [ ] Add features (Arcs, polygon, curves)
     - [x] Polygons
-- [ ] Add feature groups
-- [ ] Add features
-     - [x] Fill color and alpha
-     - [x] Stroke weigt and color
-     - [ ] Canvas sizing
-- [ ] Improve usability (crtl z, shift)
+    - [ ] Arcs
+    - [ ] Curves
+    - [ ] Groups
+- [x] Add Controls (Fill, stroke, canvas sizing, grid)
+- [ ] Improve usability (crtl z, shift, alt)
 - [ ] Output
     - [ ] Image file (support alpha)
     - [ ] Processing Code 
