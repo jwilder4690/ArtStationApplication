@@ -27,6 +27,15 @@ import processing.core.*;
              paint = app.color(255,255,0);
         }
          
+         Handle(Handle base, Shape parent){
+             app = base.app;
+             offset = base.offset;
+             this.parent = parent;
+             paint = base.paint;
+             radius = base.radius;
+             modifier = base.modifier;
+         }
+         
          PVector getPosition(float rot){
              
              //Optional TODO: if this works set the position in a PVector that manually updates on mouse release of rotation, to avoid doing this calculation constantly

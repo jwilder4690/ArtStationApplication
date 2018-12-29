@@ -6,7 +6,7 @@
 package artstationapplication;
 import java.util.ArrayList;
 import processing.core.*;
-import javafx.scene.paint.Color;
+import java.util.Collections;
 
 /**
  *
@@ -29,6 +29,21 @@ public class Polygon extends Shape{
         name = "Polygon";
         index = id;
         origin = new VertexHandle(app, 0,0);
+    }
+    
+    //Copy Constructor
+    Polygon(Polygon base, int id){
+      super(base.app, base.fillColor, base.strokeColor, base.pos.x, base.pos.y);
+      strokeWeight = base.strokeWeight;
+      name = base.name;
+      index = id;
+      rotation = base.rotation;
+      origin = new VertexHandle(base.app, base.origin.getPosition());
+      for(int i = 0; i < base.vertices.size(); i++){
+          vertices.add(new VertexHandle(base.app, base.vertices.get(i).getPosition()));
+      }
+      completed = base.completed;
+      this.calculateBoundingBox();
     }
     
     void adjustOrigin(PVector point){
@@ -218,5 +233,10 @@ public class Polygon extends Shape{
     @Override
     void finishHandles(){
         //pass
+    }
+    
+        @Override
+    Shape copy(int id){
+        return new Polygon(this, id);
     }
 }

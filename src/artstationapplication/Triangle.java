@@ -12,14 +12,11 @@ import javafx.scene.paint.Color;
  * @author wilder4690
  */
  class Triangle extends Shape{
-    float altitude = 1;
-    float side = 1;
     Handle widthHandleL;
     Handle widthHandleR;
     Handle heightHandleT;
     Handle activeHandle;
     Handle[] inactiveHandle = new Handle[2];
-
 
     Triangle(PApplet drawingSpace, int paint, int outline, float thickness, float x, float y, int id){
       super(drawingSpace, paint, outline, x,y);
@@ -29,8 +26,18 @@ import javafx.scene.paint.Color;
       widthHandleR = new Handle(drawingSpace, this, new PVector(1,0));
       widthHandleL = new Handle(drawingSpace, this, new PVector(-1,0));
       heightHandleT = new Handle(drawingSpace, this, new PVector(0,-1));
-      altitude = 50;
-      side = app.sqrt((float)(4.0/3.0)*app.sq(altitude));
+    }
+    
+    //Copy Constructor
+    Triangle(Triangle base, int id){
+      super(base.app, base.fillColor, base.strokeColor, base.pos.x, base.pos.y);
+      strokeWeight = base.strokeWeight;
+      name = base.name;
+      index = id;
+      widthHandleR = new Handle(base.widthHandleR, this);
+      widthHandleL = new Handle (base.widthHandleL, this);
+      heightHandleT = new Handle (base.heightHandleT, this);
+      rotation = base.rotation;
     }
 
     @Override 
@@ -144,8 +151,6 @@ import javafx.scene.paint.Color;
         else{
             activeHandle.setModifier(dist);  
         }
-//        float radius = app.dist(pos.x, pos.y, mouse.x, mouse.y);  
-//        activeHandle.setModifier(radius);
     }
     
     @Override
@@ -160,6 +165,11 @@ import javafx.scene.paint.Color;
         widthHandleL.reset();
         widthHandleR.reset();
         heightHandleT.reset();
+    }
+    
+        @Override
+    Shape copy(int id){
+        return new Triangle(this, id);
     }
     
   }

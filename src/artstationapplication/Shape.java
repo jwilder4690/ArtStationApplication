@@ -98,6 +98,8 @@ abstract class Shape{
     abstract boolean mouseOver(PVector mouse);
     
     abstract void finishHandles();
+    
+    abstract Shape copy(int id);
 
     void manipulate(PVector mouse) {
         pos.set(mouse);

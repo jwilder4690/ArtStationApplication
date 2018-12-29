@@ -13,7 +13,6 @@ import javafx.scene.paint.Color;
  * @author wilder4690
  */
 class Circle extends Shape{
-    //float radius; //needed? Info contained in handle now
     Handle widthHandleR;
     Handle widthHandleL;
     Handle heightHandleT;
@@ -30,6 +29,19 @@ class Circle extends Shape{
       widthHandleL = new Handle(drawingSpace, this, new PVector(-1,0));
       heightHandleB = new Handle(drawingSpace, this, new PVector(0,1));
       heightHandleT = new Handle(drawingSpace, this, new PVector(0,-1));
+    }
+        
+    //Copy constructor
+    Circle(Circle base, int id){
+      super(base.app, base.fillColor, base.strokeColor, base.pos.x, base.pos.y);
+      strokeWeight = base.strokeWeight;
+      name = base.name;
+      index = id;
+      widthHandleR = new Handle(base.widthHandleR, this);
+      widthHandleL = new Handle (base.widthHandleL, this);
+      heightHandleB = new Handle (base.heightHandleB, this);
+      heightHandleT = new Handle (base.heightHandleT, this);
+      rotation = base.rotation;
     }
 
     @Override 
@@ -140,5 +152,10 @@ class Circle extends Shape{
         widthHandleR.reset();
         heightHandleT.reset();
         heightHandleB.reset();
+    }
+    
+    Shape copy(int id){
+        Circle copy = new Circle(this, id);
+        return copy;
     }
  }

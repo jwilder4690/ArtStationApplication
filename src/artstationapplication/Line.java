@@ -27,6 +27,17 @@ import javafx.scene.paint.Color;
       point.sub(new PVector(x,y));
       end = new VertexHandle(drawingSpace, point);
     }
+    
+    //Copy Constructor
+    Line(Line base, int id){
+      super(base.app, base.fillColor, base.strokeColor, base.pos.x, base.pos.y);
+      strokeWeight = base.strokeWeight;
+      name = base.name;
+      index = id;
+      rotation = base.rotation;
+      start = new VertexHandle(base.app, base.start.getPosition());
+      end = new VertexHandle(base.app, base.end.getPosition());
+    }
 
     //
     @Override 
@@ -130,5 +141,10 @@ import javafx.scene.paint.Color;
         @Override
     void finishHandles(){
         //pass
+    }
+    
+        @Override
+    Shape copy(int id){
+        return new Line(this, id);
     }
   }

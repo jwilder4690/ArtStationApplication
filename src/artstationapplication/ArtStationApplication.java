@@ -34,9 +34,11 @@ public class ArtStationApplication extends PApplet{
     enum ShapeType {CIR, REC, TRI, LIN, POL}
     enum Mode {DRAW, EDIT}
     enum Transformation {ROT, SCA, TRA, NON}
+    enum Coordinates {OFF, MOUSE, TOP};
     ShapeType activeTool = ShapeType.CIR;
     Mode activeMode = Mode.DRAW;
     Transformation subMode = Transformation.NON;
+    Coordinates coordinateMode = Coordinates.TOP;
     CanvasArea pad = new CanvasArea(this,900,900);
     float scaleFactor;
     float verticalPadding = 0.05f;
@@ -76,40 +78,47 @@ public class ArtStationApplication extends PApplet{
         MenuBar mb = new MenuBar();
 
         Menu fileMenu = new Menu("File");
+        
         MenuItem open = new MenuItem("Open");
-        MenuItem close = new MenuItem("Close");
-        MenuItem save = new MenuItem("Save");
+        MenuItem newDrawing = new MenuItem("New Drawing");
+        MenuItem export = new MenuItem("Export");
         MenuItem exit = new MenuItem("Exit");
-        fileMenu.getItems().addAll(open, close, save, new SeparatorMenuItem(), exit);
-        mb.getMenus().add(fileMenu);
+        fileMenu.getItems().addAll(open, newDrawing, export, new SeparatorMenuItem(), exit);
+
 
         Menu optionsMenu = new Menu("Options");
 
-        Menu inDevicesMenu = new Menu("Input Devices");
-        MenuItem keyboard = new MenuItem("Keyboard");
-        MenuItem mouse = new MenuItem("Mouse");
-        MenuItem touchscreen = new MenuItem("Touchscreen");
-        inDevicesMenu.getItems().addAll(keyboard,mouse,touchscreen);
-        optionsMenu.getItems().add(inDevicesMenu);
+        Menu gridOptions = new Menu("Grid Options");
+        
+        CheckMenuItem gridOn = new CheckMenuItem("Grid");
+        gridOn.setAccelerator(KeyCombination.keyCombination("shortcut+G"));
+        gridOn.setSelected(true);
+        CheckMenuItem gridSnapOn = new CheckMenuItem("Snap");
+        gridSnapOn.setAccelerator(KeyCombination.keyCombination("shortcut+L"));
+        gridOptions.getItems().addAll(gridOn, gridSnapOn);
+        optionsMenu.getItems().add(gridOptions);
+        
 
-        Menu clockMenu = new Menu("Clock Style");
-        MenuItem analog = new MenuItem("Analog");
-        MenuItem digital = new MenuItem("Digital");
-        clockMenu.getItems().addAll(analog,digital);
-        optionsMenu.getItems().add(clockMenu);
-
+        Menu mouseOptions = new Menu("Mouse Options");
+        ToggleGroup tgMouse = new ToggleGroup();
+        
+        RadioMenuItem coordsOff = new RadioMenuItem("Off");
+        RadioMenuItem coordsMouse = new RadioMenuItem("Mouse");
+        RadioMenuItem coordsTop = new RadioMenuItem("Top");
+        coordsOff.setToggleGroup(tgMouse);
+        coordsMouse.setToggleGroup(tgMouse);
+        coordsTop.setToggleGroup(tgMouse);
+        coordsOff.setOnAction(event -> coordinateMode = Coordinates.OFF); 
+        coordsMouse.setOnAction(event -> coordinateMode = Coordinates.MOUSE); 
+        coordsTop.setOnAction(event -> coordinateMode = Coordinates.TOP); 
+        mouseOptions.getItems().addAll(coordsOff, coordsMouse, coordsTop);
+        optionsMenu.getItems().add(mouseOptions);
         optionsMenu.getItems().add(new SeparatorMenuItem());
 
-        MenuItem reset = new MenuItem("Reset");
-        optionsMenu.getItems().add(reset);
-
+        mb.getMenus().add(fileMenu);
         mb.getMenus().add(optionsMenu);
 
-        Menu helpMenu = new Menu("Help");
-        MenuItem about = new MenuItem("About");
-        helpMenu.getItems().add(about);
 
-        mb.getMenus().add(helpMenu);
 
         EventHandler<ActionEvent> MenuHandler = new EventHandler<ActionEvent>(){ 
             public void handle(ActionEvent ae){ 
@@ -122,16 +131,10 @@ public class ArtStationApplication extends PApplet{
         };
         
         open.setOnAction(MenuHandler);
-        close.setOnAction(MenuHandler);
-        save.setOnAction(MenuHandler);
+        newDrawing.setOnAction(MenuHandler);
+        export.setOnAction(MenuHandler);
         exit.setOnAction(MenuHandler);
-        keyboard.setOnAction(MenuHandler);
-        mouse.setOnAction(MenuHandler);
-        touchscreen.setOnAction(MenuHandler);
-        analog.setOnAction(MenuHandler);
-        digital.setOnAction(MenuHandler);
-        reset.setOnAction(MenuHandler);
-        about.setOnAction(MenuHandler);
+
         
         
         //Mode buttons//////////////////////////////////////////////////////////
@@ -344,9 +347,11 @@ public class ArtStationApplication extends PApplet{
         cbGridOn.setOnAction(new EventHandler<ActionEvent>(){
             public void handle(ActionEvent ae){
                 pad.toggleGrid(cbGridOn.isSelected());
+                gridOn.setSelected(cbGridOn.isSelected());
                 gridTextField.setDisable(!cbGridOn.isSelected());
                 gridSlider.setDisable(!cbGridOn.isSelected());
                 cbGridSnap.setDisable(!cbGridOn.isSelected());
+
             }
         });
         
@@ -530,24 +535,28 @@ public class ArtStationApplication extends PApplet{
         
         Button btnDelete = new Button("Delete");
         btnDelete.setTooltip(new Tooltip("Deletes current shape."));
+        btnDelete.setMinWidth(toolBarWidth + spacing);
                 
         Button btnReset = new Button("Reset");
         btnReset.setTooltip(new Tooltip("Removes all rotation and scaling from current shape."));
+        btnReset.setMinWidth(toolBarWidth + spacing);
+        
+        Button btnCopy = new Button("Copy");
+        btnCopy.setTooltip(new Tooltip("Creates an identical copy of currently selected shape."));
+        btnCopy.setMinWidth(toolBarWidth + spacing);
         
         btnUpArrow.setOnAction(event -> swapElements(listIndex, listIndex-1));
         btnDownArrow.setOnAction(event -> swapElements(listIndex, listIndex+1));
-        
         btnDelete.setOnAction(event -> deleteShape());
         btnReset.setOnAction(event -> shapes.get(listIndex).reset());
+        btnCopy.setOnAction(event -> copyShape());
 
         
-        listControls.getChildren().addAll(btnUpArrow, btnDownArrow, strut, btnReset, btnDelete);
+        listControls.getChildren().addAll(btnUpArrow, btnDownArrow, strut, btnCopy, btnReset, btnDelete);
         listPanel.getChildren().addAll(listControls, shapeViewer);
         
         //shapeViewer.setMaxSize(controlBarWidth -7*spacing, controlBarWidth*5);
         listControls.setAlignment(Pos.CENTER);
-        btnDelete.setMinWidth(toolBarWidth + spacing);
-        btnReset.setMinWidth(toolBarWidth + spacing);
         listControls.setPadding(new Insets(0,spacing,0,0));
         listPanel.setMaxSize(controlBarWidth -7*spacing, controlBarWidth*3);
         //listControls.setPrefColumns(1);
@@ -634,6 +643,30 @@ public class ArtStationApplication extends PApplet{
              //canvas.setHeight(stage.getHeight()-toolBarWidth - controlBarWidth);
         });
         
+        //Cross Element Event Handling//////////////////////////////////////////
+        ////Use for handling of triggers that need to reference mulitple GUI elements
+        
+        gridSnapOn.setOnAction(event ->{
+            pad.toggleSnap(gridSnapOn.isSelected());
+            pad.toggleGrid(true);
+            cbGridSnap.setSelected(gridSnapOn.isSelected());
+            gridOn.setSelected(true);
+            cbGridOn.setSelected(gridOn.isSelected());
+            gridTextField.setDisable(!cbGridOn.isSelected());
+            gridSlider.setDisable(!cbGridOn.isSelected());
+            cbGridSnap.setDisable(!cbGridOn.isSelected());
+        });
+        
+        gridOn.setOnAction(event -> {
+            pad.toggleGrid(gridOn.isSelected());
+            cbGridOn.setSelected(gridOn.isSelected());
+            gridTextField.setDisable(!cbGridOn.isSelected());
+            gridSlider.setDisable(!cbGridOn.isSelected());
+            cbGridSnap.setDisable(!cbGridOn.isSelected());
+        });
+
+
+        
         
         Platform.runLater(new Runnable() {
             @Override
@@ -650,8 +683,7 @@ public class ArtStationApplication extends PApplet{
         background(55,55,55);
         drawCanvasArea();
         drawFrames();
-        fill(155);
-        text( "X: "+canvasX + ", Y: "+ canvasY,mouseX, mouseY-5);
+        drawMouse();
     }
        
     @Override
@@ -745,6 +777,12 @@ public class ArtStationApplication extends PApplet{
         }
     }
     
+    void copyShape() {
+        if(activeMode == Mode.EDIT && !shapes.isEmpty()){
+            shapes.add(shapes.get(listIndex).copy(shapes.size()));
+        }
+    }
+    
     int convertColorToInt(Color col){
         int r = (int)(col.getRed()*255);
         int g = (int)(col.getGreen()*255);
@@ -778,6 +816,15 @@ public class ArtStationApplication extends PApplet{
     
     boolean mouseOverCanvas(){
         return (canvasX >= 0 && canvasY >= 0 && canvasX <= pad.getHeight() && canvasY <= pad.getWidth());
+    }
+    
+    void drawMouse(){
+        fill(155);
+        switch(coordinateMode){
+            case OFF: break;
+            case MOUSE:  text( "X: "+canvasX + ", Y: "+ canvasY,mouseX, mouseY-5); break;
+            case TOP: text( "X: "+canvasX + ", Y: "+ canvasY,width*horizontalPadding , height*verticalPadding - spacing); break;
+        }
     }
     
     void drawFrames(){
@@ -931,14 +978,21 @@ public class ArtStationApplication extends PApplet{
                 case DRAW:
                     if(!shapes.get(shapes.size() - 1).getFinished()){
                         shapes.get(listIndex).setShift(shift);
-                        shapes.get(shapes.size() - 1).modify(mouse);
+                        if(gridOn && gridSnapOn && activeTool == ShapeType.LIN) {
+                            println("snapping");
+                            shapes.get(shapes.size() - 1).modify(snapToGrid(mouse));
+                        }
+                        else shapes.get(shapes.size() - 1).modify(mouse);
                     } break;
                 case EDIT:
                     shapes.get(listIndex).setShift(shift);
                     switch(subMode){
-                        case SCA: shapes.get(listIndex).adjustActiveHandle(mouse); break;
+                        case SCA:
+                            if(gridOn && gridSnapOn && (activeTool == ShapeType.POL ||  activeTool == ShapeType.LIN)) shapes.get(listIndex).adjustActiveHandle(snapToGrid(mouse));
+                            else shapes.get(listIndex).adjustActiveHandle(mouse);
+                            break;
                         case TRA: 
-                            if(gridSnapOn)shapes.get(listIndex).manipulate(snapToGrid(mouse));
+                            if(gridSnapOn && gridOn)shapes.get(listIndex).manipulate(snapToGrid(mouse));
                             else shapes.get(listIndex).manipulate(mouse);
                             break;
                         case ROT: shapes.get(listIndex).changeRotation(mouse); break;
@@ -948,7 +1002,7 @@ public class ArtStationApplication extends PApplet{
 
         void drawShape(float x, float y, ShapeType type) {
             listIndex = shapeViewer.getItems().size();
-            if(gridSnapOn){
+            if(gridSnapOn && gridOn){
                 x = snapToGrid(x);
                 y = snapToGrid(y);
             }
@@ -976,6 +1030,10 @@ public class ArtStationApplication extends PApplet{
         
         
         void completeVertex(float x, float y){
+            if(gridOn && gridSnapOn){
+                x = snapToGrid(x);
+                y = snapToGrid(y);
+            }
             shapes.get(shapes.size()-1).modify(new PVector(x,y));
         }
 
@@ -984,7 +1042,6 @@ public class ArtStationApplication extends PApplet{
                 shapes.get(shapes.size()-1).finishShape();
                 listIndex = shapes.size()-1;
                 activeMode = Mode.EDIT;
-                //toggleSelectShape(true);
                 modifying = false;
             }
         }

@@ -34,6 +34,20 @@ import javafx.scene.paint.Color;
         centerType = style;
         corner = new PVector(a+1,b+1); //default corner, will not be displayed 
     }
+    
+    //Copy constructor
+    Rectangle(Rectangle base, int id){
+      super(base.app, base.fillColor, base.strokeColor, base.pos.x, base.pos.y);
+      strokeWeight = base.strokeWeight;
+      name = base.name;
+      index = id;
+      widthHandleR = new Handle(base.widthHandleR, this);
+      widthHandleL = new Handle (base.widthHandleL, this);
+      heightHandleB = new Handle (base.heightHandleB, this);
+      heightHandleT = new Handle (base.heightHandleT, this);
+      rotation = base.rotation;
+      centerType = base.centerType;
+    }
 
     @Override 
     boolean mouseOver(PVector mouse){
@@ -192,5 +206,10 @@ import javafx.scene.paint.Color;
         widthHandleR.reset();
         heightHandleT.reset();
         heightHandleB.reset();
+    }
+    
+    @Override
+    Shape copy(int id){
+        return new Rectangle(this, id);
     }
   }
