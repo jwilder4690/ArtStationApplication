@@ -212,4 +212,55 @@ import javafx.scene.paint.Color;
     Shape copy(int id){
         return new Rectangle(this, id);
     }
+    
+    @Override
+    String printToClipboard(){
+        String output = "";
+        if(fillColor == NONE) output += "\tnoFill();\n";
+        else output += "\tfill("+fillColor+");\n";
+
+        if(strokeWeight == 0) output += "\tnoStroke();\n";
+        else output += "\tstrokeWeight("+strokeWeight+");\n\tstroke("+strokeColor+");\n";
+
+        output += "\tpushMatrix();\n";
+        output += "\ttranslate("+pos.x+", "+pos.y+");\n";
+        output += "\trotate("+rotation+");\n";
+        output += "\trectMode(CORNERS);\n";
+        output += "\trect("+-widthHandleL.getRadius()+", "+-heightHandleT.getRadius()+", "+widthHandleR.getRadius()+", "+heightHandleB.getRadius()+");\n";
+        output += "\tpopMatrix();\n\n";
+        
+        return output;
+    }
+    
+    @Override
+    PGraphics printToPGraphic(PGraphics ig){
+      if(fillColor == NONE){
+          ig.noFill();
+      }
+      else{
+        ig.fill(fillColor);
+      }
+      if(strokeWeight == 0){
+        ig.noStroke();
+      }
+      else{
+        ig.stroke(strokeColor);
+        ig.strokeWeight(strokeWeight);
+      }
+      ig.pushMatrix();
+      ig.translate(pos.x, pos.y);
+      ig.rotate(rotation);
+      if(centerType){
+        //Still uses corners drawing mode in order to enable assymetric scaling
+        ig.rectMode(CORNERS);
+        ig.rect(-widthHandleL.getRadius(), -heightHandleT.getRadius(), widthHandleR.getRadius(), heightHandleB.getRadius());
+      }
+      //Currently not using, alt draw mode maybe?
+      else if(!centerType){
+        ig.rectMode(CORNERS);
+        ig.rect(0,0, corner.x, corner.y);
+      }
+      ig.popMatrix();
+      return ig;
+    }
   }

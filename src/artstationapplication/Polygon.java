@@ -176,11 +176,6 @@ public class Polygon extends Shape{
                 app.vertex(vertices.get(i).getPositionFloats());
             }
             app.endShape(app.CLOSE);
-            app.noFill();
-            app.stroke(0,0,0);
-            app.strokeWeight(1);
-            app.rectMode(app.CORNERS);
-            app.rect(boundingBox[SMALLEST_X], boundingBox[SMALLEST_Y], boundingBox[GREATEST_X], boundingBox[GREATEST_Y]);
         }
         if(!completed){
             app.noFill();
@@ -194,8 +189,6 @@ public class Polygon extends Shape{
                 vertices.get(i).drawHandle();
             }
         }
-        app.fill(0,255,0);
-        app.ellipse(0,0, 15,15);
         app.popMatrix();    
     }
     
@@ -214,6 +207,14 @@ public class Polygon extends Shape{
         app.endShape(app.CLOSE); 
         drawHandles();
         //pivot point
+        app.fill(0,255,0);
+        app.ellipse(0,0, 15,15);
+        //bounding box
+        app.noFill();
+        app.stroke(0,0,0);
+        app.strokeWeight(1);
+        app.rectMode(app.CORNERS);
+        app.rect(boundingBox[SMALLEST_X], boundingBox[SMALLEST_Y], boundingBox[GREATEST_X], boundingBox[GREATEST_Y]);
         app.fill(0,255,0);
         app.ellipse(0,0, 15,15);
         app.popMatrix();
@@ -238,5 +239,55 @@ public class Polygon extends Shape{
         @Override
     Shape copy(int id){
         return new Polygon(this, id);
+    }
+    
+        @Override
+    String printToClipboard(){
+        String output = "";
+        if(fillColor == NONE) output += "\tnoFill();\n";
+        else output += "\tfill("+fillColor+");\n";
+
+        if(strokeWeight == 0) output += "\tnoStroke();\n";
+        else output += "\tstrokeWeight("+strokeWeight+");\n\tstroke("+strokeColor+");\n";
+
+        output += "\tpushMatrix();\n";
+        output += "\ttranslate("+pos.x+", "+pos.y+");\n";
+        output += "\trotate("+rotation+");\n";
+        output += "\tbeginShape();\n";
+        for(int i = 0; i < vertices.size(); i++){
+            output += "\tvertex("+vertices.get(i).getPosition().x+", "+vertices.get(i).getPosition().y+");\n"; 
+        }
+        output += "\tendShape(CLOSE);\n";
+        output += "\tpopMatrix();\n\n";
+                
+        return output;
+    }
+    
+    @Override
+    PGraphics printToPGraphic(PGraphics ig){
+        if(fillColor == NONE){
+            ig.noFill();
+        }
+        else{
+          ig.fill(fillColor);
+        }
+        if(strokeWeight == 0){
+          ig.noStroke();
+        }
+        else{
+          ig.stroke(strokeColor);
+          ig.strokeWeight(strokeWeight);
+        }
+        ig.pushMatrix();
+        ig.translate(pos.x, pos.y);
+        ig.rotate(rotation);
+        if(completed){
+            ig.beginShape();
+            for(int i = 0; i < vertices.size(); i++){
+                ig.vertex(vertices.get(i).getPositionFloats());
+            }
+            ig.endShape(ig.CLOSE);
+        }
+        return ig;
     }
 }

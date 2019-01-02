@@ -66,9 +66,9 @@ import javafx.scene.paint.Color;
         app.stroke(strokeColor);
         app.strokeWeight(strokeWeight);
       }
-      app.pushMatrix();
+      //app.pushMatrix();
       app.line(start.getPosition().x, start.getPosition().y, end.getPosition().x, end.getPosition().y);
-      app.popMatrix();
+      //app.popMatrix();
     }
     
     @Override
@@ -146,5 +146,29 @@ import javafx.scene.paint.Color;
         @Override
     Shape copy(int id){
         return new Line(this, id);
+    }
+    
+        @Override
+    String printToClipboard(){
+        String output = "";
+        if(strokeWeight == 0) output += "\tnoStroke();\n";
+        else output += "\tstrokeWeight("+strokeWeight+");\n\tstroke("+strokeColor+");\n";
+
+        output += "\tline("+start.getPosition().x+", "+start.getPosition().y+", "+end.getPosition().x+", "+end.getPosition().y+");\n";
+        
+        return output;
+    }
+    
+    @Override
+    PGraphics printToPGraphic(PGraphics ig){
+       if(strokeWeight == 0){
+          ig.noStroke();
+      }
+      else{
+        ig.stroke(strokeColor);
+        ig.strokeWeight(strokeWeight);
+      }
+      ig.line(start.getPosition().x, start.getPosition().y, end.getPosition().x, end.getPosition().y);
+      return ig;
     }
   }

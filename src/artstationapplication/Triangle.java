@@ -172,4 +172,44 @@ import javafx.scene.paint.Color;
         return new Triangle(this, id);
     }
     
+        @Override
+    String printToClipboard(){
+                String output = "";
+        if(fillColor == NONE) output += "\tnoFill();\n";
+        else output += "\tfill("+fillColor+");\n";
+
+        if(strokeWeight == 0) output += "\tnoStroke();\n";
+        else output += "\tstrokeWeight("+strokeWeight+");\n\tstroke("+strokeColor+");\n";
+
+        output += "\tpushMatrix();\n";
+        output += "\ttranslate("+pos.x+", "+pos.y+");\n";
+        output += "\trotate("+rotation+");\n";
+        output += "\ttriangle(0, "+-heightHandleT.getRadius()+", "+-widthHandleL.getRadius()+", 0, "+widthHandleR.getRadius()+", 0);\n";
+        output += "\tpopMatrix();\n\n";
+                
+        return output;
+    }
+    
+    @Override
+    PGraphics printToPGraphic(PGraphics ig){
+      if(fillColor == NONE){
+          ig.noFill();
+      }
+      else{
+        ig.fill(fillColor);
+      }
+      if(strokeWeight == 0){
+        ig.noStroke();
+      }
+      else{
+        ig.stroke(strokeColor);
+        ig.strokeWeight(strokeWeight);
+      }
+      ig.pushMatrix();
+      ig.translate(pos.x, pos.y);
+      ig.rotate(rotation);
+      ig.triangle(0, -heightHandleT.getRadius(), -widthHandleL.getRadius(), 0, widthHandleR.getRadius(),0); 
+      ig.popMatrix();
+      return ig;
+    }
   }

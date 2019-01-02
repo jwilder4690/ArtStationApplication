@@ -14,6 +14,7 @@ import javafx.scene.paint.Color;
  */
 abstract class Shape{
     PApplet app;
+    PGraphics graphic;
     PVector pos;
     final float QUARTER_PI = app.QUARTER_PI;
     final float HALF_PI = app.HALF_PI;
@@ -100,10 +101,13 @@ abstract class Shape{
     abstract void finishHandles();
     
     abstract Shape copy(int id);
+    
+    abstract String printToClipboard();
+    
+    abstract PGraphics printToPGraphic(PGraphics ig);
 
     void manipulate(PVector mouse) {
-        pos.set(mouse);
-        
+        pos.set(mouse);  
     }
 
     void changeRotation(PVector mouse) {         
@@ -120,16 +124,10 @@ abstract class Shape{
         finishHandles();
         completed = true;
     }
-
-//    void select() {
-//        selected = true;
-//    }
-//
-//    void deselect() {
-//        selected = false;
-//    }
     
     void reset(){
         //pass
     }
+    
+
 }

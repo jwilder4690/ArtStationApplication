@@ -24,6 +24,8 @@ import javafx.scene.control.ColorPicker;
 import javafx.scene.paint.Color;
 import java.util.*;
 
+import java.awt.Toolkit;
+
 
 /**
  *
@@ -74,16 +76,15 @@ public class ArtStationApplication extends PApplet{
         final Canvas canvas = (Canvas) FXSurface.getNative(); // canvas is the processing drawing
         final Stage stage = (Stage) canvas.getScene().getWindow(); // stage is the window
         
-        //Dummy Menu Bar from Practice//////////////////////////////////////////
+        //Menu Bar /////////////////////////////////////////////////////////////
         MenuBar mb = new MenuBar();
 
         Menu fileMenu = new Menu("File");
         
         MenuItem open = new MenuItem("Open");
         MenuItem newDrawing = new MenuItem("New Drawing");
-        MenuItem export = new MenuItem("Export");
         MenuItem exit = new MenuItem("Exit");
-        fileMenu.getItems().addAll(open, newDrawing, export, new SeparatorMenuItem(), exit);
+        fileMenu.getItems().addAll(open, newDrawing, new SeparatorMenuItem(), exit);
 
 
         Menu optionsMenu = new Menu("Options");
@@ -99,7 +100,7 @@ public class ArtStationApplication extends PApplet{
         optionsMenu.getItems().add(gridOptions);
         
 
-        Menu mouseOptions = new Menu("Mouse Options");
+        Menu mouseOptions = new Menu("Mouse Position");
         ToggleGroup tgMouse = new ToggleGroup();
         
         RadioMenuItem coordsOff = new RadioMenuItem("Off");
@@ -114,25 +115,36 @@ public class ArtStationApplication extends PApplet{
         mouseOptions.getItems().addAll(coordsOff, coordsMouse, coordsTop);
         optionsMenu.getItems().add(mouseOptions);
         optionsMenu.getItems().add(new SeparatorMenuItem());
+        
+        Menu exportMenu = new Menu("Export");
+        
+        MenuItem clipboardShapes = new MenuItem("... Shapes to Clipboard");
+        MenuItem clipboardFile = new MenuItem("... File to Clipboard");
+        MenuItem imageFile = new MenuItem("...as Image");
+        exportMenu.getItems().addAll(clipboardFile, clipboardShapes, imageFile);
 
-        mb.getMenus().add(fileMenu);
-        mb.getMenus().add(optionsMenu);
+        mb.getMenus().addAll(fileMenu, optionsMenu, exportMenu);
+
 
 
 
         EventHandler<ActionEvent> MenuHandler = new EventHandler<ActionEvent>(){ 
             public void handle(ActionEvent ae){ 
                 String name = ((MenuItem)ae.getTarget()).getText();
+                MenuItem target = (MenuItem)ae.getTarget();
                 //all menu Handling done here
                 if(name.equals("Exit")) Platform.exit();
-
-                //response.setText(name + " selected.");
+                else if(target == clipboardFile) exportProcessingFileToClipboard(); 
+                else if(target == clipboardShapes) exportProcessingShapesToClipboard(); 
+                else if(target == imageFile) exportImageFile("test.png");
             }
         };
         
         open.setOnAction(MenuHandler);
         newDrawing.setOnAction(MenuHandler);
-        export.setOnAction(MenuHandler);
+        clipboardFile.setOnAction(MenuHandler);
+        clipboardShapes.setOnAction(MenuHandler);
+        imageFile.setOnAction(MenuHandler);
         exit.setOnAction(MenuHandler);
 
         
@@ -236,16 +248,20 @@ public class ArtStationApplication extends PApplet{
         
         //Canvas Menu///////////////////////////////////////////////////////////
         final HBox dimensionPane = new HBox(spacing);
-        final MenuButton dimensionMenuButton = new MenuButton("Canvas Dimensions");
-        final CustomMenuItem dimensionMenu = new CustomMenuItem(dimensionPane);
-        dimensionMenuButton.getItems().add(dimensionMenu);
+        //final VBox canvasOptions = new VBox(spacing, dimensionPane, backgroundPane);
+        final MenuButton canvasMenuButton = new MenuButton("Canvas Options");
+        final CustomMenuItem canvasMenu = new CustomMenuItem(dimensionPane);
+        canvasMenuButton.getItems().add(canvasMenu);
         final TextField widthTextField = new TextField(Integer.toString(pad.getWidth()));
         final TextField heightTextField = new TextField(Integer.toString(pad.getHeight()));
         final Label lblWidth = new Label("Width:");
         final Label lblHeight = new Label("Height:");
         
-        dimensionMenu.setHideOnClick(false);
-        dimensionMenuButton.setPrefWidth(controlBarWidth/2);
+        
+        dimensionPane.getChildren().addAll(lblWidth, widthTextField, lblHeight, heightTextField);
+        
+        canvasMenu.setHideOnClick(false);
+        canvasMenuButton.setPrefWidth(controlBarWidth/2);
         dimensionPane.setPrefWidth(controlBarWidth -7*spacing);
         widthTextField.setPrefColumnCount(5);
         heightTextField.setPrefColumnCount(5);
@@ -274,9 +290,6 @@ public class ArtStationApplication extends PApplet{
         widthTextField.setOnAction(textHandler);
         heightTextField.setOnAction(textHandler);
         
-        //dimensionPane.setOnMouseExited(e -> canvas.requestFocus());
-        
-        dimensionPane.getChildren().addAll(lblWidth, widthTextField, lblHeight, heightTextField);
                 
         //Grid Menu///////////////////////////////////////////////////////////
         int gridMax = 100;
@@ -313,7 +326,7 @@ public class ArtStationApplication extends PApplet{
         cbGridOn.setSelected(true);
         gridMenu.setHideOnClick(false);
         
-        //Lamba? wtf this is so much more intuitive
+        //Lambda? wtf this is so much more intuitive
         //gridMenuButton.setOnAction( //TODO use lamba to see if we can focus on canvas if menu is open);
         //gridMenuButton.setOnMouseClicked(e -> canvas.requestFocus());
         
@@ -381,20 +394,29 @@ public class ArtStationApplication extends PApplet{
         final Label lblStroke = new Label("Stroke:");
         final Label lblWeight = new Label("Weight");
         final Label lblNone = new Label("None");
+        final Label lblBackground = new Label("Canvas:");
         
         final ColorPicker colorPickerFill = new ColorPicker(Color.WHITE);
         final ColorPicker colorPickerStroke = new ColorPicker(Color.BLACK);
+        final ColorPicker colorPickerBackground = new ColorPicker(Color.WHITE);
+        
         final CheckBox cbNoFill = new CheckBox();
         final CheckBox cbNoStroke = new CheckBox();
+        final CheckBox cbNoBackground = new CheckBox();
+        
         final Slider weightSlider = new Slider(0, 10, 1);
         final TextField weightTextField = new TextField("1");
         
         colorPane.setVgap(spacing/2);
         colorPane.setHgap(spacing);
         colorPane.setHalignment(lblFill, HPos.RIGHT);
+        colorPane.setHalignment(lblStroke, HPos.RIGHT);
+        colorPane.setHalignment(lblBackground, HPos.RIGHT);
         colorPane.setHalignment(lblColor, HPos.CENTER);
+        colorPane.setHalignment(lblNone, HPos.CENTER);
         colorPane.setHalignment(cbNoStroke, HPos.CENTER);
         colorPane.setHalignment(cbNoFill, HPos.CENTER);
+        colorPane.setHalignment(cbNoBackground, HPos.CENTER);
         lblColor.setUnderline(true);
         lblNone.setUnderline(true);
         weightTextField.setPrefColumnCount(3);
@@ -498,19 +520,41 @@ public class ArtStationApplication extends PApplet{
                 }
             }
         });
+        
+        cbNoBackground.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent ae){
+                if(cbNoBackground.isSelected()){
+                    pad.setBackgroundColor(NONE);
+                    colorPickerBackground.setDisable(true);
+                }
+                else{
+                    pad.setBackgroundColor(convertColorToInt(colorPickerBackground.getValue()));
+                    colorPickerBackground.setDisable(false);
+                }
+            }
+        });
+        
+        colorPickerBackground.setOnAction(new EventHandler() {
+            public void handle(Event t) {
+                pad.setBackgroundColor(convertColorToInt(colorPickerBackground.getValue()));
+            }
+        });
 
         colorPane.setMaxWidth(controlBarWidth -7*spacing);
         colorPane.add(lblColor, 1,0);
         colorPane.add(lblNone, 2,0);
-        colorPane.add(lblFill, 0,1);
-        colorPane.add(colorPickerFill, 1,1);
-        colorPane.add(cbNoFill, 2,1);
-        colorPane.add(lblStroke, 0,2);
-        colorPane.add(colorPickerStroke, 1,2);
-        colorPane.add(cbNoStroke, 2,2);
-        colorPane.add(lblWeight, 0, 3);
-        colorPane.add(weightSlider, 1, 3);
-        colorPane.add(weightTextField, 2,3);
+        colorPane.add(lblBackground, 0,1);
+        colorPane.add(colorPickerBackground, 1,1);
+        colorPane.add(cbNoBackground, 2,1);
+        colorPane.add(lblFill, 0,2);
+        colorPane.add(colorPickerFill, 1,2);
+        colorPane.add(cbNoFill, 2,2);
+        colorPane.add(lblStroke, 0,3);
+        colorPane.add(colorPickerStroke, 1,3);
+        colorPane.add(cbNoStroke, 2,3);
+        colorPane.add(lblWeight, 0, 4);
+        colorPane.add(weightSlider, 1, 4);
+        colorPane.add(weightTextField, 2,4);
         
         //Observable List///////////////////////////////////////////////////////  
         HBox listPanel = new HBox();
@@ -611,7 +655,7 @@ public class ArtStationApplication extends PApplet{
 
         controls.setPadding(new Insets(spacing, 2*spacing, spacing, spacing));
         controls.setMinWidth(controlBarWidth -4*spacing);
-        controls.getChildren().addAll(dimensionMenuButton, gridMenuButton, colorPane,listPanel);
+        controls.getChildren().addAll(canvasMenuButton, gridMenuButton, colorPane,listPanel);
         modes.getChildren().addAll(drawMode, editMode, new Separator(Orientation.HORIZONTAL));
         modes.setPadding(new Insets(spacing, 0,0,0));
         toolPane.setPadding(new Insets(0,spacing,0,spacing));
@@ -815,7 +859,7 @@ public class ArtStationApplication extends PApplet{
     }
     
     boolean mouseOverCanvas(){
-        return (canvasX >= 0 && canvasY >= 0 && canvasX <= pad.getHeight() && canvasY <= pad.getWidth());
+        return (canvasX >= 0 && canvasY >= 0 && canvasY <= pad.getHeight() && canvasX <= pad.getWidth());
     }
     
     void drawMouse(){
@@ -855,6 +899,47 @@ public class ArtStationApplication extends PApplet{
         }
     }
     
+    void exportProcessingFileToClipboard(){
+        String output = "void setup(){\n ";
+        output += "\tsize("+pad.getWidth()+", "+pad.getHeight()+");\n}\n\n";
+        output += "void draw(){ \n";
+        output += "\tbackground("+pad.getBackgroundColor()+");\n\n";
+        
+        for (int i = 0; i < shapes.size(); i++) {
+            output += shapes.get(i).printToClipboard();
+        }
+        output += "}";
+        
+        //Prepare String for clipbaord
+        final Clipboard clipboard = Clipboard.getSystemClipboard();
+        final ClipboardContent content = new ClipboardContent();
+        content.putString(output);
+        clipboard.setContent(content);
+    }
+    
+    void exportProcessingShapesToClipboard(){
+        String output = "";
+        for (int i = 0; i < shapes.size(); i++) {
+            output += shapes.get(i).printToClipboard();
+        }
+        //Prepare String for clipbaord
+        final Clipboard clipboard = Clipboard.getSystemClipboard();
+        final ClipboardContent content = new ClipboardContent();
+        content.putString(output);
+        clipboard.setContent(content);
+    }
+    
+    void exportImageFile(String location){
+        PGraphics exportGraphic = createGraphics(pad.getWidth(), pad.getHeight());
+        exportGraphic.beginDraw();
+        if(pad.getBackgroundColor() != NONE) exportGraphic.background(pad.getBackgroundColor());
+        for(int i = 0; i < shapes.size(); i++){
+            shapes.get(i).printToPGraphic(exportGraphic);
+        }
+        exportGraphic.endDraw();
+        exportGraphic.save(location);
+    }
+    
     public static void main(String[] args) {
         String[] processingArgs = {"Art Station"};
         ArtStationApplication app = new ArtStationApplication();
@@ -865,9 +950,9 @@ public class ArtStationApplication extends PApplet{
         final private PApplet sketch;
         final boolean CENT = true;
         final boolean CORN = false;
+        int backgroundColor = color(245, 245, 245);
         int canvasWidth;
         int canvasHeight;
-        int background = color(245, 245, 245);
         int gridDensity = 10; //must be less than canvasWidth if int division is used
         float gridSpacing;
         boolean gridOn = true;
@@ -915,6 +1000,10 @@ public class ArtStationApplication extends PApplet{
             return canvasHeight;
         }
         
+        void setBackgroundColor(int color){
+            backgroundColor = color;
+        }
+        
         void setCurrentFillColor(int color){
             currentFillColor = color;
         }
@@ -935,6 +1024,10 @@ public class ArtStationApplication extends PApplet{
             return currentStrokeWeight;
         }
         
+        int getBackgroundColor(){
+            return backgroundColor;
+        }
+        
         Transformation checkForTransformation(PVector mouse){
             if(shapes.isEmpty()) return Transformation.NON;
             if(shapes.get(listIndex).checkHandles(mouse)){
@@ -951,7 +1044,7 @@ public class ArtStationApplication extends PApplet{
 
         void drawCanvas(float mx, float my) {
             rectMode(CORNERS);
-            fill(background);
+            fill(backgroundColor);
             noStroke();
             rect(0, 0, canvasWidth, canvasHeight);
             if (mousePressed && shapes.size() > 0){
@@ -1085,5 +1178,7 @@ public class ArtStationApplication extends PApplet{
                 i++;
             }
         }
+        
+
     }
 }
