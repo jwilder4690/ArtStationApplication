@@ -23,8 +23,10 @@ import javafx.beans.value.*;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.paint.Color;
 import java.util.*;
+import java.io.File;
+import java.io.IOException;
 
-import java.awt.Toolkit;
+//import java.awt.Toolkit;
 
 
 /**
@@ -62,6 +64,7 @@ public class ArtStationApplication extends PApplet{
     int toolBarWidth = 50;
     int controlBarWidth = 275;
     int spacing = 5;
+    String dialog = "";
 
     @Override
     public void settings(){
@@ -78,7 +81,7 @@ public class ArtStationApplication extends PApplet{
         
         //Menu Bar /////////////////////////////////////////////////////////////
         MenuBar mb = new MenuBar();
-
+        
         Menu fileMenu = new Menu("File");
         
         MenuItem open = new MenuItem("Open");
@@ -136,7 +139,23 @@ public class ArtStationApplication extends PApplet{
                 if(name.equals("Exit")) Platform.exit();
                 else if(target == clipboardFile) exportProcessingFileToClipboard(); 
                 else if(target == clipboardShapes) exportProcessingShapesToClipboard(); 
-                else if(target == imageFile) exportImageFile("test.png");
+                else if(target == imageFile){
+                        final FileChooser fileChooser = new FileChooser();
+                        fileChooser.setTitle("Save Image");
+                        fileChooser.getExtensionFilters().addAll(
+                            new FileChooser.ExtensionFilter("PNG", "*.png"),
+                            new FileChooser.ExtensionFilter("JPG", "*.jpg"),
+                            new FileChooser.ExtensionFilter("TIFF", "*.tif"),
+                            new FileChooser.ExtensionFilter("TARGA", "*.tga")
+                        );
+                        File file = fileChooser.showSaveDialog(stage); //arg here is a Window that input will be blocked to until dialog complete (can be null)
+                        if(file != null){ 
+                            String location = file.getAbsolutePath();
+                            println(location);
+                            exportImageFile(location);
+                        }
+                        
+                }
             }
         };
         
@@ -728,6 +747,7 @@ public class ArtStationApplication extends PApplet{
         drawCanvasArea();
         drawFrames();
         drawMouse();
+        drawDialog();
     }
        
     @Override
@@ -735,6 +755,7 @@ public class ArtStationApplication extends PApplet{
         activeButton = mouseButton; //stores a copy because mouseButton drops value before triggering mouseReleased/mouseClicked
         if(mouseButton == LEFT){
             if(mouseOverCanvas()){
+              dialog = "";
               if(activeMode == Mode.DRAW){
                 pad.drawShape(canvasX, canvasY, activeTool);
               }
@@ -871,6 +892,11 @@ public class ArtStationApplication extends PApplet{
         }
     }
     
+    void drawDialog(){
+        fill(155);
+        text(dialog, width*horizontalPadding, height*verticalPadding - 4*spacing);
+    }
+    
     void drawFrames(){
         rectMode(CORNER);
         noStroke();
@@ -938,6 +964,7 @@ public class ArtStationApplication extends PApplet{
         }
         exportGraphic.endDraw();
         exportGraphic.save(location);
+        dialog = "Image saved in "+location;
     }
     
     public static void main(String[] args) {
