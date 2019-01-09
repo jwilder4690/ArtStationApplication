@@ -12,11 +12,16 @@ First commits are merges of code developed in my "ArtStation-Halted" repository.
 - [x] GUI element shape list (Observable list)
 - [ ] Add features (Arcs, polygon, curves)
     - [x] Polygons
-    - [ ] Arcs
-    - [ ] Curves
+    - [x] Curves
     - [ ] Groups
 - [x] Add Controls (Fill, stroke, canvas sizing, grid)
 - [ ] Improve usability (crtl z, shift, alt)
-- [ ] Output
-    - [ ] Image file (support alpha)
-    - [ ] Processing Code 
+    - [ ] Shortcuts
+    - [ ] Temporary modifiers (alt for snap) 
+- [] Output
+    - [x] Image file (supports alpha)
+    - [x] Processing Code 
+    - [ ] Save Artstation Drawing
+- [ ] Import
+    - [ ] Reference Image
+    - [ ] Saved Artstation Drawing
