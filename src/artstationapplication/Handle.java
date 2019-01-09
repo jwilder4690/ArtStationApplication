@@ -36,6 +36,8 @@ import processing.core.*;
              modifier = base.modifier;
          }
          
+         
+         
          PVector getPosition(float rot){
              
              //Optional TODO: if this works set the position in a PVector that manually updates on mouse release of rotation, to avoid doing this calculation constantly

@@ -35,7 +35,7 @@ import java.io.IOException;
  */
 public class ArtStationApplication extends PApplet{
     
-    enum ShapeType {CIR, REC, TRI, LIN, POL}
+    enum ShapeType {CIR, REC, TRI, LIN, POL, CUR}
     enum Mode {DRAW, EDIT}
     enum Transformation {ROT, SCA, TRA, NON}
     enum Coordinates {OFF, MOUSE, TOP};
@@ -233,6 +233,13 @@ public class ArtStationApplication extends PApplet{
         btnPoly.setToggleGroup(toolGroup);
         btnPoly.setTooltip(new Tooltip("Single click for each vertex, SPACE or right click to complete."));
         
+        Image imageCurve = new Image(getClass().getResource("data/btnCurve.png").toExternalForm());
+        ToggleButton btnCurve = new ToggleButton("Curve", new ImageView(imageCurve));
+        btnCurve.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        btnCurve.setStyle("-fx-padding:0");
+        btnCurve.setToggleGroup(toolGroup);
+        btnCurve.setTooltip(new Tooltip("Single click for start point and cingle click for end point."));
+        
         EventHandler<ActionEvent> ToolHandler = new EventHandler<ActionEvent>(){
             public void handle(ActionEvent ae){
                 String name = ((ToggleButton)ae.getTarget()).getText();
@@ -252,9 +259,11 @@ public class ArtStationApplication extends PApplet{
                 else if(name.equals("Poly")){
                     activeTool = ShapeType.POL;
                 }
+                else if(name.equals("Curve")){
+                    activeTool = ShapeType.CUR;
+                }
                 drawMode.setSelected(true);
                 activeMode = Mode.DRAW;
-                //pad.toggleSelectShape(false);
                 canvas.requestFocus(); 
             }
         };
@@ -264,6 +273,7 @@ public class ArtStationApplication extends PApplet{
         btnLine.setOnAction(ToolHandler);
         btnTriangle.setOnAction(ToolHandler);
         btnPoly.setOnAction(ToolHandler);
+        btnCurve.setOnAction(ToolHandler);
         
         //Canvas Menu///////////////////////////////////////////////////////////
         final HBox dimensionPane = new HBox(spacing);
@@ -678,7 +688,7 @@ public class ArtStationApplication extends PApplet{
         modes.getChildren().addAll(drawMode, editMode, new Separator(Orientation.HORIZONTAL));
         modes.setPadding(new Insets(spacing, 0,0,0));
         toolPane.setPadding(new Insets(0,spacing,0,spacing));
-        toolPane.getChildren().addAll(modes, btnCircle, btnRectangle, btnTriangle, btnLine, btnPoly);
+        toolPane.getChildren().addAll(modes, btnCircle, btnRectangle, btnTriangle, btnLine, btnPoly, btnCurve);
         toolPane.setPrefColumns(1);
         toolPane.setHgap(spacing);
         toolPane.setVgap(spacing);
@@ -1108,7 +1118,7 @@ public class ArtStationApplication extends PApplet{
                     shapes.get(listIndex).setShift(shift);
                     switch(subMode){
                         case SCA:
-                            if(gridOn && gridSnapOn && (activeTool == ShapeType.POL ||  activeTool == ShapeType.LIN)) shapes.get(listIndex).adjustActiveHandle(snapToGrid(mouse));
+                            if(gridOn && gridSnapOn && (activeTool == ShapeType.POL ||  activeTool == ShapeType.LIN || activeTool == ShapeType.CUR)) shapes.get(listIndex).adjustActiveHandle(snapToGrid(mouse));
                             else shapes.get(listIndex).adjustActiveHandle(mouse);
                             break;
                         case TRA: 
@@ -1143,7 +1153,9 @@ public class ArtStationApplication extends PApplet{
                     if(!modifying){
                         modifying = true;
                         shapes.add(new Polygon(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y,listIndex));
-                    }
+                    }break;
+                case CUR: 
+                    shapes.add(new Bezier(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex));
                     break;
             }
         }
@@ -1159,8 +1171,8 @@ public class ArtStationApplication extends PApplet{
 
         void completeShape() {
             if(shapes.size() > 0){
-                shapes.get(shapes.size()-1).finishShape();
                 listIndex = shapes.size()-1;
+                if(!shapes.get(listIndex).getFinished()) shapes.get(listIndex).finishShape();
                 activeMode = Mode.EDIT;
                 modifying = false;
             }

@@ -111,11 +111,6 @@ public class Polygon extends Shape{
         float rotX = deltaX*app.cos(-rotation) - deltaY*app.sin(-rotation);
         float rotY = deltaY*app.cos(-rotation) + deltaX*app.sin(-rotation);
         PVector rot = new PVector(rotX, rotY);
-//        if(origin.overHandle(rot)){
-//            activeHandle = origin;
-//            System.out.println("here");
-//            return true;
-//        }
         for(int i = 0; i < vertices.size(); i++){
                 if(vertices.get(i).overHandle(rot)){
                     activeHandle = vertices.get(i);

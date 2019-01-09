@@ -6,7 +6,6 @@
 package artstationapplication;
 
 import processing.core.*;
-import javafx.scene.paint.Color;
 
 /**
  *
@@ -85,23 +84,20 @@ abstract class Shape{
     public String toString(){
         return "("+index+") - " +name;
     }
-
-    abstract boolean checkHandles(PVector mouse);
-
-    abstract void adjustActiveHandle(PVector mouse);
-
+    abstract boolean mouseOver(PVector mouse);
+    
     abstract void drawShape();
     
     abstract void drawSelected();
 
-    abstract void modify(PVector mouse);
-
-    abstract boolean mouseOver(PVector mouse);
+    abstract void modify(PVector mouse);    
     
-    abstract void finishHandles();
+    abstract boolean checkHandles(PVector mouse);
+
+    abstract void adjustActiveHandle(PVector mouse);
     
     abstract Shape copy(int id);
-    
+
     abstract String printToClipboard();
     
     abstract PGraphics printToPGraphic(PGraphics ig);
@@ -118,6 +114,11 @@ abstract class Shape{
             leftover = app.round(leftover);
             rotation = app.floor(rotation / QUARTER_PI) * QUARTER_PI + (leftover * QUARTER_PI);
         }
+    }
+    
+    void finishHandles(){
+        //This methods sets the initial radius of Handles so that they can be reset back to this value if needed. 
+        //This methood should be overwritten by shapes that use it. 
     }
 
     void finishShape() {

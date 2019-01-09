@@ -137,11 +137,7 @@ import javafx.scene.paint.Color;
             activeHandle.setPosition(mouse);
         }
     }
-    
-        @Override
-    void finishHandles(){
-        //pass
-    }
+     
     
         @Override
     Shape copy(int id){

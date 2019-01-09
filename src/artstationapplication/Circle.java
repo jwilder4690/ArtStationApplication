@@ -6,7 +6,6 @@
 package artstationapplication;
 
 import processing.core.*;
-import javafx.scene.paint.Color;
 
 /**
  *

@@ -15,6 +15,7 @@ public class VertexHandle {
     PVector pos;
     float size = 15;
     int paint;
+    PVector offset; //used for bezier Controllers?
     
     VertexHandle(PApplet drawingSpace, float x, float y){
         app = drawingSpace;
