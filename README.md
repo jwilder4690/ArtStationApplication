@@ -18,7 +18,7 @@ First commits are merges of code developed in my "ArtStation-Halted" repository.
 - [ ] Improve usability (crtl z, shift, alt)
     - [ ] Shortcuts
     - [ ] Temporary modifiers (alt for snap) 
-- [] Output
+- [ ] Output
     - [x] Image file (supports alpha)
     - [x] Processing Code 
     - [ ] Save Artstation Drawing
