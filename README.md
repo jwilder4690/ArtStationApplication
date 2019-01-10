@@ -22,6 +22,7 @@ First commits are merges of code developed in my "ArtStation-Halted" repository.
     - [x] Image file (supports alpha)
     - [x] Processing Code 
     - [ ] Save Artstation Drawing
+    - [ ] Save SVG 
 - [ ] Import
     - [ ] Reference Image
     - [ ] Saved Artstation Drawing
