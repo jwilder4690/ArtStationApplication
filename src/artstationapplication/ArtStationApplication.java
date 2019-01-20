@@ -14,6 +14,7 @@ import javafx.stage.*;
 import javafx.event.*;
 import javafx.scene.input.*;
 import processing.core.*;
+import processing.svg.*; //TODO: remove if unused
 import processing.javafx.PSurfaceFX;
 import javafx.scene.image.*;
 import javafx.event.ActionEvent;
@@ -23,8 +24,8 @@ import javafx.beans.value.*;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.paint.Color;
 import java.util.*;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+
 
 //import java.awt.Toolkit;
 
@@ -86,8 +87,12 @@ public class ArtStationApplication extends PApplet{
         
         MenuItem open = new MenuItem("Open");
         MenuItem newDrawing = new MenuItem("New Drawing");
+        MenuItem save = new MenuItem("Save");
         MenuItem exit = new MenuItem("Exit");
-        fileMenu.getItems().addAll(open, newDrawing, new SeparatorMenuItem(), exit);
+        
+        save.setAccelerator(KeyCombination.keyCombination("shortcut+S"));
+        
+        fileMenu.getItems().addAll(open, newDrawing, save, new SeparatorMenuItem(), exit);
 
 
         Menu optionsMenu = new Menu("Options");
@@ -112,9 +117,6 @@ public class ArtStationApplication extends PApplet{
         coordsOff.setToggleGroup(tgMouse);
         coordsMouse.setToggleGroup(tgMouse);
         coordsTop.setToggleGroup(tgMouse);
-        coordsOff.setOnAction(event -> coordinateMode = Coordinates.OFF); 
-        coordsMouse.setOnAction(event -> coordinateMode = Coordinates.MOUSE); 
-        coordsTop.setOnAction(event -> coordinateMode = Coordinates.TOP); 
         mouseOptions.getItems().addAll(coordsOff, coordsMouse, coordsTop);
         optionsMenu.getItems().add(mouseOptions);
         optionsMenu.getItems().add(new SeparatorMenuItem());
@@ -124,12 +126,45 @@ public class ArtStationApplication extends PApplet{
         MenuItem clipboardShapes = new MenuItem("... Shapes to Clipboard");
         MenuItem clipboardFile = new MenuItem("... File to Clipboard");
         MenuItem imageFile = new MenuItem("...as Image");
-        exportMenu.getItems().addAll(clipboardFile, clipboardShapes, imageFile);
+        MenuItem svgFile = new MenuItem("... as SVG");
+        exportMenu.getItems().addAll(clipboardFile, clipboardShapes, imageFile, svgFile);
 
         mb.getMenus().addAll(fileMenu, optionsMenu, exportMenu);
-
-
-
+        
+        coordsOff.setOnAction(event -> coordinateMode = Coordinates.OFF); 
+        coordsMouse.setOnAction(event -> coordinateMode = Coordinates.MOUSE); 
+        coordsTop.setOnAction(event -> coordinateMode = Coordinates.TOP); 
+        
+        newDrawing.setOnAction(event -> clearScreen());
+        save.setOnAction(event ->{
+            final FileChooser fileChooser = new FileChooser();
+            File initialDirectory = new File("C:\\Users\\wilder4690\\Documents\\GitHub\\ArtStationApplication\\src\\artstationapplication\\data\\saveFiles");
+            fileChooser.setInitialDirectory(initialDirectory);
+            fileChooser.setTitle("Save Drawing");
+            fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("ASF", "*.txt")
+            );
+            File file = fileChooser.showSaveDialog(stage); //arg here is a Window that input will be blocked to until dialog complete (can be null)
+            if(file != null){ 
+                String location = file.getAbsolutePath();
+                saveDrawing(location);
+            }
+        });
+        
+        open.setOnAction(event ->{
+            final FileChooser fileChooser = new FileChooser();
+            File initialDirectory = new File("C:\\Users\\wilder4690\\Documents\\GitHub\\ArtStationApplication\\src\\artstationapplication\\data\\saveFiles");
+            fileChooser.setInitialDirectory(initialDirectory);
+            fileChooser.setTitle("Open Drawing");
+            fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("ASF", "*.txt")
+            );
+            File file = fileChooser.showOpenDialog(stage); //arg here is a Window that input will be blocked to until dialog complete (can be null)
+            if(file != null){ 
+                String location = file.getAbsolutePath();
+                loadDrawing(location);
+            }
+        });
 
         EventHandler<ActionEvent> MenuHandler = new EventHandler<ActionEvent>(){ 
             public void handle(ActionEvent ae){ 
@@ -151,19 +186,29 @@ public class ArtStationApplication extends PApplet{
                         File file = fileChooser.showSaveDialog(stage); //arg here is a Window that input will be blocked to until dialog complete (can be null)
                         if(file != null){ 
                             String location = file.getAbsolutePath();
-                            println(location);
                             exportImageFile(location);
                         }
                         
                 }
+                else if(target == svgFile){
+                        final FileChooser fileChooser = new FileChooser();
+                        fileChooser.setTitle("Save SVG");
+                        fileChooser.getExtensionFilters().addAll(
+                            new FileChooser.ExtensionFilter("SVG", "*.svg")
+                        );
+                        File file = fileChooser.showSaveDialog(stage); //arg here is a Window that input will be blocked to until dialog complete (can be null)
+                        if(file != null){ 
+                            String location = file.getAbsolutePath();
+                            exportSVGFile(location);
+                        }
+                }
             }
         };
         
-        open.setOnAction(MenuHandler);
-        newDrawing.setOnAction(MenuHandler);
         clipboardFile.setOnAction(MenuHandler);
         clipboardShapes.setOnAction(MenuHandler);
         imageFile.setOnAction(MenuHandler);
+        svgFile.setOnAction(MenuHandler);
         exit.setOnAction(MenuHandler);
 
         
@@ -238,7 +283,7 @@ public class ArtStationApplication extends PApplet{
         btnCurve.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         btnCurve.setStyle("-fx-padding:0");
         btnCurve.setToggleGroup(toolGroup);
-        btnCurve.setTooltip(new Tooltip("Single click for start point and cingle click for end point."));
+        btnCurve.setTooltip(new Tooltip("Click for first point and drag to second point."));
         
         EventHandler<ActionEvent> ToolHandler = new EventHandler<ActionEvent>(){
             public void handle(ActionEvent ae){
@@ -319,6 +364,37 @@ public class ArtStationApplication extends PApplet{
         widthTextField.setOnAction(textHandler);
         heightTextField.setOnAction(textHandler);
         
+        //Reference Image Button////////////////////////////////////////////////
+        final HBox referencePane = new HBox(spacing);
+        final Button btnReferenceImage = new Button("Reference Image");
+        final CheckBox cbReferenceImage = new CheckBox();
+        
+        btnReferenceImage.setTooltip(new Tooltip("Loads reference image to background of sketch"));
+        btnReferenceImage.setPrefWidth(controlBarWidth/2);
+        cbReferenceImage.setSelected(false);
+        
+        referencePane.getChildren().addAll(btnReferenceImage, cbReferenceImage);
+        
+        btnReferenceImage.setOnAction(event ->{
+            final FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Load Reference Image");
+            fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("PNG", "*.png"),
+                new FileChooser.ExtensionFilter("JPG", "*.jpg"),
+                new FileChooser.ExtensionFilter("GIF", "*.gif"),
+                new FileChooser.ExtensionFilter("TARGA", "*.tga")
+            );
+            File file = fileChooser.showOpenDialog(stage); //arg here is a Window that input will be blocked to until dialog complete (can be null)
+            if(file != null){ 
+                String location = file.getAbsolutePath();
+                pad.loadReferenceImage(location);
+                cbReferenceImage.setSelected(true);
+            }
+        });
+        
+        cbReferenceImage.setOnAction(event ->{
+            pad.toggleReferenceImage(cbReferenceImage.isSelected());
+        });
                 
         //Grid Menu///////////////////////////////////////////////////////////
         int gridMax = 100;
@@ -402,9 +478,6 @@ public class ArtStationApplication extends PApplet{
                 pad.toggleSnap(cbGridSnap.isSelected());
             }
         });
-        
-        //maybe... get User Input
-        //gridPane.setOnMouseExited(e -> canvas.requestFocus());
         
         gridSettings.add(lblGrid, 0,0);
         gridSettings.add(lblGridOn, 1, 0);
@@ -684,7 +757,7 @@ public class ArtStationApplication extends PApplet{
 
         controls.setPadding(new Insets(spacing, 2*spacing, spacing, spacing));
         controls.setMinWidth(controlBarWidth -4*spacing);
-        controls.getChildren().addAll(canvasMenuButton, gridMenuButton, colorPane,listPanel);
+        controls.getChildren().addAll(canvasMenuButton, referencePane,gridMenuButton, colorPane,listPanel);
         modes.getChildren().addAll(drawMode, editMode, new Separator(Orientation.HORIZONTAL));
         modes.setPadding(new Insets(spacing, 0,0,0));
         toolPane.setPadding(new Insets(0,spacing,0,spacing));
@@ -840,6 +913,14 @@ public class ArtStationApplication extends PApplet{
         shapeViewer.getSelectionModel().select(newIndex);
     }
     
+    void clearScreen(){
+        for(int i = shapes.size()-1; i >= 0; i--){
+            shapes.remove(i);
+        }
+        listIndex = 0;
+        activeMode = Mode.DRAW;
+    }
+    
     void deleteShape(){
         if(activeMode == Mode.EDIT && !shapes.isEmpty()){
             shapes.remove(listIndex);
@@ -977,6 +1058,67 @@ public class ArtStationApplication extends PApplet{
         dialog = "Image saved in "+location;
     }
     
+    void exportSVGFile(String location){
+        PGraphics exportGraphic = createGraphics(pad.getWidth(), pad.getHeight(), SVG, location);
+        exportGraphic.beginDraw();
+        if(pad.getBackgroundColor() != NONE) exportGraphic.background(pad.getBackgroundColor());
+        for(int i = 0; i < shapes.size(); i++){
+            shapes.get(i).printToPGraphic(exportGraphic);
+        }
+        exportGraphic.dispose();
+        exportGraphic.endDraw();
+        dialog = "Image saved in "+location;
+    }
+    
+    //Semicolon is used as delimiter for an object. Comma is delimiter for values. 
+    //Parsing should split first by ';' and the first element ("Bezier", "Circle", "Rectangle", etc) 
+    //will determine which load constructor to use.
+    void loadDrawing(String location){
+        String line = null;
+        String[] pieces;
+        
+        try{
+            BufferedReader reader = new BufferedReader(new FileReader(location));
+            while((line = reader.readLine()) != null){
+                pieces = line.split(";");
+                pad.loadShape(pieces[0], pieces[1].split(","));
+            }
+        }
+        catch (FileNotFoundException e){
+            dialog = "File not found.";
+        }
+        catch (IOException e){
+            dialog = "IO Exception.";
+        }
+    }
+    
+    //TODO: use to save if you opened a file
+    void saveDrawing(){
+        saveDrawing("C:\\Users\\wilder4690\\Documents\\GitHub\\ArtStationApplication\\src\\artstationapplication\\data\\saveFiles\\drawing.txt");
+    }
+    
+    void saveDrawing(String location){
+        File file = new File(location);
+        PrintWriter output;
+        try{
+            file.createNewFile();
+        } catch( IOException e1){
+            dialog = "Could not create File.";
+        }
+        try{
+            output = new PrintWriter(file);
+            for(int i = 0; i < shapes.size(); i++){
+                //test for multiple shapes. Maybe print would be better?
+                output.println(shapes.get(i).save());
+            }
+            output.flush();
+            output.close();
+        }
+        catch(FileNotFoundException e){
+            dialog = "File not found.";
+        }
+    }
+    
     public static void main(String[] args) {
         String[] processingArgs = {"Art Station"};
         ArtStationApplication app = new ArtStationApplication();
@@ -985,6 +1127,8 @@ public class ArtStationApplication extends PApplet{
     
     class CanvasArea {
         final private PApplet sketch;
+        PImage referenceImage;
+        boolean referenceOn = false;
         final boolean CENT = true;
         final boolean CORN = false;
         int backgroundColor = color(245, 245, 245);
@@ -1065,6 +1209,45 @@ public class ArtStationApplication extends PApplet{
             return backgroundColor;
         }
         
+        void loadShape(String shapeType, String[] shapeInfo){
+            if(shapeType.equals("Circle")){
+                shapes.add(new Circle(sketch, shapeInfo));
+            }
+        }
+        
+        void loadReferenceImage(String location){
+            referenceImage = loadImage(location);
+            referenceOn = true;
+
+            //Popup to handle resize////////////////////////////////////////////
+            if(referenceImage.width > canvasWidth || referenceImage.height > canvasHeight){
+                final Stage dialog = new Stage();
+                dialog.initModality(Modality.APPLICATION_MODAL);
+                
+                final FlowPane dialogBox = new FlowPane(Orientation.VERTICAL, spacing, 2*spacing);
+                final HBox options = new HBox(spacing);
+                final Button maintain = new Button("Maintain Canvas");
+                final Button resize = new Button("Resize Canvas");
+                final Label text = new Label("The reference image is larger than the canvas.\nHow would you like to resolve this?");
+                
+                text.setWrapText(true);
+                dialogBox.setAlignment(Pos.CENTER);
+
+                options.getChildren().addAll(maintain, resize);
+                dialogBox.getChildren().addAll(text, options);
+                Scene dialogScene = new Scene(dialogBox, 400, 200);
+                dialog.setScene(dialogScene);
+                dialog.show();
+                
+                maintain.setOnAction(event -> dialog.close());
+                resize.setOnAction(event -> {
+                    setHeight(referenceImage.height);
+                    setWidth(referenceImage.width);
+                    dialog.close();
+                });
+            }
+        }
+        
         Transformation checkForTransformation(PVector mouse){
             if(shapes.isEmpty()) return Transformation.NON;
             if(shapes.get(listIndex).checkHandles(mouse)){
@@ -1084,6 +1267,7 @@ public class ArtStationApplication extends PApplet{
             fill(backgroundColor);
             noStroke();
             rect(0, 0, canvasWidth, canvasHeight);
+            if(referenceOn && referenceImage != null) image(referenceImage, 0, 0);
             if (mousePressed && shapes.size() > 0){
                 if(modifying){
                     ellipse(mx, my, 10, 10);
@@ -1109,7 +1293,6 @@ public class ArtStationApplication extends PApplet{
                     if(!shapes.get(shapes.size() - 1).getFinished()){
                         shapes.get(listIndex).setShift(shift);
                         if(gridOn && gridSnapOn && activeTool == ShapeType.LIN) {
-                            println("snapping");
                             shapes.get(shapes.size() - 1).modify(snapToGrid(mouse));
                         }
                         else shapes.get(shapes.size() - 1).modify(mouse);
@@ -1178,6 +1361,10 @@ public class ArtStationApplication extends PApplet{
             }
         }
         
+        void toggleReferenceImage(boolean flip){
+            referenceOn = flip;
+        }
+        
         void toggleSnap(boolean flip){
             gridSnapOn = flip;
         }
@@ -1217,7 +1404,5 @@ public class ArtStationApplication extends PApplet{
                 i++;
             }
         }
-        
-
     }
 }

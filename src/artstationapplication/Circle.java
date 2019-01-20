@@ -42,6 +42,22 @@ class Circle extends Shape{
       heightHandleT = new Handle (base.heightHandleT, this);
       rotation = base.rotation;
     }
+    
+    //Load Constructor
+    Circle(PApplet drawingSpace, String[] input){
+        super(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[2]), Float.valueOf(input[3]));
+        offset = Float.valueOf(input[4]);
+        rotation = Float.valueOf(input[5]);
+        strokeWeight = Float.valueOf(input[6]);
+        completed = true;
+        shift = false;
+        name = "Circle";
+        index = Integer.valueOf(input[7]);
+        widthHandleR = new Handle(drawingSpace, this, input[8].split("&"));
+        widthHandleL = new Handle(drawingSpace, this, input[9].split("&"));
+        heightHandleT = new Handle(drawingSpace, this, input[10].split("&"));
+        heightHandleB = new Handle(drawingSpace, this, input[11].split("&"));
+    }
 
     @Override 
     boolean mouseOver(PVector mouse){
@@ -197,5 +213,16 @@ class Circle extends Shape{
       ig.ellipse(0,0, 2*widthHandleL.getRadius(), 2*heightHandleT.getRadius());
       ig.popMatrix();
       return ig;
+    }
+    
+    @Override
+    String save(){
+        String output ="Circle;";
+        output += fillColor+","+strokeColor+","+pos.x+","+pos.y+","+offset+","+rotation+","+strokeWeight+","+index+",";
+        output += widthHandleL.save()+",";
+        output += widthHandleR.save()+",";
+        output += heightHandleT.save()+",";
+        output += heightHandleB.save();
+        return output;
     }
  }

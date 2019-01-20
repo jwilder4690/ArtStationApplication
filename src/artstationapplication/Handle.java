@@ -36,7 +36,15 @@ import processing.core.*;
              modifier = base.modifier;
          }
          
-         
+         //Load Constructor
+         Handle(PApplet drawingSpace, Shape parent, String[] input){
+            app = drawingSpace;
+            modifier = Float.valueOf(input[0]);
+            radius = Float.valueOf(input[1]);
+            paint = app.color(255,255,0);
+            offset = new PVector(Float.valueOf(input[2]),Float.valueOf(input[3]));
+            this.parent = parent;
+         }
          
          PVector getPosition(float rot){
              
@@ -72,5 +80,11 @@ import processing.core.*;
          
          void reset(){
              modifier = 1;
+         }
+         
+         String save(){
+             String output = "";
+             output += modifier+"&"+radius+"&"+offset.x+"&"+offset.y;
+             return output;
          }
      }

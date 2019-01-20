@@ -284,4 +284,10 @@ public class Bezier extends Shape{
       ig.bezier(start.getPosition().x, start.getPosition().y, startController.getPosition().x, startController.getPosition().y ,endController.getPosition().x, endController.getPosition().y, end.getPosition().x, end.getPosition().y);
       return ig;
     }
+    
+        @Override
+    String save(){
+        String output ="";
+        return output;
+    }
 }

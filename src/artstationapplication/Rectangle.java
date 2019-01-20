@@ -51,11 +51,14 @@ import javafx.scene.paint.Color;
 
     @Override 
     boolean mouseOver(PVector mouse){
-        float deltaX = mouse.x - pos.x;
-        float deltaY = mouse.y - pos.y;
+        float deltaX = mouse.x-pos.x;
+        float deltaY = mouse.y-pos.y;
         float rotX = deltaX*app.cos(-rotation) - deltaY*app.sin(-rotation);
         float rotY = deltaY*app.cos(-rotation) + deltaX*app.sin(-rotation);
-        return (app.abs(rotX) < widthHandleL.getRadius() && app.abs(rotY) < heightHandleT.getRadius());
+        
+        if(rotX < -widthHandleL.getRadius() || rotX > widthHandleR.getRadius()) return false;
+        if(rotY < -heightHandleT.getRadius() || rotY > heightHandleB.getRadius()) return false;
+        return true;
     }
 
     @Override
@@ -262,5 +265,11 @@ import javafx.scene.paint.Color;
       }
       ig.popMatrix();
       return ig;
+    }
+    
+        @Override
+    String save(){
+        String output ="";
+        return output;
     }
   }

@@ -285,4 +285,10 @@ public class Polygon extends Shape{
         }
         return ig;
     }
+    
+        @Override
+    String save(){
+        String output ="";
+        return output;
+    }
 }

@@ -212,4 +212,10 @@ import javafx.scene.paint.Color;
       ig.popMatrix();
       return ig;
     }
+    
+        @Override
+    String save(){
+        String output ="";
+        return output;
+    }
   }

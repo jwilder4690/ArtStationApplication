@@ -19,7 +19,7 @@ abstract class Shape{
     final float HALF_PI = app.HALF_PI;
     final int NONE = -777;
     final float PI = app.PI;
-    PVector startingRotation;
+    PVector startingRotation; //unused?
     float offset = 0;
     float rotation = 0;
     int fillColor;
@@ -101,6 +101,8 @@ abstract class Shape{
     abstract String printToClipboard();
     
     abstract PGraphics printToPGraphic(PGraphics ig);
+    
+    abstract String save();
 
     void manipulate(PVector mouse) {
         pos.set(mouse);  

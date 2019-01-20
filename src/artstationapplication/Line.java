@@ -16,6 +16,12 @@ import javafx.scene.paint.Color;
     VertexHandle end;
     VertexHandle activeHandle;
     VertexHandle inactiveHandle;
+    final int SMALLEST_X = 0;
+    final int SMALLEST_Y = 1;
+    final int GREATEST_X = 2;
+    final int GREATEST_Y = 3;
+    int padding = 15;
+    float[] boundingBox = {0,0,0,0}; // Index 0 is smallest x, 1 is smallest y, 2 is greatest x, 3 is greatest y
 
     Line(PApplet drawingSpace, int paint, int outline, float thickness, float x, float y, int id){
       super(drawingSpace, paint, outline, x,y);
@@ -39,15 +45,11 @@ import javafx.scene.paint.Color;
       end = new VertexHandle(base.app, base.end.getPosition());
     }
 
-    //
-    @Override 
+    @Override
     boolean mouseOver(PVector mouse){
-        //could create bounding box and check if outside top left and bottom right. Only do if will be reused, this will be sufficient for current use
-        if(mouse.x > start.getPosition().x && mouse.x < end.getPosition().x || mouse.x < start.getPosition().x && mouse.x > end.getPosition().x){
-            if(mouse.y > start.getPosition().y && mouse.y < end.getPosition().y || mouse.y < start.getPosition().y && mouse.y > end.getPosition().y )
-                return true;
-        }
-        return false;
+        if(mouse.x < boundingBox[SMALLEST_X] || mouse.x > boundingBox[GREATEST_X]) return false;
+        if(mouse.y < boundingBox[SMALLEST_Y] || mouse.y > boundingBox[GREATEST_Y]) return false;
+        return true;
     }
     
     @Override
@@ -55,6 +57,7 @@ import javafx.scene.paint.Color;
         PVector lineDelta = PVector.sub(end.getPosition(), start.getPosition());
         start.setPosition(mouse);
         end.setPosition(PVector.add(start.getPosition(), lineDelta));
+        calculateBoundingBox();
     }
 
     @Override
@@ -78,6 +81,12 @@ import javafx.scene.paint.Color;
         app.strokeWeight(3);
         app.stroke(255,255, 0);
         app.line(start.getPosition().x, start.getPosition().y, end.getPosition().x, end.getPosition().y);
+        //bounding box
+        app.noFill();
+        app.stroke(0,0,0);
+        app.strokeWeight(1);
+        app.rectMode(app.CORNERS);
+        app.rect(boundingBox[SMALLEST_X], boundingBox[SMALLEST_Y], boundingBox[GREATEST_X], boundingBox[GREATEST_Y]);
         drawHandles();
         app.popMatrix();
     }
@@ -90,6 +99,10 @@ import javafx.scene.paint.Color;
     @Override
     void modify(PVector mouse){
       end.setPosition(mouse);
+    }
+    
+    void finishHandles(){
+        calculateBoundingBox();
     }
 
     @Override
@@ -136,12 +149,42 @@ import javafx.scene.paint.Color;
         else{
             activeHandle.setPosition(mouse);
         }
+         calculateBoundingBox();
     }
      
+        void setBoundingBox(float[] point){
+        float a = point[0];
+        float b = point[1];
+        float c = point[0];
+        float d = point[1];
+        //padding is for vertical or horizontal line, to give the bounding box
+        //some area in thos situations
+        boundingBox[SMALLEST_X] = a - padding;
+        boundingBox[SMALLEST_Y] = b - padding;
+        boundingBox[GREATEST_X] = c + padding;
+        boundingBox[GREATEST_Y] = d + padding;        
+    }
+ 
+     //Compares new point to existing bounding box points to see if new extreme
+    void calculateBoundingBox(float[] point){
+        float x = point[0];
+        float y = point[1];
+        if(x > boundingBox[GREATEST_X]) boundingBox[GREATEST_X] = x + padding;
+        if(x < boundingBox[SMALLEST_X]) boundingBox[SMALLEST_X] = x - padding;
+        if(y > boundingBox[GREATEST_Y]) boundingBox[GREATEST_Y] = y + padding;
+        if(y < boundingBox[SMALLEST_Y]) boundingBox[SMALLEST_Y] = y - padding;
+    }
+        
+    void calculateBoundingBox(){
+        setBoundingBox(start.getPositionFloats());
+        calculateBoundingBox(end.getPositionFloats());
+    }
     
         @Override
     Shape copy(int id){
-        return new Line(this, id);
+        Line copy = new Line(this, id);
+        copy.calculateBoundingBox();
+        return copy;
     }
     
         @Override
@@ -166,5 +209,11 @@ import javafx.scene.paint.Color;
       }
       ig.line(start.getPosition().x, start.getPosition().y, end.getPosition().x, end.getPosition().y);
       return ig;
+    }
+    
+        @Override
+    String save(){
+        String output ="";
+        return output;
     }
   }
