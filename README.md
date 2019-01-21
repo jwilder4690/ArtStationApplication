@@ -10,19 +10,15 @@ First commits are merges of code developed in my "ArtStation-Halted" repository.
 - [x] Implement edit mode transformations (Transformation, Rotation, Scaling)
 - [x] Apply all transformations to each shape
 - [x] GUI element shape list (Observable list)
+- [x] Output
+- [x] Import
+- [x] Add Controls (Fill, stroke, canvas sizing, grid)
 - [ ] Add features (Arcs, polygon, curves)
     - [x] Polygons
     - [x] Curves
     - [ ] Groups
-- [x] Add Controls (Fill, stroke, canvas sizing, grid)
 - [ ] Improve usability (crtl z, shift, alt)
     - [ ] Shortcuts
     - [ ] Temporary modifiers (alt for snap) 
-- [ ] Output
-    - [x] Image file (supports alpha)
-    - [x] Processing Code 
-    - [ ] Save Artstation Drawing
-    - [ ] Save SVG 
-- [ ] Import
-    - [ ] Reference Image
-    - [ ] Saved Artstation Drawing
+
+
