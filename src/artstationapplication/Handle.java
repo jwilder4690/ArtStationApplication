@@ -13,7 +13,7 @@ import processing.core.*;
          PApplet app;
          float modifier = 1;
          float radius = 50;
-         float size = 15;
+         float size = 20;
          int paint;
          PVector offset;
          Shape parent;
@@ -54,8 +54,16 @@ import processing.core.*;
              return new PVector(parent.getPosition().x + pointX * app.cos(rot) - pointY*app.sin(rot), parent.getPosition().y + pointX*app.sin(rot) + pointY*app.cos(rot));
          }
                   
-         void setModifier(float r){
+         void calculateModifier(float r){
              modifier = r/radius;
+         }
+        
+         void setModifier(float mod){
+             modifier = mod;
+         }
+         
+         float getModifier(){
+             return modifier;
          }
          
          void setRadius(){
@@ -71,6 +79,10 @@ import processing.core.*;
              return radius*modifier;
          }
          
+        void scaleSize(float newSize){
+            size = newSize;
+        }
+
          void drawHandle(){
              app.fill(paint);
              app.strokeWeight(1);

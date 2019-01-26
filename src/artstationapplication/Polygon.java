@@ -5,6 +5,7 @@
  */
 package artstationapplication;
 import java.util.ArrayList;
+import java.util.Arrays;
 import processing.core.*;
 import java.util.Collections;
 
@@ -45,6 +46,22 @@ public class Polygon extends Shape{
       completed = base.completed;
       this.calculateBoundingBox();
     }
+    
+    //Load Constructor
+    Polygon(PApplet drawingSpace, String[] input){
+        super(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[2]), Float.valueOf(input[3]));
+        offset = Float.valueOf(input[4]);
+        rotation = Float.valueOf(input[5]);
+        strokeWeight = Float.valueOf(input[6]);
+        completed = true;
+        shift = false;
+        name = "Polygon";
+        index = Integer.valueOf(input[7]);
+        for(int i = 0; i < Integer.valueOf(input[8]); i++){
+            vertices.add(new VertexHandle(drawingSpace, input[9+i].split("&")));
+        }
+    }
+    
     
     void adjustOrigin(PVector point){
         //fix (check handles is commented out for now)
@@ -104,6 +121,13 @@ public class Polygon extends Shape{
         if(y < boundingBox[SMALLEST_Y]) boundingBox[SMALLEST_Y] = y;
     }
     
+        @Override
+    void resizeHandles(float size){
+        for(int i = 0; i < vertices.size(); i++){
+            vertices.get(i).scaleSize(size);
+        }
+    }
+    
     @Override
     boolean checkHandles(PVector mouse){
         float deltaX = mouse.x - pos.x;
@@ -130,6 +154,26 @@ public class Polygon extends Shape{
         activeHandle.setPosition(rot);
         if(activeHandle == origin){
             adjustOrigin(rot);
+        }
+        calculateBoundingBox();
+    }
+    
+    @Override
+    float[] getHandles(){
+        
+        float[] points = new float[2*vertices.size()];      
+        for(int i = 0; i < vertices.size(); i++){
+            points[2*i] = vertices.get(i).getPosition().x;
+            points[2*i+1] = vertices.get(i).getPosition().y;
+        }
+        System.out.println(Arrays.toString(points));
+        return points;
+    }
+    
+    @Override
+    void setHandles(float[] mods){
+        for(int i = 0; i < vertices.size(); i++){
+            vertices.get(i).setPosition(mods[2*i], mods[2*i+1]);
         }
         calculateBoundingBox();
     }
@@ -286,9 +330,17 @@ public class Polygon extends Shape{
         return ig;
     }
     
-        @Override
+    @Override
     String save(){
-        String output ="";
+        String output ="Polygon;";
+        output += fillColor+","+strokeColor+","+pos.x+","+pos.y+","+offset+","+rotation+","+strokeWeight+","+index+",";
+        output += vertices.size()+",";
+        for(int i = 0; i < vertices.size(); i++){
+            output += vertices.get(i).save();
+            if(i != vertices.size()-1){
+                output += ",";
+            }
+        }
         return output;
     }
 }

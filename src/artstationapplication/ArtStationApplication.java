@@ -14,7 +14,6 @@ import javafx.stage.*;
 import javafx.event.*;
 import javafx.scene.input.*;
 import processing.core.*;
-import processing.svg.*; //TODO: remove if unused
 import processing.javafx.PSurfaceFX;
 import javafx.scene.image.*;
 import javafx.event.ActionEvent;
@@ -38,8 +37,9 @@ public class ArtStationApplication extends PApplet{
     
     enum ShapeType {CIR, REC, TRI, LIN, POL, CUR}
     enum Mode {DRAW, EDIT}
-    enum Transformation {ROT, SCA, TRA, NON}
+    enum Transformation {ROT, SCA, TRA, DEL, ORD, ADD, FIL, STF, STW, NON}
     enum Coordinates {OFF, MOUSE, TOP};
+    ChangeList tasks = new ChangeList();
     ShapeType activeTool = ShapeType.CIR;
     Mode activeMode = Mode.DRAW;
     Transformation subMode = Transformation.NON;
@@ -357,6 +357,10 @@ public class ArtStationApplication extends PApplet{
                     canvas.setWidth(stage.getWidth()-toolBarWidth - controlBarWidth);
                     pad.setGridDensity();
                     canvas.requestFocus();
+                    for(int i = 0; i < shapes.size(); i++){
+                        //I believe this is correct, but is getting called many times instead of just once. 
+                        shapes.get(i).resizeHandles(20/scaleFactor);
+                    }
                 }
             }
         };
@@ -831,6 +835,7 @@ public class ArtStationApplication extends PApplet{
         drawFrames();
         drawMouse();
         drawDialog();
+        checkInput();
     }
        
     @Override
@@ -870,8 +875,7 @@ public class ArtStationApplication extends PApplet{
                pad.completeShape();  
            }
             else{  
-                activeMode = Mode.DRAW;
-                //pad.toggleSelectShape(false);  
+                activeMode = Mode.DRAW; 
             }
         }
         if(activeMode == Mode.EDIT){
@@ -904,6 +908,15 @@ public class ArtStationApplication extends PApplet{
                 case ALT: pad.setAlt(false); break;
                 case CONTROL: pad.setControl(false); break; 
             }
+        }
+    }
+    
+    void checkInput(){
+        if((keys['z'] || keys['Z']) && pad.control){
+            Change item = tasks.pop();
+            if(item != null) item.undo();
+            keys['z'] = false;
+            keys['Z'] = false;
         }
     }
     
@@ -1016,6 +1029,7 @@ public class ArtStationApplication extends PApplet{
         }
     }
     
+    
     void exportProcessingFileToClipboard(){
         String output = "void setup(){\n ";
         output += "\tsize("+pad.getWidth()+", "+pad.getHeight()+");\n}\n\n";
@@ -1074,11 +1088,22 @@ public class ArtStationApplication extends PApplet{
     //Parsing should split first by ';' and the first element ("Bezier", "Circle", "Rectangle", etc) 
     //will determine which load constructor to use.
     void loadDrawing(String location){
-        String line = null;
+        clearScreen();
+        String line;
         String[] pieces;
         
         try{
             BufferedReader reader = new BufferedReader(new FileReader(location));
+            
+            //Canvas information////////////////////////////////////////////////
+            line = reader.readLine();
+            pieces = line.split(",");
+            pad.setWidth(Integer.valueOf(pieces[0]));
+            pad.setHeight(Integer.valueOf(pieces[1]));
+            pad.setBackgroundColor(Integer.valueOf(pieces[2]));
+            pad.setGridDensity(Integer.valueOf(pieces[3]));
+            
+            //Creates shapes with load constructor//////////////////////////////
             while((line = reader.readLine()) != null){
                 pieces = line.split(";");
                 pad.loadShape(pieces[0], pieces[1].split(","));
@@ -1107,8 +1132,8 @@ public class ArtStationApplication extends PApplet{
         }
         try{
             output = new PrintWriter(file);
+            output.println(pad.getWidth()+","+pad.getHeight()+","+pad.getBackgroundColor()+","+pad.getGridDensity()); 
             for(int i = 0; i < shapes.size(); i++){
-                //test for multiple shapes. Maybe print would be better?
                 output.println(shapes.get(i).save());
             }
             output.flush();
@@ -1129,8 +1154,6 @@ public class ArtStationApplication extends PApplet{
         final private PApplet sketch;
         PImage referenceImage;
         boolean referenceOn = false;
-        final boolean CENT = true;
-        final boolean CORN = false;
         int backgroundColor = color(245, 245, 245);
         int canvasWidth;
         int canvasHeight;
@@ -1209,10 +1232,30 @@ public class ArtStationApplication extends PApplet{
             return backgroundColor;
         }
         
+        int getGridDensity(){
+            return gridDensity;
+        }
+        
         void loadShape(String shapeType, String[] shapeInfo){
             if(shapeType.equals("Circle")){
                 shapes.add(new Circle(sketch, shapeInfo));
             }
+            if(shapeType.equals("Bezier")){
+                shapes.add(new Bezier(sketch, shapeInfo));
+            }
+            if(shapeType.equals("Rectangle")){
+                shapes.add(new Rectangle(sketch, shapeInfo));
+            }
+            if(shapeType.equals("Line")){
+                shapes.add(new Line(sketch, shapeInfo));
+            }
+            if(shapeType.equals("Triangle")){
+                shapes.add(new Triangle(sketch, shapeInfo));
+            }
+            if(shapeType.equals("Polygon")){
+                shapes.add(new Polygon(sketch, shapeInfo));
+            }
+            
         }
         
         void loadReferenceImage(String location){
@@ -1252,12 +1295,17 @@ public class ArtStationApplication extends PApplet{
             if(shapes.isEmpty()) return Transformation.NON;
             if(shapes.get(listIndex).checkHandles(mouse)){
                 shapes.get(listIndex).setShift(shift);
+                tasks.push(new Change(Transformation.SCA, listIndex, shapes.get(listIndex).getHandles()));
                 return Transformation.SCA;
             }
-            else if(shapes.get(listIndex).mouseOver(mouse)) return Transformation.TRA;
+            else if(shapes.get(listIndex).mouseOver(mouse)){
+                tasks.push(new Change(Transformation.TRA, listIndex, shapes.get(listIndex).getPositionFloats()));
+                return Transformation.TRA;
+            }
             else{
                 shapes.get(listIndex).setStartingRotation(mouse);
                 shapes.get(listIndex).setShift(shift);
+                tasks.push(new Change(Transformation.ROT, listIndex, shapes.get(listIndex).rotation));
                 return Transformation.ROT;
             }
         }
@@ -1305,7 +1353,7 @@ public class ArtStationApplication extends PApplet{
                             else shapes.get(listIndex).adjustActiveHandle(mouse);
                             break;
                         case TRA: 
-                            if(gridSnapOn && gridOn)shapes.get(listIndex).manipulate(snapToGrid(mouse));
+                            if(gridSnapOn && gridOn) shapes.get(listIndex).manipulate(snapToGrid(mouse));
                             else shapes.get(listIndex).manipulate(mouse);
                             break;
                         case ROT: shapes.get(listIndex).changeRotation(mouse); break;
@@ -1324,7 +1372,7 @@ public class ArtStationApplication extends PApplet{
                     shapes.add(new Circle(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex));
                     break;
                 case REC:
-                    shapes.add(new Rectangle(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex, CENT));
+                    shapes.add(new Rectangle(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex));
                     break;
                 case TRI:
                     shapes.add(new Triangle(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex));
@@ -1373,12 +1421,12 @@ public class ArtStationApplication extends PApplet{
             gridOn = flip;
         }
         
-        void setGridDensity(int newDensity){
+        void setGridDensity(int newDensity){ //Use when density changed 
             gridDensity = newDensity;
             gridSpacing = canvasWidth / (float)gridDensity;
         }
         
-        void setGridDensity(){ //Width changed, not density
+        void setGridDensity(){ //Use when width changed
             gridSpacing = canvasWidth / (float)gridDensity;
         }
         
@@ -1402,6 +1450,80 @@ public class ArtStationApplication extends PApplet{
             while (i * gridSpacing < canvasHeight) {
                 line(0, i * gridSpacing, canvasWidth, i * gridSpacing);
                 i++;
+            }
+        }
+    }
+    
+    public class ChangeList{
+        //Keeps log of 20 most recent changes 
+        final int UNDO_LIMIT = 20;
+        int last = UNDO_LIMIT - 1;
+        Change[] stack = new Change[UNDO_LIMIT];
+        int index = 0; //next available slot
+        
+        ChangeList(){
+            //Nothing in constructor?
+        }
+        
+        void push(Change task){
+            stack[index] = task;
+            index++;
+            if(index == UNDO_LIMIT) index = 0; //Wraps back to beginning to overwrite
+        }
+        
+        //Needs to go to element previous to index to get last change
+        Change pop(){
+            Change task;
+            index--;
+            if(index == -1){ //Wraps to end of array if more changes, otherwise stays at beginning
+                if(stack[last] != null) index = last;
+                else index = 0;            
+            }
+            
+            if(stack[index] != null)  task = stack[index];
+            else task = null;
+            stack[index] = null;
+
+            return task;
+        }
+    }
+    
+    //This will hold the information about the previous state of a shape, and can be used to revert 
+    //back to that state when evoked. 
+    public class Change{
+        Transformation operation;
+        int index;
+        Shape clone;
+        float[] changedValues;
+
+        Change(Transformation change, int id, float[] values){
+            index = id;
+            operation = change;
+            changedValues = values;
+        }
+        
+        Change(Transformation change, int id, float value){
+            index = id;
+            operation = change;
+            changedValues = new float[1];
+            changedValues[0] = value;
+        }
+
+        void createClone(Shape original){
+            clone = original;
+        }
+
+        void undo(){
+            switch(operation){
+                case TRA: shapes.get(index).manipulate(changedValues[0],changedValues[1]); break;
+                case ROT: shapes.get(index).setRotation(changedValues[0]); break;
+                case SCA: shapes.get(index).setHandles(changedValues); break;
+                case DEL: break;
+                case ORD: break;
+                case ADD: break;
+                case FIL: break;
+                case STF: break;
+                case STW: break;   
             }
         }
     }

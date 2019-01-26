@@ -67,8 +67,17 @@ abstract class Shape{
         return pos;
     }
     
+    float[] getPositionFloats(){
+        return new float[] {pos.x, pos.y};
+    }
+    
+    //redundant with manipulate, remove?
     void setPosition(float x, float y){
         pos.set(x,y);
+    }
+    
+    void setRotation(float rot){
+        rotation = rot;
     }
     
     void setShift(boolean turn){
@@ -102,10 +111,20 @@ abstract class Shape{
     
     abstract PGraphics printToPGraphic(PGraphics ig);
     
+    abstract void resizeHandles(float factor);
+    
+    abstract void setHandles(float[] values);
+    
+    abstract float[] getHandles();
+    
     abstract String save();
 
     void manipulate(PVector mouse) {
         pos.set(mouse);  
+    }
+    
+    void manipulate(float x, float y){
+        manipulate(new PVector(x,y));
     }
 
     void changeRotation(PVector mouse) {         

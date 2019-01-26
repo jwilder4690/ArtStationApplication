@@ -44,7 +44,24 @@ import javafx.scene.paint.Color;
       start = new VertexHandle(base.app, base.start.getPosition());
       end = new VertexHandle(base.app, base.end.getPosition());
     }
+    
+    //Load Constructor
+    Line(PApplet drawingSpace, String[] input){
+        super(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[2]), Float.valueOf(input[3]));
+        strokeWeight = Float.valueOf(input[4]);
+        completed = true;
+        shift = false;
+        name = "Line";
+        index = Integer.valueOf(input[5]);
+        start = new VertexHandle(drawingSpace, input[6].split("&"));
+        end = new VertexHandle(drawingSpace, input[7].split("&"));
+    }
 
+    @Override
+    float[] getPositionFloats(){
+        return start.getPositionFloats();
+    }
+    
     @Override
     boolean mouseOver(PVector mouse){
         if(mouse.x < boundingBox[SMALLEST_X] || mouse.x > boundingBox[GREATEST_X]) return false;
@@ -101,6 +118,13 @@ import javafx.scene.paint.Color;
       end.setPosition(mouse);
     }
     
+        @Override
+    void resizeHandles(float size){
+        start.scaleSize(size);
+        end.scaleSize(size);
+    }
+    
+        @Override
     void finishHandles(){
         calculateBoundingBox();
     }
@@ -150,6 +174,24 @@ import javafx.scene.paint.Color;
             activeHandle.setPosition(mouse);
         }
          calculateBoundingBox();
+    }
+    
+    @Override
+    float[] getHandles(){
+        float[] points = {
+            start.getPosition().x,
+            start.getPosition().y,
+            end.getPosition().x,
+            end.getPosition().y,
+        };
+        return points;
+    }
+    
+    @Override
+    void setHandles(float[] mods){
+        start.setPosition(mods[0],mods[1]);
+        end.setPosition(mods[2],mods[3]);
+        calculateBoundingBox();
     }
      
         void setBoundingBox(float[] point){
@@ -211,9 +253,12 @@ import javafx.scene.paint.Color;
       return ig;
     }
     
-        @Override
+    @Override
     String save(){
-        String output ="";
+        String output ="Line;";
+        output += fillColor+","+strokeColor+","+pos.x+","+pos.y+","+strokeWeight+","+index+",";
+        output += start.save()+",";
+        output += end.save();
         return output;
     }
   }

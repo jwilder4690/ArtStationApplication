@@ -30,7 +30,7 @@ public class Bezier extends Shape{
     Bezier(PApplet drawingSpace, int paint, int outline, float thickness, float x, float y, int id){
       super(drawingSpace, paint, outline, x,y);
       strokeWeight = thickness;
-      name = "Curve";
+      name = "Bezier";
       index = id;
       start = new VertexHandle(drawingSpace, x,y);
       PVector point = new PVector(50,50);
@@ -50,10 +50,27 @@ public class Bezier extends Shape{
       end = new VertexHandle(base.app, base.end.getPosition());
       startController = new VertexHandle(base.app, base.startController.getPosition());
       endController = new VertexHandle(base.app, base.endController.getPosition());
-      for(int i = 0; i < vertices.length; i++){
-          this.vertices[i] = base.vertices[i];
-      }
+      System.arraycopy(base.vertices, 0, this.vertices, 0, vertices.length);
       completed = true;
+    }
+    
+    //Load Constructor
+    Bezier(PApplet drawingSpace, String[] input){
+        super(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[2]), Float.valueOf(input[3]));
+        strokeWeight = Float.valueOf(input[4]);
+        completed = true;
+        shift = false;
+        name = "Bezier";
+        index = Integer.valueOf(input[5]);
+        start = new VertexHandle(drawingSpace, input[6].split("&"));
+        startController = new VertexHandle(drawingSpace, input[7].split("&"));
+        end = new VertexHandle(drawingSpace, input[8].split("&"));
+        endController = new VertexHandle(drawingSpace, input[9].split("&"));
+    }
+    
+    @Override
+    float[] getPositionFloats(){
+        return start.getPositionFloats();
     }
 
     @Override
@@ -67,6 +84,11 @@ public class Bezier extends Shape{
     void manipulate(PVector mouse){
         moveAnchor(Vertex.BOTH, mouse);
         calculateBoundingBox();
+    }
+    
+    @Override
+    void manipulate(float x, float y){
+        manipulate(new PVector(x,y));
     }
 
     @Override
@@ -141,12 +163,18 @@ public class Bezier extends Shape{
         calculateBoundingBox();
     }
     
-
-    
     @Override
     void modify(PVector mouse){
       end.setPosition(mouse);
     }   
+    
+    @Override
+    void resizeHandles(float size){
+        start.scaleSize(size);
+        end.scaleSize(size);
+        startController.scaleSize(size);
+        endController.scaleSize(size);
+    }
     
     @Override
     boolean checkHandles(PVector mouse){
@@ -187,6 +215,30 @@ public class Bezier extends Shape{
         else{
             moveAnchor(Vertex.TAIL, mouse);
         }
+        calculateBoundingBox();
+    }
+    
+    @Override
+    float[] getHandles(){
+        float[] points = {
+            start.getPosition().x,
+            start.getPosition().y,
+            startController.getPosition().x,
+            startController.getPosition().y,
+            end.getPosition().x,
+            end.getPosition().y,
+            endController.getPosition().x,
+            endController.getPosition().y
+        };
+        return points;
+    }
+    
+    @Override
+    void setHandles(float[] mods){
+        start.setPosition(mods[0],mods[1]);
+        startController.setPosition(mods[2],mods[3]);
+        end.setPosition(mods[4],mods[5]);
+        endController.setPosition(mods[6],mods[7]);
         calculateBoundingBox();
     }
     
@@ -285,9 +337,14 @@ public class Bezier extends Shape{
       return ig;
     }
     
-        @Override
+    @Override
     String save(){
-        String output ="";
+        String output ="Bezier;";
+        output += fillColor+","+strokeColor+","+pos.x+","+pos.y+","+strokeWeight+","+index+",";
+        output += start.save()+",";
+        output += startController.save()+",";
+        output += end.save()+",";
+        output += endController.save();
         return output;
     }
 }

@@ -5,6 +5,7 @@
  */
 package artstationapplication;
 
+import java.util.Arrays;
 import processing.core.*;
 
 /**
@@ -112,12 +113,20 @@ class Circle extends Shape{
     void modify(PVector mouse){
       float radius = app.dist(mouse.x, mouse.y, pos.x, pos.y);
       rotation = 0;
-      widthHandleR.setModifier(radius);
-      widthHandleL.setModifier(radius);
-      heightHandleT.setModifier(radius);
-      heightHandleB.setModifier(radius);
+      widthHandleR.calculateModifier(radius);
+      widthHandleL.calculateModifier(radius);
+      heightHandleT.calculateModifier(radius);
+      heightHandleB.calculateModifier(radius);
     }
 
+        @Override
+    void resizeHandles(float size){
+        widthHandleL.scaleSize(size);
+        widthHandleR.scaleSize(size);
+        heightHandleT.scaleSize(size);
+        heightHandleB.scaleSize(size);
+    }
+    
     @Override
     boolean checkHandles(PVector mouse){
         if(widthHandleL.overHandle(mouse, rotation) || widthHandleR.overHandle(mouse,rotation)){
@@ -142,14 +151,14 @@ class Circle extends Shape{
         float delta = (activeHandle[0].getRadius() - inactiveHandle[0].getRadius())/activeHandle[0].getRadius();
         float dist = app.dist(pos.x, pos.y, mouse.x, mouse.y);
         if(shift){       
-            activeHandle[0].setModifier(dist); 
-            activeHandle[1].setModifier(dist);
-            inactiveHandle[0].setModifier(dist - dist * delta);  
-            inactiveHandle[1].setModifier(dist - dist * delta);
+            activeHandle[0].calculateModifier(dist); 
+            activeHandle[1].calculateModifier(dist);
+            inactiveHandle[0].calculateModifier(dist - dist * delta);  
+            inactiveHandle[1].calculateModifier(dist - dist * delta);
         }
         else{
-            activeHandle[0].setModifier(dist);  
-            activeHandle[1].setModifier(dist);
+            activeHandle[0].calculateModifier(dist);  
+            activeHandle[1].calculateModifier(dist);
         }
     }
     
@@ -161,6 +170,20 @@ class Circle extends Shape{
         heightHandleB.setRadius();
     }
     
+    @Override
+    float[] getHandles(){
+        return new float[] {widthHandleL.getModifier(), widthHandleR.getModifier(), heightHandleT.getModifier(), heightHandleB.getModifier()};
+    }
+    
+    @Override
+    void setHandles(float[] mods){
+        widthHandleL.setModifier(mods[0]);
+        widthHandleR.setModifier(mods[1]);
+        heightHandleT.setModifier(mods[2]);
+        heightHandleB.setModifier(mods[3]);
+    }
+    
+    @Override
     void reset(){
         rotation = 0;
         widthHandleL.reset();

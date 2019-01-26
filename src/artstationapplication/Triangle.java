@@ -39,6 +39,21 @@ import javafx.scene.paint.Color;
       heightHandleT = new Handle (base.heightHandleT, this);
       rotation = base.rotation;
     }
+    
+        //Load Constructor
+    Triangle(PApplet drawingSpace, String[] input){
+        super(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[2]), Float.valueOf(input[3]));
+        offset = Float.valueOf(input[4]);
+        rotation = Float.valueOf(input[5]);
+        strokeWeight = Float.valueOf(input[6]);
+        completed = true;
+        shift = false;
+        name = "Triangle";
+        index = Integer.valueOf(input[7]);
+        widthHandleR = new Handle(drawingSpace, this, input[8].split("&"));
+        widthHandleL = new Handle(drawingSpace, this, input[9].split("&"));
+        heightHandleT = new Handle(drawingSpace, this, input[10].split("&"));
+    }
 
     @Override 
     boolean mouseOver(PVector mouse){
@@ -102,9 +117,9 @@ import javafx.scene.paint.Color;
     @Override
     void modify(PVector mouse){
       float radius = app.dist(pos.x, pos.y, mouse.x, mouse.y);
-      heightHandleT.setModifier(radius);
-      widthHandleL.setModifier(app.sqrt((float)(4.0/3.0)*app.sq(radius))/2);
-      widthHandleR.setModifier(app.sqrt((float)(4.0/3.0)*app.sq(radius))/2);
+      heightHandleT.calculateModifier(radius);
+      widthHandleL.calculateModifier(app.sqrt((float)(4.0/3.0)*app.sq(radius))/2);
+      widthHandleR.calculateModifier(app.sqrt((float)(4.0/3.0)*app.sq(radius))/2);
 
       rotation = app.atan2(mouse.y - pos.y, mouse.x - pos.x);
       rotation += offset;
@@ -115,6 +130,13 @@ import javafx.scene.paint.Color;
       }
     }
 
+        @Override
+    void resizeHandles(float size){
+        widthHandleL.scaleSize(size);
+        widthHandleR.scaleSize(size);
+        heightHandleT.scaleSize(size);
+    }
+    
     @Override
     boolean checkHandles(PVector mouse){
         if(widthHandleL.overHandle(mouse, rotation)){
@@ -144,12 +166,12 @@ import javafx.scene.paint.Color;
         float delta2 = (activeHandle.getRadius() - inactiveHandle[1].getRadius())/activeHandle.getRadius();
         float dist = app.dist(pos.x, pos.y, mouse.x, mouse.y);
         if(shift){       
-            activeHandle.setModifier(dist); 
-            inactiveHandle[0].setModifier(dist - dist * delta1);  
-            inactiveHandle[1].setModifier(dist - dist * delta2);  
+            activeHandle.calculateModifier(dist); 
+            inactiveHandle[0].calculateModifier(dist - dist * delta1);  
+            inactiveHandle[1].calculateModifier(dist - dist * delta2);  
         }
         else{
-            activeHandle.setModifier(dist);  
+            activeHandle.calculateModifier(dist);  
         }
     }
     
@@ -160,6 +182,19 @@ import javafx.scene.paint.Color;
         heightHandleT.setRadius();
     }
     
+        @Override
+    float[] getHandles(){
+        return new float[] {widthHandleL.getModifier(), widthHandleR.getModifier(), heightHandleT.getModifier()};
+    }
+    
+    @Override
+    void setHandles(float[] mods){
+        widthHandleL.setModifier(mods[0]);
+        widthHandleR.setModifier(mods[1]);
+        heightHandleT.setModifier(mods[2]);
+    }
+    
+    @Override
     void reset(){
         rotation = 0;
         widthHandleL.reset();
@@ -213,9 +248,13 @@ import javafx.scene.paint.Color;
       return ig;
     }
     
-        @Override
+    @Override
     String save(){
-        String output ="";
+        String output ="Triangle;";
+        output += fillColor+","+strokeColor+","+pos.x+","+pos.y+","+offset+","+rotation+","+strokeWeight+","+index+",";
+        output += widthHandleL.save()+",";
+        output += widthHandleR.save()+",";
+        output += heightHandleT.save();
         return output;
     }
   }

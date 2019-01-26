@@ -20,9 +20,8 @@ import javafx.scene.paint.Color;
     Handle activeHandle;
     Handle[] inactiveHandle = new Handle[3];
     PVector corner;
-    boolean centerType;
 
-    Rectangle(PApplet drawingSpace, int paint, int outline, float thickness, float a, float b, int id, boolean style){ 
+    Rectangle(PApplet drawingSpace, int paint, int outline, float thickness, float a, float b, int id){ 
         super(drawingSpace, paint, outline, a,b);
         strokeWeight = thickness;
         name = "Rectangle";
@@ -31,7 +30,6 @@ import javafx.scene.paint.Color;
         widthHandleL = new Handle(drawingSpace, this, new PVector(-1,0));
         heightHandleB = new Handle(drawingSpace, this, new PVector(0,1));
         heightHandleT = new Handle(drawingSpace, this, new PVector(0,-1));
-        centerType = style;
         corner = new PVector(a+1,b+1); //default corner, will not be displayed 
     }
     
@@ -46,7 +44,22 @@ import javafx.scene.paint.Color;
       heightHandleB = new Handle (base.heightHandleB, this);
       heightHandleT = new Handle (base.heightHandleT, this);
       rotation = base.rotation;
-      centerType = base.centerType;
+    }
+    
+    //Load Constructor
+    Rectangle(PApplet drawingSpace, String[] input){
+        super(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[2]), Float.valueOf(input[3]));
+        offset = Float.valueOf(input[4]);
+        rotation = Float.valueOf(input[5]);
+        strokeWeight = Float.valueOf(input[6]);
+        completed = true;
+        shift = false;
+        name = "Rectangle";
+        index = Integer.valueOf(input[7]);
+        widthHandleR = new Handle(drawingSpace, this, input[8].split("&"));
+        widthHandleL = new Handle(drawingSpace, this, input[9].split("&"));
+        heightHandleT = new Handle(drawingSpace, this, input[10].split("&"));
+        heightHandleB = new Handle(drawingSpace, this, input[11].split("&"));
     }
 
     @Override 
@@ -78,26 +91,19 @@ import javafx.scene.paint.Color;
       }
       app.pushMatrix();
       app.translate(pos.x, pos.y);
-      app.rotate(rotation);
-      if(centerType){
-        //Still uses corners drawing mode in order to enable assymetric scaling
-        app.rectMode(CORNERS);
-        app.rect(-widthHandleL.getRadius(), -heightHandleT.getRadius(), widthHandleR.getRadius(), heightHandleB.getRadius());
-      }
-      //Currently not using, alt draw mode maybe?
-      else if(!centerType){
-        app.rectMode(CORNERS);
-        app.rect(0,0, corner.x, corner.y);
-      }
+      app.rotate(rotation); 
+        
+      //Still uses corners drawing mode in order to enable assymetric scaling
+      app.rectMode(CORNERS);
+      app.rect(-widthHandleL.getRadius(), -heightHandleT.getRadius(), widthHandleR.getRadius(), heightHandleB.getRadius());
       app.popMatrix();
     }
     
     @Override
     void drawSelected(){
-      app.pushMatrix();
-      app.translate(pos.x, pos.y);
-      app.rotate(rotation);
-      if(centerType){
+        app.pushMatrix();
+        app.translate(pos.x, pos.y);
+        app.rotate(rotation);
         //Still uses corners drawing mode in order to enable assymetric scaling
         app.rectMode(CORNERS);
         app.noFill();
@@ -105,16 +111,7 @@ import javafx.scene.paint.Color;
         app.stroke(255,255, 0);
         app.rect(-widthHandleL.getRadius(), -heightHandleT.getRadius(), widthHandleR.getRadius(), heightHandleB.getRadius());
         drawHandles();
-      }
-      //Currently not using, alt draw mode maybe?
-      else if(!centerType){
-        app.rectMode(CORNERS);
-        app.noFill();
-        app.strokeWeight(3);
-        app.stroke(255,255, 0);
-        app.rect(0,0, corner.x, corner.y);
-      }
-      app.popMatrix();
+        app.popMatrix();
     }
 
     void drawHandles(){   
@@ -127,14 +124,15 @@ import javafx.scene.paint.Color;
     @Override
     void modify(PVector mouse){
         float radius;
-        if(centerType){
+        //TODO: implement alt drawMode
+        if(true){
             radius = app.dist(mouse.x, mouse.y, pos.x, pos.y);
-            widthHandleR.setModifier(radius);
-            widthHandleL.setModifier(radius);
-            heightHandleT.setModifier(radius);
-            heightHandleB.setModifier(radius);
+            widthHandleR.calculateModifier(radius);
+            widthHandleL.calculateModifier(radius);
+            heightHandleT.calculateModifier(radius);
+            heightHandleB.calculateModifier(radius);
         }
-        else if(!centerType) corner.set(mouse.x, mouse.y);
+        //else if(alt) corner.set(mouse.x, mouse.y);
         rotation = app.atan2(mouse.y - pos.y, mouse.x - pos.x);
         rotation += offset;
         if(shift){ //implement shift
@@ -142,6 +140,14 @@ import javafx.scene.paint.Color;
             leftover = app.round(leftover);
             rotation = app.floor(rotation/QUARTER_PI)*QUARTER_PI+(leftover*QUARTER_PI);
         }
+    }
+    
+        @Override
+    void resizeHandles(float size){
+        widthHandleL.scaleSize(size);
+        widthHandleR.scaleSize(size);
+        heightHandleT.scaleSize(size);
+        heightHandleB.scaleSize(size);
     }
 
     @Override
@@ -184,13 +190,13 @@ import javafx.scene.paint.Color;
             float delta0 = (activeHandle.getRadius() - inactiveHandle[0].getRadius())/activeHandle.getRadius();
             float delta1 = (activeHandle.getRadius() - inactiveHandle[1].getRadius())/activeHandle.getRadius();
             float delta2 = (activeHandle.getRadius() - inactiveHandle[2].getRadius())/activeHandle.getRadius();
-            activeHandle.setModifier(dist); 
-            inactiveHandle[0].setModifier(dist - dist * delta0);  
-            inactiveHandle[1].setModifier(dist - dist * delta1);
-            inactiveHandle[2].setModifier(dist - dist * delta2);
+            activeHandle.calculateModifier(dist); 
+            inactiveHandle[0].calculateModifier(dist - dist * delta0);  
+            inactiveHandle[1].calculateModifier(dist - dist * delta1);
+            inactiveHandle[2].calculateModifier(dist - dist * delta2);
         }
         else{
-            activeHandle.setModifier(dist);  
+            activeHandle.calculateModifier(dist);  
         }
     }
     
@@ -200,6 +206,19 @@ import javafx.scene.paint.Color;
         widthHandleR.setRadius();
         heightHandleT.setRadius();
         heightHandleB.setRadius();
+    }
+    
+    @Override
+    float[] getHandles(){
+        return new float[] {widthHandleL.getModifier(), widthHandleR.getModifier(), heightHandleT.getModifier(), heightHandleB.getModifier()};
+    }
+    
+    @Override
+    void setHandles(float[] mods){
+        widthHandleL.setModifier(mods[0]);
+        widthHandleR.setModifier(mods[1]);
+        heightHandleT.setModifier(mods[2]);
+        heightHandleB.setModifier(mods[3]);
     }
     
     @Override
@@ -237,39 +256,33 @@ import javafx.scene.paint.Color;
     
     @Override
     PGraphics printToPGraphic(PGraphics ig){
-      if(fillColor == NONE){
-          ig.noFill();
-      }
-      else{
-        ig.fill(fillColor);
-      }
-      if(strokeWeight == 0){
-        ig.noStroke();
-      }
-      else{
-        ig.stroke(strokeColor);
-        ig.strokeWeight(strokeWeight);
-      }
-      ig.pushMatrix();
-      ig.translate(pos.x, pos.y);
-      ig.rotate(rotation);
-      if(centerType){
+        if(fillColor == NONE) ig.noFill();
+        else ig.fill(fillColor);
+
+        if(strokeWeight == 0) ig.noStroke();
+        else{
+            ig.stroke(strokeColor);
+            ig.strokeWeight(strokeWeight);
+        }
+        
+        ig.pushMatrix();
+        ig.translate(pos.x, pos.y);
+        ig.rotate(rotation);
         //Still uses corners drawing mode in order to enable assymetric scaling
         ig.rectMode(CORNERS);
         ig.rect(-widthHandleL.getRadius(), -heightHandleT.getRadius(), widthHandleR.getRadius(), heightHandleB.getRadius());
-      }
-      //Currently not using, alt draw mode maybe?
-      else if(!centerType){
-        ig.rectMode(CORNERS);
-        ig.rect(0,0, corner.x, corner.y);
-      }
-      ig.popMatrix();
-      return ig;
+        ig.popMatrix();
+        return ig;
     }
     
-        @Override
+    @Override
     String save(){
-        String output ="";
+        String output ="Rectangle;";
+        output += fillColor+","+strokeColor+","+pos.x+","+pos.y+","+offset+","+rotation+","+strokeWeight+","+index+",";
+        output += widthHandleL.save()+",";
+        output += widthHandleR.save()+",";
+        output += heightHandleT.save()+",";
+        output += heightHandleB.save();
         return output;
     }
   }
