@@ -357,8 +357,7 @@ public class ArtStationApplication extends PApplet{
                     canvas.setWidth(stage.getWidth()-toolBarWidth - controlBarWidth);
                     pad.setGridDensity();
                     canvas.requestFocus();
-                    for(int i = 0; i < shapes.size(); i++){
-                        //I believe this is correct, but is getting called many times instead of just once. 
+                    for(int i = 0; i < shapes.size(); i++){ 
                         shapes.get(i).resizeHandles(20/scaleFactor);
                     }
                 }
@@ -573,6 +572,7 @@ public class ArtStationApplication extends PApplet{
                     //canvas.requestFocus(); 
                 }
                 else{
+                    tasks.push(new Change(Transformation.FIL, listIndex, shapes.get(listIndex).getFillColor()));
                     shapes.get(listIndex).setFillColor(convertColorToInt(colorPickerFill.getValue()));
                 }
                 canvas.requestFocus(); 
@@ -586,6 +586,7 @@ public class ArtStationApplication extends PApplet{
                     //canvas.requestFocus(); 
                 }
                 else{
+                    tasks.push(new Change(Transformation.STF, listIndex, shapes.get(listIndex).getStrokeColor()));
                     shapes.get(listIndex).setStrokeColor(convertColorToInt(colorPickerStroke.getValue()));
                 }
                 canvas.requestFocus();  
@@ -597,6 +598,7 @@ public class ArtStationApplication extends PApplet{
                 weightTextField.setText(Double.toString(newVal.floatValue()));
                 pad.setCurrentStrokeWeight((float)newVal.floatValue());
                 if(activeMode == Mode.EDIT){
+                    tasks.push(new Change(Transformation.STW, listIndex, shapes.get(listIndex).strokeWeight));
                     shapes.get(listIndex).setStrokeWeight(newVal.floatValue());
                 }
             }
@@ -622,6 +624,7 @@ public class ArtStationApplication extends PApplet{
                 }
                 pad.setCurrentStrokeWeight((float)newValue);
                 if(activeMode == Mode.EDIT){
+                    tasks.push(new Change(Transformation.STW, listIndex, shapes.get(listIndex).strokeWeight));
                     shapes.get(listIndex).setStrokeWeight((float)newValue);
                 }
             }
@@ -695,9 +698,31 @@ public class ArtStationApplication extends PApplet{
         btnCopy.setTooltip(new Tooltip("Creates an identical copy of currently selected shape."));
         btnCopy.setMinWidth(toolBarWidth + spacing);
         
-        btnUpArrow.setOnAction(event -> swapElements(listIndex, listIndex-1));
-        btnDownArrow.setOnAction(event -> swapElements(listIndex, listIndex+1));
-        btnDelete.setOnAction(event -> deleteShape());
+        btnUpArrow.setOnAction(event -> {
+            if(listIndex-1 < 0 || listIndex-1 == shapes.size()) {
+                canvas.requestFocus();
+                return;
+            }
+            tasks.push(new Change(Transformation.ORD, listIndex, new float[]{listIndex-1, listIndex}));
+            swapElements(listIndex, listIndex-1);
+            canvas.requestFocus();
+        });
+        btnDownArrow.setOnAction(event -> {
+            if(listIndex+1 < 0 || listIndex+1 == shapes.size()){
+                canvas.requestFocus();
+                return;
+            }
+            tasks.push(new Change(Transformation.ORD, listIndex, new float[]{listIndex+1, listIndex}));
+            swapElements(listIndex, listIndex+1);
+            canvas.requestFocus();
+        });
+        btnDelete.setOnAction(event -> {
+            Change currentChange = new Change(Transformation.DEL, listIndex, 0);
+            currentChange.createClone(shapes.get(listIndex));
+            tasks.push(currentChange);
+            deleteShape();
+            canvas.requestFocus();
+        });
         btnReset.setOnAction(event -> shapes.get(listIndex).reset());
         btnCopy.setOnAction(event -> copyShape());
 
@@ -705,11 +730,9 @@ public class ArtStationApplication extends PApplet{
         listControls.getChildren().addAll(btnUpArrow, btnDownArrow, strut, btnCopy, btnReset, btnDelete);
         listPanel.getChildren().addAll(listControls, shapeViewer);
         
-        //shapeViewer.setMaxSize(controlBarWidth -7*spacing, controlBarWidth*5);
         listControls.setAlignment(Pos.CENTER);
         listControls.setPadding(new Insets(0,spacing,0,0));
         listPanel.setMaxSize(controlBarWidth -7*spacing, controlBarWidth*3);
-        //listControls.setPrefColumns(1);
         shapeViewer.setPrefHeight(controlBarWidth*1.5);
         MultipleSelectionModel<Shape> selectionModel = shapeViewer.getSelectionModel();
         
@@ -717,9 +740,7 @@ public class ArtStationApplication extends PApplet{
             public void changed(ObservableValue<? extends Number> changed, Number oldVal, Number newVal){
                 editMode.setSelected(true);
                 activeMode = Mode.EDIT;
-                //pad.deselectShape(listIndex);
                 listIndex = (int)newVal;
-                //pad.selectShape(listIndex);
             }
         });
         
@@ -734,6 +755,9 @@ public class ArtStationApplication extends PApplet{
         //Key Events for full scene
         rootNode.addEventFilter(KeyEvent.KEY_RELEASED, event->{
             if(event.getCode() == KeyCode.DELETE){
+                Change currentChange = new Change(Transformation.DEL, listIndex, 0);
+                currentChange.createClone(shapes.get(listIndex));
+                tasks.push(currentChange);
                 deleteShape();
             }
             else if(event.getCode() == KeyCode.ALT){
@@ -746,10 +770,10 @@ public class ArtStationApplication extends PApplet{
                 }
                 else{
                     drawMode.setSelected(true);
-                    activeMode = Mode.DRAW;
-                    //pad.toggleSelectShape(false);   
+                    activeMode = Mode.DRAW;  
                 }
             }
+            //canvas.requestFocus();
         });
         
         
@@ -935,9 +959,13 @@ public class ArtStationApplication extends PApplet{
     }
     
     void deleteShape(){
-        if(activeMode == Mode.EDIT && !shapes.isEmpty()){
-            shapes.remove(listIndex);
-            listIndex = shapes.size() - 1;
+        deleteShape(listIndex);
+    }
+     
+    void deleteShape(int target){
+        if(!shapes.isEmpty()){
+            shapes.remove(target);
+            listIndex = shapes.size() - 1; 
             shapeViewer.getSelectionModel().select(listIndex);
             if(listIndex < 0){
                 listIndex = 0;
@@ -1363,6 +1391,7 @@ public class ArtStationApplication extends PApplet{
 
         void drawShape(float x, float y, ShapeType type) {
             listIndex = shapeViewer.getItems().size();
+            tasks.push(new Change(Transformation.ADD, listIndex, 0));
             if(gridSnapOn && gridOn){
                 x = snapToGrid(x);
                 y = snapToGrid(y);
@@ -1515,15 +1544,15 @@ public class ArtStationApplication extends PApplet{
 
         void undo(){
             switch(operation){
-                case TRA: shapes.get(index).manipulate(changedValues[0],changedValues[1]); break;
-                case ROT: shapes.get(index).setRotation(changedValues[0]); break;
-                case SCA: shapes.get(index).setHandles(changedValues); break;
-                case DEL: break;
-                case ORD: break;
-                case ADD: break;
-                case FIL: break;
-                case STF: break;
-                case STW: break;   
+                case TRA: shapes.get(index).manipulate(changedValues[0],changedValues[1]); dialog = "Reverted translation.";  break;
+                case ROT: shapes.get(index).setRotation(changedValues[0]);dialog = "Reverted rotation.";  break;
+                case SCA: shapes.get(index).setHandles(changedValues); dialog = "Reverted scaling."; break;
+                case DEL: shapes.add(clone); dialog = "Reverted deletion.";  break;
+                case ORD: swapElements((int)changedValues[0], (int) changedValues[1]); dialog = "Reverted reordering."; break;
+                case ADD: deleteShape(index); dialog = "Reverted addition of new shape."; break;
+                case FIL: shapes.get(index).setFillColor((int) changedValues[0]); break;
+                case STF: shapes.get(index).setStrokeColor((int) changedValues[0]); break;
+                case STW: shapes.get(index).setStrokeWeight((int) changedValues[0]); break;   
             }
         }
     }
