@@ -1,6 +1,6 @@
 # ArtStationApplication
 
-This application was created as a developer tool to aid in the creation of Processing sketches. Various shapes can be drawn and editted on  screen. The export option can be used output the processing code to your clipboard or to create an image or SVG file. The JAR file is available above to run the application. 
+This application was created as a developer tool to aid in the creation of Processing sketches. Various shapes can be drawn and editted on  screen. The export option can be used output the processing code to your clipboard or to create an image or SVG file. The JAR file is available above in the ArtStation.zip. 
 
 This application is still in development, please report any issues. 
 
