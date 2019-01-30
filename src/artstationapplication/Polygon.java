@@ -166,7 +166,6 @@ public class Polygon extends Shape{
             points[2*i] = vertices.get(i).getPosition().x;
             points[2*i+1] = vertices.get(i).getPosition().y;
         }
-        System.out.println(Arrays.toString(points));
         return points;
     }
     

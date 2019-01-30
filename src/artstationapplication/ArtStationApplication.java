@@ -708,7 +708,7 @@ public class ArtStationApplication extends PApplet{
             canvas.requestFocus();
         });
         btnDownArrow.setOnAction(event -> {
-            if(listIndex+1 < 0 || listIndex+1 == shapes.size()){
+            if(listIndex+1 < 0 || listIndex+1 >= shapes.size()){
                 canvas.requestFocus();
                 return;
             }
@@ -717,13 +717,16 @@ public class ArtStationApplication extends PApplet{
             canvas.requestFocus();
         });
         btnDelete.setOnAction(event -> {
+            if(shapes.isEmpty()) return;
             Change currentChange = new Change(Transformation.DEL, listIndex, 0);
             currentChange.createClone(shapes.get(listIndex));
             tasks.push(currentChange);
             deleteShape();
             canvas.requestFocus();
         });
-        btnReset.setOnAction(event -> shapes.get(listIndex).reset());
+        btnReset.setOnAction(event -> {
+            if(!shapes.isEmpty()) shapes.get(listIndex).reset();
+        });
         btnCopy.setOnAction(event -> copyShape());
 
         
@@ -753,12 +756,20 @@ public class ArtStationApplication extends PApplet{
         rootNode.setPadding(new Insets(0,8*spacing,0,0));
         
         //Key Events for full scene
+        rootNode.addEventFilter(KeyEvent.KEY_PRESSED, event ->{
+            if(event.getCode() == KeyCode.ESCAPE){
+                //Does this work?
+                activeMode = Mode.DRAW;
+            }
+        });
         rootNode.addEventFilter(KeyEvent.KEY_RELEASED, event->{
             if(event.getCode() == KeyCode.DELETE){
-                Change currentChange = new Change(Transformation.DEL, listIndex, 0);
-                currentChange.createClone(shapes.get(listIndex));
-                tasks.push(currentChange);
-                deleteShape();
+                if(!shapes.isEmpty()){
+                    Change currentChange = new Change(Transformation.DEL, listIndex, 0);
+                    currentChange.createClone(shapes.get(listIndex));
+                    tasks.push(currentChange);
+                    deleteShape();
+                }
             }
             else if(event.getCode() == KeyCode.ALT){
                 
@@ -963,14 +974,15 @@ public class ArtStationApplication extends PApplet{
     }
      
     void deleteShape(int target){
+        if(pad.modifying) pad.completeShape(); //finishes polygon if interrupted while drawing
         if(!shapes.isEmpty()){
             shapes.remove(target);
             listIndex = shapes.size() - 1; 
-            shapeViewer.getSelectionModel().select(listIndex);
             if(listIndex < 0){
                 listIndex = 0;
                 activeMode = Mode.DRAW; //switches back to draw mode if no other shapes to edit. 
             }
+            shapeViewer.getSelectionModel().select(listIndex);
         }
     }
     
@@ -1390,8 +1402,10 @@ public class ArtStationApplication extends PApplet{
         }
 
         void drawShape(float x, float y, ShapeType type) {
-            listIndex = shapeViewer.getItems().size();
-            tasks.push(new Change(Transformation.ADD, listIndex, 0));
+            if(!modifying){
+                listIndex = shapeViewer.getItems().size();
+                tasks.push(new Change(Transformation.ADD, listIndex, 0));
+            }
             if(gridSnapOn && gridOn){
                 x = snapToGrid(x);
                 y = snapToGrid(y);
