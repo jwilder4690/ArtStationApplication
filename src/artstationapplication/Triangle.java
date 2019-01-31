@@ -27,7 +27,10 @@ import processing.core.*;
       heightHandleT = new Handle(drawingSpace, this, new PVector(0,-1));
     }
     
-    //Copy Constructor
+    /*
+      Copy Constructor
+      Used for creating an exact copy of base shape.
+    */
     Triangle(Triangle base, int id){
       this(base.app, base.fillColor, base.strokeColor, base.strokeWeight, base.pos.x+base.COPY_OFFSET, base.pos.y+base.COPY_OFFSET, id);
       widthHandleR = new Handle(base.widthHandleR, this);
@@ -36,7 +39,10 @@ import processing.core.*;
       rotation = base.rotation;
     }
     
-    //Load Constructor 
+    /*
+      Load Constructor
+      Used for creating shape from information stored in save file.
+    */ 
     Triangle(PApplet drawingSpace, String[] input){
         this(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]),Float.valueOf(input[6]), Float.valueOf(input[2]), Float.valueOf(input[3]), Integer.valueOf(input[7]));
         startingRotation = Float.valueOf(input[4]);
@@ -90,6 +96,7 @@ import processing.core.*;
     
         @Override
     void drawSelected(){
+        //If shape is selected this method will be called to draw a highlighted outline over shape. 
         app.pushMatrix();
         app.translate(pos.x, pos.y);
         app.rotate(rotation); 
@@ -163,13 +170,23 @@ import processing.core.*;
 
     @Override
     void adjustActiveHandle(PVector mouse){
-        float delta1 = (activeHandle.getRadius() - inactiveHandle[0].getRadius())/activeHandle.getRadius();
-        float delta2 = (activeHandle.getRadius() - inactiveHandle[1].getRadius())/activeHandle.getRadius();
         float dist = app.dist(pos.x, pos.y, mouse.x, mouse.y);
-        if(shift){       
+        if(shift){
+            //If shift is held, inactive handles are scaled proportionally with the active controller.
+            //First calulates ratio between current handles, then scales handles accordingly
+            /*
+              Try:
+              ratio1 = inactiveHandle[0].getRadius()/activeHandle.getRadius();
+              ratio2 = inactiveHandle[1].getRadius()/activeHandle.getRadius();
+              activeHandle.calculateModifier(dist); 
+              inactiveHandle[0].calculateModifier(dist * ratio1);  
+              inactiveHandle[1].calculateModifier(dist * ratio2);  
+            */
+            float ratio1 = (activeHandle.getRadius() - inactiveHandle[0].getRadius())/activeHandle.getRadius();
+            float ratio2 = (activeHandle.getRadius() - inactiveHandle[1].getRadius())/activeHandle.getRadius();
             activeHandle.calculateModifier(dist); 
-            inactiveHandle[0].calculateModifier(dist - dist * delta1);  
-            inactiveHandle[1].calculateModifier(dist - dist * delta2);  
+            inactiveHandle[0].calculateModifier(dist - dist * ratio1);  
+            inactiveHandle[1].calculateModifier(dist - dist * ratio2);  
         }
         else{
             activeHandle.calculateModifier(dist);  
@@ -177,6 +194,7 @@ import processing.core.*;
     }
     
     @Override
+    //This sets the base radius that the shape will be set to if reset function is called
     void finishHandles(){
         widthHandleL.setRadius();
         widthHandleR.setRadius();
@@ -203,12 +221,12 @@ import processing.core.*;
         heightHandleT.reset();
     }
     
-        @Override
+    @Override
     Shape copy(int id){
         return new Triangle(this, id);
     }
     
-        @Override
+    @Override
     String printToClipboard(){
         String output = "";
         if(fillColor == NONE) output += "\tnoFill();\n";
