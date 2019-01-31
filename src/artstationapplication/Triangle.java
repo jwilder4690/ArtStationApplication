@@ -5,7 +5,6 @@
  */
 package artstationapplication;
 import processing.core.*;
-import javafx.scene.paint.Color;
 
 /**
  *
@@ -30,30 +29,24 @@ import javafx.scene.paint.Color;
     
     //Copy Constructor
     Triangle(Triangle base, int id){
-      super(base.app, base.fillColor, base.strokeColor, base.pos.x, base.pos.y);
-      strokeWeight = base.strokeWeight;
-      name = base.name;
-      index = id;
+      this(base.app, base.fillColor, base.strokeColor, base.strokeWeight, base.pos.x+base.COPY_OFFSET, base.pos.y+base.COPY_OFFSET, id);
       widthHandleR = new Handle(base.widthHandleR, this);
       widthHandleL = new Handle (base.widthHandleL, this);
       heightHandleT = new Handle (base.heightHandleT, this);
       rotation = base.rotation;
     }
     
-        //Load Constructor
+    //Load Constructor 
     Triangle(PApplet drawingSpace, String[] input){
-        super(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[2]), Float.valueOf(input[3]));
-        offset = Float.valueOf(input[4]);
+        this(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]),Float.valueOf(input[6]), Float.valueOf(input[2]), Float.valueOf(input[3]), Integer.valueOf(input[7]));
+        startingRotation = Float.valueOf(input[4]);
         rotation = Float.valueOf(input[5]);
-        strokeWeight = Float.valueOf(input[6]);
         completed = true;
-        shift = false;
-        name = "Triangle";
-        index = Integer.valueOf(input[7]);
         widthHandleR = new Handle(drawingSpace, this, input[8].split("&"));
         widthHandleL = new Handle(drawingSpace, this, input[9].split("&"));
         heightHandleT = new Handle(drawingSpace, this, input[10].split("&"));
     }
+    
 
     @Override 
     boolean mouseOver(PVector mouse){
@@ -114,16 +107,24 @@ import javafx.scene.paint.Color;
         heightHandleT.drawHandle();           
     }
 
+
+    /*
+      Uses mouse position relative to shape position to scale and rotate shape.
+      Used only during initial drawing to canvas.
+    */
     @Override
     void modify(PVector mouse){
-      float radius = app.dist(pos.x, pos.y, mouse.x, mouse.y);
-      heightHandleT.calculateModifier(radius);
-      widthHandleL.calculateModifier(app.sqrt((float)(4.0/3.0)*app.sq(radius))/2);
-      widthHandleR.calculateModifier(app.sqrt((float)(4.0/3.0)*app.sq(radius))/2);
+      float heightOfTriangle = app.dist(pos.x, pos.y, mouse.x, mouse.y);
+      //Calculates half width based on height to maintain equilateral triangle
+      float halfWidthOfTriangle = app.sqrt((float)(4.0/3.0)*app.sq(heightOfTriangle))/2; 
+      
+      heightHandleT.calculateModifier(heightOfTriangle);
+      widthHandleL.calculateModifier(halfWidthOfTriangle);
+      widthHandleR.calculateModifier(halfWidthOfTriangle);
 
-      rotation = app.atan2(mouse.y - pos.y, mouse.x - pos.x);
-      rotation += offset;
-      if(shift){ //implement shift
+      rotation = app.atan2(mouse.y - pos.y, mouse.x - pos.x) + PI/2;
+      rotation += startingRotation;
+      if(shift){ //Snaps rotation to 30 degree increments if shift key pressed
           float leftover = rotation % app.radians(30);
           leftover = app.round(leftover);
           rotation = app.floor(rotation/app.radians(30))*app.radians(30)+(leftover*app.radians(30));
@@ -209,7 +210,7 @@ import javafx.scene.paint.Color;
     
         @Override
     String printToClipboard(){
-                String output = "";
+        String output = "";
         if(fillColor == NONE) output += "\tnoFill();\n";
         else output += "\tfill("+fillColor+");\n";
 
@@ -251,7 +252,7 @@ import javafx.scene.paint.Color;
     @Override
     String save(){
         String output ="Triangle;";
-        output += fillColor+","+strokeColor+","+pos.x+","+pos.y+","+offset+","+rotation+","+strokeWeight+","+index+",";
+        output += fillColor+","+strokeColor+","+pos.x+","+pos.y+","+startingRotation+","+rotation+","+strokeWeight+","+index+",";
         output += widthHandleL.save()+",";
         output += widthHandleR.save()+",";
         output += heightHandleT.save();
