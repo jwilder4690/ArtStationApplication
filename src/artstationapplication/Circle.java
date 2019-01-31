@@ -47,7 +47,7 @@ class Circle extends Shape{
     //Load Constructor
     Circle(PApplet drawingSpace, String[] input){
         super(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[2]), Float.valueOf(input[3]));
-        offset = Float.valueOf(input[4]);
+        startingRotation = Float.valueOf(input[4]);
         rotation = Float.valueOf(input[5]);
         strokeWeight = Float.valueOf(input[6]);
         completed = true;
@@ -241,7 +241,7 @@ class Circle extends Shape{
     @Override
     String save(){
         String output ="Circle;";
-        output += fillColor+","+strokeColor+","+pos.x+","+pos.y+","+offset+","+rotation+","+strokeWeight+","+index+",";
+        output += fillColor+","+strokeColor+","+pos.x+","+pos.y+","+startingRotation+","+rotation+","+strokeWeight+","+index+",";
         output += widthHandleL.save()+",";
         output += widthHandleR.save()+",";
         output += heightHandleT.save()+",";

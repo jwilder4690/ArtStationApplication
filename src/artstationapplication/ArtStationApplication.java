@@ -37,7 +37,7 @@ public class ArtStationApplication extends PApplet{
     
     enum ShapeType {CIR, REC, TRI, LIN, POL, CUR}
     enum Mode {DRAW, EDIT}
-    enum Transformation {ROT, SCA, TRA, DEL, ORD, ADD, FIL, STF, STW, NON}
+    enum Transformation {ROT, SCA, TRA, DEL, ORD, ADD, COP, FIL, STF, STW, NON}
     enum Coordinates {OFF, MOUSE, TOP};
     ChangeList tasks = new ChangeList();
     ShapeType activeTool = ShapeType.CIR;
@@ -989,6 +989,7 @@ public class ArtStationApplication extends PApplet{
     void copyShape() {
         if(activeMode == Mode.EDIT && !shapes.isEmpty()){
             shapes.add(shapes.get(listIndex).copy(shapes.size()));
+            listIndex++;
         }
     }
     
@@ -1564,6 +1565,7 @@ public class ArtStationApplication extends PApplet{
                 case DEL: shapes.add(clone); dialog = "Reverted deletion.";  break;
                 case ORD: swapElements((int)changedValues[0], (int) changedValues[1]); dialog = "Reverted reordering."; break;
                 case ADD: deleteShape(index); dialog = "Reverted addition of new shape."; break;
+                case COP: break;
                 case FIL: shapes.get(index).setFillColor((int) changedValues[0]); break;
                 case STF: shapes.get(index).setStrokeColor((int) changedValues[0]); break;
                 case STW: shapes.get(index).setStrokeWeight((int) changedValues[0]); break;   

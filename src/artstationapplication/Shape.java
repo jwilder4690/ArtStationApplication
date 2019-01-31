@@ -12,15 +12,17 @@ import processing.core.*;
  * @author wilder4690
  */
 abstract class Shape{
+
     PApplet app;
     PGraphics graphic;
     PVector pos;
+    final int COPY_OFFSET = 15;
     final float QUARTER_PI = app.QUARTER_PI;
     final float HALF_PI = app.HALF_PI;
     final int NONE = -777;
     final float PI = app.PI;
-    PVector startingRotation; //unused?
-    float offset = 0;
+    //PVector startingRotation; //unused?
+    float startingRotation = 0;
     float rotation = 0;
     int fillColor;
     int strokeColor;
@@ -30,6 +32,7 @@ abstract class Shape{
     boolean shift = false;
     String name = "shape";
     int index;
+    
 
     Shape(PApplet drawingSpace, int paint, int outline, float x, float y) {
         app = drawingSpace;
@@ -85,7 +88,7 @@ abstract class Shape{
     }
 
     void setStartingRotation(PVector mouse) {
-        offset = rotation - app.atan2(mouse.y - pos.y, mouse.x - pos.x);
+        startingRotation = rotation - app.atan2(mouse.y - pos.y, mouse.x - pos.x);
     }
     
     
@@ -129,7 +132,7 @@ abstract class Shape{
 
     void changeRotation(PVector mouse) {         
           rotation = app.atan2(mouse.y - pos.y, mouse.x - pos.x);
-          rotation += offset;
+          rotation += startingRotation;
         if (shift) {
             float leftover = rotation % QUARTER_PI;
             leftover = app.round(leftover);

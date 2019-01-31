@@ -49,7 +49,7 @@ import javafx.scene.paint.Color;
     //Load Constructor
     Rectangle(PApplet drawingSpace, String[] input){
         super(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[2]), Float.valueOf(input[3]));
-        offset = Float.valueOf(input[4]);
+        startingRotation = Float.valueOf(input[4]);
         rotation = Float.valueOf(input[5]);
         strokeWeight = Float.valueOf(input[6]);
         completed = true;
@@ -134,7 +134,7 @@ import javafx.scene.paint.Color;
         }
         //else if(alt) corner.set(mouse.x, mouse.y);
         rotation = app.atan2(mouse.y - pos.y, mouse.x - pos.x);
-        rotation += offset;
+        rotation += startingRotation;
         if(shift){ //implement shift
             float leftover = rotation % QUARTER_PI;
             leftover = app.round(leftover);
@@ -278,7 +278,7 @@ import javafx.scene.paint.Color;
     @Override
     String save(){
         String output ="Rectangle;";
-        output += fillColor+","+strokeColor+","+pos.x+","+pos.y+","+offset+","+rotation+","+strokeWeight+","+index+",";
+        output += fillColor+","+strokeColor+","+pos.x+","+pos.y+","+startingRotation+","+rotation+","+strokeWeight+","+index+",";
         output += widthHandleL.save()+",";
         output += widthHandleR.save()+",";
         output += heightHandleT.save()+",";
