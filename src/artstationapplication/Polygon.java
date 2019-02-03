@@ -5,9 +5,7 @@
  */
 package artstationapplication;
 import java.util.ArrayList;
-import java.util.Arrays;
 import processing.core.*;
-import java.util.Collections;
 
 /**
  *
@@ -21,7 +19,7 @@ public class Polygon extends Shape{
     final int SMALLEST_Y = 1;
     final int GREATEST_X = 2;
     final int GREATEST_Y = 3;
-    float[] boundingBox = new float[4]; // Index 0 is smallest x, 1 is smallest y, 2 is greatest x, 3 is greatest y  
+    float[] boundingBox = new float[4];  
 
     
     Polygon(PApplet drawingSpace, int paint, int outline, float thickness, float x, float y, int id){
@@ -32,36 +30,36 @@ public class Polygon extends Shape{
         origin = new VertexHandle(app, 0,0);
     }
     
-    //Copy Constructor
+    /*
+      Copy Constructor
+      Used for creating an exact copy of base shape.
+    */
     Polygon(Polygon base, int id){
-      super(base.app, base.fillColor, base.strokeColor, base.pos.x, base.pos.y);
-      strokeWeight = base.strokeWeight;
-      name = base.name;
-      index = id;
+      this(base.app, base.fillColor, base.strokeColor, base.strokeWeight, base.pos.x, base.pos.y, id);
       rotation = base.rotation;
-      origin = new VertexHandle(base.app, base.origin.getPosition());
+      origin.setPosition(base.origin.getPosition());
       for(int i = 0; i < base.vertices.size(); i++){
           vertices.add(new VertexHandle(base.app, base.vertices.get(i).getPosition()));
       }
-      completed = base.completed;
-      this.calculateBoundingBox();
     }
     
-    //Load Constructor
+    /*
+      Load Constructor
+      Used for creating shape from information stored in save file.
+    */ 
     Polygon(PApplet drawingSpace, String[] input){
-        super(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[2]), Float.valueOf(input[3]));
+        this(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[6]), Float.valueOf(input[2]), Float.valueOf(input[3]),Integer.valueOf(input[7]));
         startingRotation = Float.valueOf(input[4]);
         rotation = Float.valueOf(input[5]);
-        strokeWeight = Float.valueOf(input[6]);
-        completed = true;
-        shift = false;
-        name = "Polygon";
-        index = Integer.valueOf(input[7]);
         for(int i = 0; i < Integer.valueOf(input[8]); i++){
             vertices.add(new VertexHandle(drawingSpace, input[9+i].split("&")));
         }
     }
     
+    /*
+      TODO:
+        Figure out method to change pivot point. May need to loop through each point
+        and adjust by the same offset as the origin moved? 
     
     void adjustOrigin(PVector point){
         //fix (check handles is commented out for now)
@@ -71,9 +69,9 @@ public class Polygon extends Shape{
             vertices.get(i).shift(delta);
         }
     }
+    */
     
     void addVertex(float x, float y){
-        
         if(vertices.isEmpty()){
             setBoundingBox(0,0,0,0);
             setPosition(x,y);
@@ -100,16 +98,12 @@ public class Polygon extends Shape{
     
     void calculateBoundingBox(){
         for(int i = 0; i < vertices.size(); i++){
-
             float x = vertices.get(i).getPosition().x;
             float y = vertices.get(i).getPosition().y;
             if(i == 0){
                 setBoundingBox(x,y,x,y);
             }
-            if(x > boundingBox[GREATEST_X]) boundingBox[GREATEST_X] = x;
-            if(x < boundingBox[SMALLEST_X]) boundingBox[SMALLEST_X] = x;
-            if(y > boundingBox[GREATEST_Y]) boundingBox[GREATEST_Y] = y;
-            if(y < boundingBox[SMALLEST_Y]) boundingBox[SMALLEST_Y] = y;
+            calculateBoundingBox(x,y);
         }
     }
     
@@ -121,7 +115,7 @@ public class Polygon extends Shape{
         if(y < boundingBox[SMALLEST_Y]) boundingBox[SMALLEST_Y] = y;
     }
     
-        @Override
+    @Override
     void resizeHandles(float size){
         for(int i = 0; i < vertices.size(); i++){
             vertices.get(i).scaleSize(size);
@@ -129,38 +123,43 @@ public class Polygon extends Shape{
     }
     
     @Override
+    /*
+      Applies a rotation matrix to account for rotation of polygon, then uses
+      rotated coordinates to check if over handles. TODO: Find way to avoid doing
+      rotatedMouse calculation as often, see next method as well.
+    */
     boolean checkHandles(PVector mouse){
         float deltaX = mouse.x - pos.x;
         float deltaY = mouse.y - pos.y;
         float rotX = deltaX*app.cos(-rotation) - deltaY*app.sin(-rotation);
         float rotY = deltaY*app.cos(-rotation) + deltaX*app.sin(-rotation);
-        PVector rot = new PVector(rotX, rotY);
+        PVector rotatedMouse = new PVector(rotX, rotY);
         for(int i = 0; i < vertices.size(); i++){
-                if(vertices.get(i).overHandle(rot)){
-                    activeHandle = vertices.get(i);
-                    return true;
-                }
+            if(vertices.get(i).overHandle(rotatedMouse)){
+                activeHandle = vertices.get(i);
+                return true;
             }
+        }
         return false;
     }
 
     @Override
     void adjustActiveHandle(PVector mouse){
+        //TODO: Find way to avoid doing rotatedMouse calculation as often
         float deltaX = mouse.x - pos.x;
         float deltaY = mouse.y - pos.y;
         float rotX = deltaX*app.cos(-rotation) - deltaY*app.sin(-rotation);
         float rotY = deltaY*app.cos(-rotation) + deltaX*app.sin(-rotation);
-        PVector rot = new PVector(rotX, rotY);
-        activeHandle.setPosition(rot);
+        PVector rotatedMouse = new PVector(rotX, rotY);
+        activeHandle.setPosition(rotatedMouse);
         if(activeHandle == origin){
-            adjustOrigin(rot);
+            //adjustOrigin(rot);
         }
         calculateBoundingBox();
     }
     
     @Override
     float[] getHandles(){
-        
         float[] points = new float[2*vertices.size()];      
         for(int i = 0; i < vertices.size(); i++){
             points[2*i] = vertices.get(i).getPosition().x;
@@ -185,8 +184,8 @@ public class Polygon extends Shape{
         float rotY = deltaY*app.cos(-rotation) + deltaX*app.sin(-rotation);
 
         if(rotX < boundingBox[SMALLEST_X] || rotX > boundingBox[GREATEST_X]) return false;
-        if(rotY < boundingBox[SMALLEST_Y] || rotY > boundingBox[GREATEST_Y]) return false;
-        return true;
+        else if(rotY < boundingBox[SMALLEST_Y] || rotY > boundingBox[GREATEST_Y]) return false;
+        else return true;
     }
     
 
@@ -230,7 +229,7 @@ public class Polygon extends Shape{
         app.popMatrix();    
     }
     
-        @Override
+    @Override
     void drawSelected(){
         app.pushMatrix();
         app.translate(pos.x, pos.y);
@@ -265,21 +264,22 @@ public class Polygon extends Shape{
     }
     
     @Override
+    void finishShape(){
+        super.finishShape();
+        calculateBoundingBox();
+    }
+    
+    @Override
     void modify(PVector mouse){
         addVertex(mouse);
     }
-
-    @Override
-    void finishHandles(){
-        //pass
-    }
     
-        @Override
+    @Override
     Shape copy(int id){
         return new Polygon(this, id);
     }
     
-        @Override
+    @Override
     String printToClipboard(){
         String output = "";
         if(fillColor == NONE) output += "\tnoFill();\n";

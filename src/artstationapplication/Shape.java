@@ -139,14 +139,8 @@ abstract class Shape{
             rotation = app.floor(rotation / QUARTER_PI) * QUARTER_PI + (leftover * QUARTER_PI);
         }
     }
-    
-    void finishHandles(){
-        //This methods sets the initial radius of Handles so that they can be reset back to this value if needed. 
-        //This methood should be overwritten by shapes that use it. 
-    }
 
     void finishShape() {
-        finishHandles();
         completed = true;
     }
     

@@ -40,32 +40,30 @@ public class Bezier extends Shape{
       endController = new VertexHandle(drawingSpace, point);
     }
     
-    //Copy Constructor
+    /*
+      Copy Constructor
+      Used for creating an exact copy of base shape.
+    */
     Bezier(Bezier base, int id){
-      super(base.app, base.fillColor, base.strokeColor, base.pos.x, base.pos.y);
-      strokeWeight = base.strokeWeight;
-      name = base.name;
-      index = id;
+      this(base.app, base.fillColor, base.strokeColor, base.strokeWeight, base.pos.x, base.pos.y, id);
       start = new VertexHandle(base.app, base.start.getPosition());
       end = new VertexHandle(base.app, base.end.getPosition());
       startController = new VertexHandle(base.app, base.startController.getPosition());
-      endController = new VertexHandle(base.app, base.endController.getPosition());
-      System.arraycopy(base.vertices, 0, this.vertices, 0, vertices.length);
-      completed = true;
+      endController = new VertexHandle(base.app, base.endController.getPosition());      
+      completed = true; //must keep in order to not override vertex information when finishShape() is called
     }
     
-    //Load Constructor
+    /*
+      Load Constructor
+      Used for creating shape from information stored in save file.
+    */ 
     Bezier(PApplet drawingSpace, String[] input){
-        super(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[2]), Float.valueOf(input[3]));
-        strokeWeight = Float.valueOf(input[4]);
-        completed = true;
-        shift = false;
-        name = "Bezier";
-        index = Integer.valueOf(input[5]);
+        this(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[4]), Float.valueOf(input[2]), Float.valueOf(input[3]), Integer.valueOf(input[5]));
         start = new VertexHandle(drawingSpace, input[6].split("&"));
         startController = new VertexHandle(drawingSpace, input[7].split("&"));
         end = new VertexHandle(drawingSpace, input[8].split("&"));
         endController = new VertexHandle(drawingSpace, input[9].split("&"));
+        completed = true; //must keep in order to not override vertex information when finishShape() is called
     }
     
     @Override
@@ -148,14 +146,19 @@ public class Bezier extends Shape{
         app.bezier(head.x, head.y, hc.x, hc.y, tc.x, tc.y, tail.x, tail.y);
     }
     
-    //Using this method to position the handles relative to the start and end vertex
+    
     @Override
-    void finishHandles(){
-        PVector between = PVector.sub(start.getPosition(), end.getPosition());
-        between.mult(0.4f);
-        endController.setPosition(PVector.add(between, end.getPosition()));
-        between.mult(-1);
-        startController.setPosition(PVector.add(start.getPosition(), between));
+    void finishShape(){
+        if(!completed){
+            //Using this method to position the controller handles relative 
+            //to the start and end vertex when first drawn to canvas.
+            super.finishShape();
+            PVector between = PVector.sub(start.getPosition(), end.getPosition());
+            between.mult(0.4f);
+            endController.setPosition(PVector.add(between, end.getPosition()));
+            between.mult(-1);
+            startController.setPosition(PVector.add(start.getPosition(), between));
+        }
         vertices[0] = start;
         vertices[1] = end;
         vertices[2] = startController;
@@ -298,7 +301,6 @@ public class Bezier extends Shape{
     @Override
     Shape copy(int id){
         Bezier copy = new Bezier(this, id);
-        copy.calculateBoundingBox();
         return copy;
     }
 

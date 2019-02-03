@@ -56,6 +56,7 @@ import processing.core.*;
 
     @Override 
     boolean mouseOver(PVector mouse){
+        //Uses some fancy math to determine if mouse is inside three points
         int x1 = (int) widthHandleL.getPosition(rotation).x;
         int y1 = (int) widthHandleL.getPosition(rotation).y;
         int x2 = (int) widthHandleR.getPosition(rotation).x;
@@ -171,22 +172,16 @@ import processing.core.*;
     @Override
     void adjustActiveHandle(PVector mouse){
         float dist = app.dist(pos.x, pos.y, mouse.x, mouse.y);
+        
         if(shift){
             //If shift is held, inactive handles are scaled proportionally with the active controller.
             //First calulates ratio between current handles, then scales handles accordingly
-            /*
-              Try:
-              ratio1 = inactiveHandle[0].getRadius()/activeHandle.getRadius();
-              ratio2 = inactiveHandle[1].getRadius()/activeHandle.getRadius();
+            
+              float ratio1 = inactiveHandle[0].getRadius()/activeHandle.getRadius();
+              float ratio2 = inactiveHandle[1].getRadius()/activeHandle.getRadius();
               activeHandle.calculateModifier(dist); 
               inactiveHandle[0].calculateModifier(dist * ratio1);  
               inactiveHandle[1].calculateModifier(dist * ratio2);  
-            */
-            float ratio1 = (activeHandle.getRadius() - inactiveHandle[0].getRadius())/activeHandle.getRadius();
-            float ratio2 = (activeHandle.getRadius() - inactiveHandle[1].getRadius())/activeHandle.getRadius();
-            activeHandle.calculateModifier(dist); 
-            inactiveHandle[0].calculateModifier(dist - dist * ratio1);  
-            inactiveHandle[1].calculateModifier(dist - dist * ratio2);  
         }
         else{
             activeHandle.calculateModifier(dist);  
@@ -194,8 +189,9 @@ import processing.core.*;
     }
     
     @Override
-    //This sets the base radius that the shape will be set to if reset function is called
-    void finishHandles(){
+    void finishShape(){
+        super.finishShape();
+        //Sets the base radius to return to when 'reset' button is pressed.
         widthHandleL.setRadius();
         widthHandleR.setRadius();
         heightHandleT.setRadius();

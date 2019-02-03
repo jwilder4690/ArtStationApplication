@@ -5,7 +5,6 @@
  */
 package artstationapplication;
 import processing.core.*;
-import javafx.scene.paint.Color;
 
 /**
  *
@@ -21,7 +20,7 @@ import javafx.scene.paint.Color;
     final int GREATEST_X = 2;
     final int GREATEST_Y = 3;
     int padding = 15;
-    float[] boundingBox = {0,0,0,0}; // Index 0 is smallest x, 1 is smallest y, 2 is greatest x, 3 is greatest y
+    float[] boundingBox = {0,0,0,0};
 
     Line(PApplet drawingSpace, int paint, int outline, float thickness, float x, float y, int id){
       super(drawingSpace, paint, outline, x,y);
@@ -34,25 +33,22 @@ import javafx.scene.paint.Color;
       end = new VertexHandle(drawingSpace, point);
     }
     
-    //Copy Constructor
+    /*
+      Copy Constructor
+      Used for creating an exact copy of base shape.
+    */
     Line(Line base, int id){
-      super(base.app, base.fillColor, base.strokeColor, base.pos.x, base.pos.y);
-      strokeWeight = base.strokeWeight;
-      name = base.name;
-      index = id;
-      rotation = base.rotation;
+      this(base.app, base.fillColor, base.strokeColor, base.strokeWeight, base.pos.x, base.pos.y, id);
       start = new VertexHandle(base.app, base.start.getPosition());
       end = new VertexHandle(base.app, base.end.getPosition());
     }
     
-    //Load Constructor
+    /*
+      Load Constructor
+      Used for creating shape from information stored in save file.
+    */ 
     Line(PApplet drawingSpace, String[] input){
-        super(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[2]), Float.valueOf(input[3]));
-        strokeWeight = Float.valueOf(input[4]);
-        completed = true;
-        shift = false;
-        name = "Line";
-        index = Integer.valueOf(input[5]);
+        this(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[4]), Float.valueOf(input[2]), Float.valueOf(input[3]),Integer.valueOf(input[5]));
         start = new VertexHandle(drawingSpace, input[6].split("&"));
         end = new VertexHandle(drawingSpace, input[7].split("&"));
     }
@@ -70,6 +66,7 @@ import javafx.scene.paint.Color;
     }
     
     @Override
+    //calculates offset between start and end, and maintain it after moving start
     void manipulate(PVector mouse){
         PVector lineDelta = PVector.sub(end.getPosition(), start.getPosition());
         start.setPosition(mouse);
@@ -86,9 +83,7 @@ import javafx.scene.paint.Color;
         app.stroke(strokeColor);
         app.strokeWeight(strokeWeight);
       }
-      //app.pushMatrix();
       app.line(start.getPosition().x, start.getPosition().y, end.getPosition().x, end.getPosition().y);
-      //app.popMatrix();
     }
     
     @Override
@@ -118,15 +113,16 @@ import javafx.scene.paint.Color;
       end.setPosition(mouse);
     }
     
-        @Override
+    @Override
     void resizeHandles(float size){
         start.scaleSize(size);
         end.scaleSize(size);
     }
     
-        @Override
-    void finishHandles(){
+    @Override
+    void finishShape(){
         calculateBoundingBox();
+        super.finishShape();
     }
 
     @Override
@@ -146,25 +142,29 @@ import javafx.scene.paint.Color;
 
     @Override
     void adjustActiveHandle(PVector mouse){
+        /*
+            Holding shift can be used to maintain vertical, horizontal, or diagonal lines.
+            The angle of the mouse relative to the x unit vector is calculated and rounded 
+            to the nearest PI/4. That angle is used to determine behavior. 
+        */
         if(shift){
             float angle = PVector.angleBetween(PVector.sub(mouse, inactiveHandle.getPosition()), new PVector(1,0));
             float leftover = angle % QUARTER_PI;
             leftover = app.round(leftover);
             angle = app.floor(angle/QUARTER_PI)*QUARTER_PI+(leftover*QUARTER_PI);  
             
-            if(angle == 0 || angle % PI == 0){
+            if(angle == 0 || angle % PI == 0){ //Horizontal
                 activeHandle.setPosition(new PVector(mouse.x, inactiveHandle.getPosition().y));
             }
-            else if(angle % HALF_PI == 0 ){
+            else if(angle % HALF_PI == 0 ){ //Vertical
                 activeHandle.setPosition(new PVector(inactiveHandle.getPosition().x, mouse.y));
             }
-            else {
+            else { //Diagonal
                 float dist = mouse.dist(inactiveHandle.getPosition());
                 int direction;
-                if(mouse.y > inactiveHandle.getPosition().y){
-                    direction = 1;
-                }
+                if(mouse.y > inactiveHandle.getPosition().y) direction = 1;
                 else direction = -1;
+                
                 PVector newAngle = new PVector(app.cos(angle), direction*app.sin(angle));
                 newAngle.mult(dist);
                 activeHandle.setPosition(PVector.add(newAngle, inactiveHandle.getPosition()));
@@ -194,13 +194,13 @@ import javafx.scene.paint.Color;
         calculateBoundingBox();
     }
      
-        void setBoundingBox(float[] point){
+    void setBoundingBox(float[] point){
         float a = point[0];
         float b = point[1];
         float c = point[0];
         float d = point[1];
         //padding is for vertical or horizontal line, to give the bounding box
-        //some area in thos situations
+        //some area in those situations
         boundingBox[SMALLEST_X] = a - padding;
         boundingBox[SMALLEST_Y] = b - padding;
         boundingBox[GREATEST_X] = c + padding;

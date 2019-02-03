@@ -5,7 +5,6 @@
  */
 package artstationapplication;
 
-import java.util.Arrays;
 import processing.core.*;
 
 /**
@@ -31,12 +30,12 @@ class Circle extends Shape{
       heightHandleT = new Handle(drawingSpace, this, new PVector(0,-1));
     }
         
-    //Copy constructor
+    /*
+      Copy Constructor
+      Used for creating an exact copy of base shape.
+    */
     Circle(Circle base, int id){
-      super(base.app, base.fillColor, base.strokeColor, base.pos.x, base.pos.y);
-      strokeWeight = base.strokeWeight;
-      name = base.name;
-      index = id;
+      this(base.app, base.fillColor, base.strokeColor, base.strokeWeight, base.pos.x, base.pos.y, id);
       widthHandleR = new Handle(base.widthHandleR, this);
       widthHandleL = new Handle (base.widthHandleL, this);
       heightHandleB = new Handle (base.heightHandleB, this);
@@ -44,16 +43,14 @@ class Circle extends Shape{
       rotation = base.rotation;
     }
     
-    //Load Constructor
+    /*
+      Load Constructor
+      Used for creating shape from information stored in save file.
+    */ 
     Circle(PApplet drawingSpace, String[] input){
-        super(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[2]), Float.valueOf(input[3]));
+        this(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[6]), Float.valueOf(input[2]), Float.valueOf(input[3]), Integer.valueOf(input[7]));
         startingRotation = Float.valueOf(input[4]);
         rotation = Float.valueOf(input[5]);
-        strokeWeight = Float.valueOf(input[6]);
-        completed = true;
-        shift = false;
-        name = "Circle";
-        index = Integer.valueOf(input[7]);
         widthHandleR = new Handle(drawingSpace, this, input[8].split("&"));
         widthHandleL = new Handle(drawingSpace, this, input[9].split("&"));
         heightHandleT = new Handle(drawingSpace, this, input[10].split("&"));
@@ -110,14 +107,19 @@ class Circle extends Shape{
     }
 
     @Override
+    /*
+      Uses mouse position relative to shape position to scale shape.
+      Used only during initial drawing to canvas.
+    */
     void modify(PVector mouse){
       float radius = app.dist(mouse.x, mouse.y, pos.x, pos.y);
-      rotation = 0;
+      rotation = 0; //no rotation when initially drawing
       widthHandleR.calculateModifier(radius);
       widthHandleL.calculateModifier(radius);
       heightHandleT.calculateModifier(radius);
       heightHandleB.calculateModifier(radius);
     }
+    
 
         @Override
     void resizeHandles(float size){
@@ -148,13 +150,16 @@ class Circle extends Shape{
     
     @Override
     void adjustActiveHandle(PVector mouse){
-        float delta = (activeHandle[0].getRadius() - inactiveHandle[0].getRadius())/activeHandle[0].getRadius();
+        float ratio = inactiveHandle[0].getRadius()/activeHandle[0].getRadius();
         float dist = app.dist(pos.x, pos.y, mouse.x, mouse.y);
-        if(shift){       
+        if(shift){  
+            //If shift is held, inactive handles are scaled proportionally with the active controller.
+            //First calulates ratio between current handles, then scales handles accordingly
+            
             activeHandle[0].calculateModifier(dist); 
             activeHandle[1].calculateModifier(dist);
-            inactiveHandle[0].calculateModifier(dist - dist * delta);  
-            inactiveHandle[1].calculateModifier(dist - dist * delta);
+            inactiveHandle[0].calculateModifier(dist * ratio);  
+            inactiveHandle[1].calculateModifier(dist * ratio);
         }
         else{
             activeHandle[0].calculateModifier(dist);  
@@ -163,7 +168,8 @@ class Circle extends Shape{
     }
     
     @Override
-    void finishHandles(){
+    void finishShape(){
+        super.finishShape();
         widthHandleL.setRadius();
         widthHandleR.setRadius();
         heightHandleT.setRadius();

@@ -990,6 +990,7 @@ public class ArtStationApplication extends PApplet{
         if(activeMode == Mode.EDIT && !shapes.isEmpty()){
             shapes.add(shapes.get(listIndex).copy(shapes.size()));
             listIndex++;
+            shapes.get(listIndex).finishShape();
         }
     }
     
@@ -1278,25 +1279,17 @@ public class ArtStationApplication extends PApplet{
         }
         
         void loadShape(String shapeType, String[] shapeInfo){
-            if(shapeType.equals("Circle")){
-                shapes.add(new Circle(sketch, shapeInfo));
+            switch(shapeType){
+                case "Circle": shapes.add(new Circle(sketch, shapeInfo)); break;
+                case "Bezier": shapes.add(new Bezier(sketch, shapeInfo)); break;
+                case "Rectangle": shapes.add(new Rectangle(sketch, shapeInfo)); break;
+                case "Line": shapes.add(new Line(sketch, shapeInfo)); break;
+                case "Triangle": shapes.add(new Triangle(sketch, shapeInfo)); break;
+                case "Polygon": shapes.add(new Polygon(sketch, shapeInfo)); break;
+                default: dialog = "Load error, please report issue at https://github.com/jwilder4690/ArtStationApplication/issues";
             }
-            if(shapeType.equals("Bezier")){
-                shapes.add(new Bezier(sketch, shapeInfo));
-            }
-            if(shapeType.equals("Rectangle")){
-                shapes.add(new Rectangle(sketch, shapeInfo));
-            }
-            if(shapeType.equals("Line")){
-                shapes.add(new Line(sketch, shapeInfo));
-            }
-            if(shapeType.equals("Triangle")){
-                shapes.add(new Triangle(sketch, shapeInfo));
-            }
-            if(shapeType.equals("Polygon")){
-                shapes.add(new Polygon(sketch, shapeInfo));
-            }
-            
+            listIndex = shapes.size()-1;
+            shapes.get(listIndex).finishShape();
         }
         
         void loadReferenceImage(String location){

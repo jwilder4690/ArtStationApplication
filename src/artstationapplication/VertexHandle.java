@@ -23,16 +23,15 @@ public class VertexHandle {
     }
     
     VertexHandle(PApplet drawingSpace, PVector point){
-        app = drawingSpace;
-        pos = point.copy();
-        paint = app.color(255,255,0);
+        this(drawingSpace, point.x, point.y);
     }
     
-    //Load Constructor
+    /*
+      Load Constructor
+      Used for creating Handle from information stored in save file.
+    */ 
     VertexHandle(PApplet drawingSpace, String[] input){
-        app = drawingSpace;
-        pos = new PVector(Float.valueOf(input[0]), Float.valueOf(input[1]));
-        paint = app.color(255,255,0);
+        this(drawingSpace, Float.valueOf(input[0]), Float.valueOf(input[1]));
     }
     
     PVector getPosition(){
@@ -50,8 +49,7 @@ public class VertexHandle {
     float[] getPositionFloats(){
         return new float[] {pos.x, pos.y};
     }
-    
-    
+     
     void shift(PVector shift){
         pos.sub(shift);
     }

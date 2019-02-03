@@ -5,7 +5,6 @@
  */
 package artstationapplication;
 import processing.core.*;
-import javafx.scene.paint.Color;
 /**
  *
  * @author wilder4690
@@ -33,12 +32,12 @@ import javafx.scene.paint.Color;
         corner = new PVector(a+1,b+1); //default corner, will not be displayed 
     }
     
-    //Copy constructor
+    /*
+      Copy Constructor
+      Used for creating an exact copy of base shape.
+    */
     Rectangle(Rectangle base, int id){
-      super(base.app, base.fillColor, base.strokeColor, base.pos.x, base.pos.y);
-      strokeWeight = base.strokeWeight;
-      name = base.name;
-      index = id;
+      this(base.app, base.fillColor, base.strokeColor, base.strokeWeight, base.pos.x, base.pos.y, id);
       widthHandleR = new Handle(base.widthHandleR, this);
       widthHandleL = new Handle (base.widthHandleL, this);
       heightHandleB = new Handle (base.heightHandleB, this);
@@ -46,16 +45,14 @@ import javafx.scene.paint.Color;
       rotation = base.rotation;
     }
     
-    //Load Constructor
+    /*
+      Load Constructor
+      Used for creating shape from information stored in save file.
+    */ 
     Rectangle(PApplet drawingSpace, String[] input){
-        super(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[2]), Float.valueOf(input[3]));
+        this(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[6]),Float.valueOf(input[2]), Float.valueOf(input[3]), Integer.valueOf(input[7]));
         startingRotation = Float.valueOf(input[4]);
         rotation = Float.valueOf(input[5]);
-        strokeWeight = Float.valueOf(input[6]);
-        completed = true;
-        shift = false;
-        name = "Rectangle";
-        index = Integer.valueOf(input[7]);
         widthHandleR = new Handle(drawingSpace, this, input[8].split("&"));
         widthHandleL = new Handle(drawingSpace, this, input[9].split("&"));
         heightHandleT = new Handle(drawingSpace, this, input[10].split("&"));
@@ -122,6 +119,12 @@ import javafx.scene.paint.Color;
     }
 
     @Override
+    /*
+        Method still messy because alternate drawing method was partially implemented.
+        Will finish later. 
+        Uses mouse position relative to shape position to scale and rotate shape.
+        Used only during initial drawing to canvas.
+    */
     void modify(PVector mouse){
         float radius;
         //TODO: implement alt drawMode
@@ -135,7 +138,8 @@ import javafx.scene.paint.Color;
         //else if(alt) corner.set(mouse.x, mouse.y);
         rotation = app.atan2(mouse.y - pos.y, mouse.x - pos.x);
         rotation += startingRotation;
-        if(shift){ //implement shift
+        
+        if(shift){ //Snaps rotation to PI/4 increments if shift is held
             float leftover = rotation % QUARTER_PI;
             leftover = app.round(leftover);
             rotation = app.floor(rotation/QUARTER_PI)*QUARTER_PI+(leftover*QUARTER_PI);
@@ -187,13 +191,16 @@ import javafx.scene.paint.Color;
     void adjustActiveHandle(PVector mouse){
         float dist = app.dist(pos.x, pos.y, mouse.x, mouse.y);
         if(shift){      
-            float delta0 = (activeHandle.getRadius() - inactiveHandle[0].getRadius())/activeHandle.getRadius();
-            float delta1 = (activeHandle.getRadius() - inactiveHandle[1].getRadius())/activeHandle.getRadius();
-            float delta2 = (activeHandle.getRadius() - inactiveHandle[2].getRadius())/activeHandle.getRadius();
+            //If shift is held, inactive handles are scaled proportionally with the active controller.
+            //First calulates ratio between current handles, then scales handles accordingly
+            
+            float ratio1 = inactiveHandle[0].getRadius()/activeHandle.getRadius();
+            float ratio2 = inactiveHandle[1].getRadius()/activeHandle.getRadius();
+            float ratio3 = inactiveHandle[2].getRadius()/activeHandle.getRadius();
             activeHandle.calculateModifier(dist); 
-            inactiveHandle[0].calculateModifier(dist - dist * delta0);  
-            inactiveHandle[1].calculateModifier(dist - dist * delta1);
-            inactiveHandle[2].calculateModifier(dist - dist * delta2);
+            inactiveHandle[0].calculateModifier(dist * ratio1);  
+            inactiveHandle[1].calculateModifier(dist * ratio2);
+            inactiveHandle[2].calculateModifier(dist * ratio3);
         }
         else{
             activeHandle.calculateModifier(dist);  
@@ -201,7 +208,8 @@ import javafx.scene.paint.Color;
     }
     
     @Override
-    void finishHandles(){
+    void finishShape(){
+        super.finishShape();
         widthHandleL.setRadius();
         widthHandleR.setRadius();
         heightHandleT.setRadius();

@@ -18,8 +18,6 @@ import processing.core.*;
          PVector offset;
          Shape parent;
          
-
-         
          Handle(PApplet drawingSpace, Shape parent, PVector which){
              app = drawingSpace;
              offset = which;
@@ -27,16 +25,20 @@ import processing.core.*;
              paint = app.color(255,255,0);
         }
          
+        /*
+          Copy Constructor
+          Used for creating an exact copy of base Handle.
+        */
          Handle(Handle base, Shape parent){
-             app = base.app;
-             offset = base.offset;
-             this.parent = parent;
-             paint = base.paint;
+             this(base.app, parent, base.offset);
              radius = base.radius;
              modifier = base.modifier;
          }
          
-         //Load Constructor
+         /*
+           Load Constructor
+           Used for creating shape from information stored in save file.
+         */ 
          Handle(PApplet drawingSpace, Shape parent, String[] input){
             app = drawingSpace;
             modifier = Float.valueOf(input[0]);
@@ -47,13 +49,13 @@ import processing.core.*;
          }
          
          PVector getPosition(float rot){
-             
-             //Optional TODO: if this works set the position in a PVector that manually updates on mouse release of rotation, to avoid doing this calculation constantly
+             //Manually applies the rotation matrix to the handle position.
+             //TODO: this still seems inefficient to do this calculation constantly
              float pointX = modifier*radius*offset.x;
              float pointY = modifier*radius*offset.y;
              return new PVector(parent.getPosition().x + pointX * app.cos(rot) - pointY*app.sin(rot), parent.getPosition().y + pointX*app.sin(rot) + pointY*app.cos(rot));
          }
-                  
+         
          void calculateModifier(float r){
              modifier = r/radius;
          }
@@ -70,7 +72,7 @@ import processing.core.*;
              radius = radius*modifier;
              modifier = 1;
          }
-         
+                 
          boolean overHandle(PVector m, float rot){
              return (m.dist(getPosition(rot)) < size);
          }
