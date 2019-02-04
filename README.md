@@ -16,8 +16,9 @@ First commits are merges of code developed in my "ArtStation-Halted" repository.
 - [ ] Refactor
     - [ ] Remove any unused data members and functions
     - [ ] Separate GUI event handling into methods
-    - [ ] Clean up constructors
-    - [ ] Separate Change and Canvas class from ArtStation
+    - [x] Clean up constructors
+    - [x] Separate Change class from ArtStation
+    - [ ] Separate Canvas class
     - [ ] Comment complex functionality for clarity
 - [ ] Add features (Arcs, polygon, curves)
     - [ ] Groups
