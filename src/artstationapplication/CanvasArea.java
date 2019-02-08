@@ -146,37 +146,9 @@ import processing.core.*;
             shapes.get(listIndex).finishShape();
         }
         
-        void loadReferenceImage(String location){
-            referenceImage = sketch.loadImage(location);
+        void loadReferenceImage(PImage loaded){
+            referenceImage = loaded;
             referenceOn = true;
-
-            //Popup to handle resize////////////////////////////////////////////
-            if(referenceImage.width > canvasWidth || referenceImage.height > canvasHeight){
-                final Stage dialog = new Stage();
-                dialog.initModality(Modality.APPLICATION_MODAL);
-                
-                final FlowPane dialogBox = new FlowPane(Orientation.VERTICAL, spacing, 2*spacing);
-                final HBox options = new HBox(spacing);
-                final Button maintain = new Button("Maintain Canvas");
-                final Button resize = new Button("Resize Canvas");
-                final Label text = new Label("The reference image is larger than the canvas.\nHow would you like to resolve this?");
-                
-                text.setWrapText(true);
-                dialogBox.setAlignment(Pos.CENTER);
-
-                options.getChildren().addAll(maintain, resize);
-                dialogBox.getChildren().addAll(text, options);
-                Scene dialogScene = new Scene(dialogBox, 400, 200);
-                dialog.setScene(dialogScene);
-                dialog.show();
-                
-                maintain.setOnAction(event -> dialog.close());
-                resize.setOnAction(event -> {
-                    setHeight(referenceImage.height);
-                    setWidth(referenceImage.width);
-                    dialog.close();
-                });
-            }
         }
         
         void checkForTransformation(PVector mouse){
