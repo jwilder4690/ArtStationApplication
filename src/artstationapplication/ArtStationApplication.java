@@ -508,32 +508,42 @@ public class ArtStationApplication extends PApplet{
         
         //Key Events for full scene
         gui.rootNode.addEventFilter(KeyEvent.KEY_PRESSED, event ->{
-            if(event.getCode() == KeyCode.ESCAPE){
-                //Does this work?
-                pad.drawMode();
+            switch(event.getCode()){
+                case ESCAPE: pad.drawMode(); break; //doesn't seem to work
+                case CONTROL: pad.toggleGrid(true);
+                    pad.toggleSnap(true); 
+                    dialog = "SNAP and GRID are on.";
+                    break;
+                case ALT: pad.setAlt(true); break;
+                case SHIFT: pad.setShift(true); break;
             }
+
         });
         gui.rootNode.addEventFilter(KeyEvent.KEY_RELEASED, event->{
-            if(event.getCode() == KeyCode.DELETE){
-                if(!gui.shapes.isEmpty()){
-                    Change currentChange = new Change(Transformation.DEL, pad.listIndex, 0);
-                    currentChange.createClone(gui.shapes.get(pad.listIndex));
-                    tasks.push(currentChange);
-                    deleteShape();
-                }
-            }
-            else if(event.getCode() == KeyCode.ALT){
-                
-            }
-            else if(event.getCode() == KeyCode.SPACE){
-                if(pad.isDrawMode()){
-                    gui.editMode.setSelected(true);
-                    pad.completeShape();  
-                }
-                else{
-                    gui.drawMode.setSelected(true);
-                    pad.drawMode();  
-                }
+            switch(event.getCode()){
+                case DELETE: 
+                    if(!gui.shapes.isEmpty()){
+                        Change currentChange = new Change(Transformation.DEL, pad.listIndex, 0);
+                        currentChange.createClone(gui.shapes.get(pad.listIndex));
+                        tasks.push(currentChange);
+                        deleteShape();
+                    }break;
+                case CONTROL: 
+                    pad.toggleGrid(gui.cbGridOn.isSelected());
+                    pad.toggleSnap(gui.cbGridSnap.isSelected()); 
+                    dialog = "";
+                    break;
+                case ALT: pad.setAlt(false); break;
+                case SHIFT: pad.setShift(false); break;
+                case SPACE:
+                    if(pad.isDrawMode()){
+                        gui.editMode.setSelected(true);
+                        pad.completeShape();  
+                    }
+                    else{
+                        gui.drawMode.setSelected(true);
+                        pad.drawMode();  
+                    }break;
             }
         });
         
@@ -636,26 +646,12 @@ public class ArtStationApplication extends PApplet{
         if(key < 255){
             keys[key] = true;
         }
-        if(key == CODED){
-            switch(keyCode){
-                case SHIFT: pad.setShift(true); break;
-                case ALT: pad.setAlt(true); break;
-                case CONTROL: pad.setControl(true); break;                   
-            }
-        }
     }
     
     @Override
     public void keyReleased(){
         if(key < 255){
             keys[key] = false;
-        }
-        if(key == CODED){
-            switch(keyCode){
-                case SHIFT: pad.setShift(false); break;
-                case ALT: pad.setAlt(false); break;
-                case CONTROL: pad.setControl(false); break; 
-            }
         }
     }
 
