@@ -10,5 +10,5 @@ package artstationapplication;
  * @author wilder4690
  */
 public enum Transformation {
-     ROT, SCA, TRA, DEL, ORD, ADD, COP, FIL, STF, STW, NON
+     ROT, SCA, TRA, DEL, ORD, ADD, COP, RES,  FIL, STF, STW, NON
 }

@@ -16,12 +16,12 @@ abstract class Shape{
     PApplet app;
     PGraphics graphic;
     PVector pos;
+    PVector origin = new PVector(-10,10);
     final int COPY_OFFSET = 15;
     final float QUARTER_PI = app.QUARTER_PI;
     final float HALF_PI = app.HALF_PI;
     final int NONE = -777;
     final float PI = app.PI;
-    //PVector startingRotation; //unused?
     float startingRotation = 0;
     float rotation = 0;
     int fillColor;
@@ -118,7 +118,7 @@ abstract class Shape{
     
     abstract void setHandles(float[] values);
     
-    abstract float[] getHandles();
+    abstract float[] getResetFloats();
     
     abstract String save();
 

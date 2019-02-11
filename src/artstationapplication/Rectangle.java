@@ -37,7 +37,7 @@ import processing.core.*;
       Used for creating an exact copy of base shape.
     */
     Rectangle(Rectangle base, int id){
-      this(base.app, base.fillColor, base.strokeColor, base.strokeWeight, base.pos.x, base.pos.y, id);
+      this(base.app, base.fillColor, base.strokeColor, base.strokeWeight, base.pos.x+base.COPY_OFFSET, base.pos.y+base.COPY_OFFSET, id);
       widthHandleR = new Handle(base.widthHandleR, this);
       widthHandleL = new Handle (base.widthHandleL, this);
       heightHandleB = new Handle (base.heightHandleB, this);
@@ -217,8 +217,8 @@ import processing.core.*;
     }
     
     @Override
-    float[] getHandles(){
-        return new float[] {widthHandleL.getModifier(), widthHandleR.getModifier(), heightHandleT.getModifier(), heightHandleB.getModifier()};
+    float[] getResetFloats(){
+        return new float[] {widthHandleL.getModifier(), widthHandleR.getModifier(), heightHandleT.getModifier(), heightHandleB.getModifier(), rotation};
     }
     
     @Override

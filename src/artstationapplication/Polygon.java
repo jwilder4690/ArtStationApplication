@@ -14,7 +14,6 @@ import processing.core.*;
 public class Polygon extends Shape{
     ArrayList<VertexHandle> vertices = new ArrayList<>();
     VertexHandle activeHandle;
-    VertexHandle origin;
     final int SMALLEST_X = 0;
     final int SMALLEST_Y = 1;
     final int GREATEST_X = 2;
@@ -27,7 +26,6 @@ public class Polygon extends Shape{
         strokeWeight = thickness;
         name = "Polygon";
         index = id;
-        origin = new VertexHandle(app, 0,0);
     }
     
     /*
@@ -35,9 +33,8 @@ public class Polygon extends Shape{
       Used for creating an exact copy of base shape.
     */
     Polygon(Polygon base, int id){
-      this(base.app, base.fillColor, base.strokeColor, base.strokeWeight, base.pos.x, base.pos.y, id);
+      this(base.app, base.fillColor, base.strokeColor, base.strokeWeight, base.pos.x+base.COPY_OFFSET, base.pos.y+base.COPY_OFFSET, id);
       rotation = base.rotation;
-      origin.setPosition(base.origin.getPosition());
       for(int i = 0; i < base.vertices.size(); i++){
           vertices.add(new VertexHandle(base.app, base.vertices.get(i).getPosition()));
       }
@@ -76,6 +73,7 @@ public class Polygon extends Shape{
             setBoundingBox(0,0,0,0);
             setPosition(x,y);
             vertices.add(new VertexHandle(app, 0,0));
+            origin = new PVector(x,y);
         }
         else{
             PVector vPos = new PVector(x,y);
@@ -152,19 +150,17 @@ public class Polygon extends Shape{
         float rotY = deltaY*app.cos(-rotation) + deltaX*app.sin(-rotation);
         PVector rotatedMouse = new PVector(rotX, rotY);
         activeHandle.setPosition(rotatedMouse);
-        if(activeHandle == origin){
-            //adjustOrigin(rot);
-        }
         calculateBoundingBox();
     }
     
     @Override
-    float[] getHandles(){
-        float[] points = new float[2*vertices.size()];      
+    float[] getResetFloats(){
+        float[] points = new float[(2*vertices.size())+1];      
         for(int i = 0; i < vertices.size(); i++){
             points[2*i] = vertices.get(i).getPosition().x;
             points[2*i+1] = vertices.get(i).getPosition().y;
         }
+        points[points.length-1] = rotation;
         return points;
     }
     
@@ -225,6 +221,9 @@ public class Polygon extends Shape{
             for(int i = 0; i < vertices.size(); i++){
                 vertices.get(i).drawHandle();
             }
+            //Origin/pivot point
+            app.fill(0,255,0);
+            app.ellipse(0,0, 15,15);
         }
         app.popMatrix();    
     }
@@ -243,7 +242,7 @@ public class Polygon extends Shape{
         }
         app.endShape(app.CLOSE); 
         drawHandles();
-        //pivot point
+        //Origin/pivot point
         app.fill(0,255,0);
         app.ellipse(0,0, 15,15);
         //bounding box

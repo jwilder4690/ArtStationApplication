@@ -20,7 +20,6 @@ package artstationapplication;
             //Nothing in constructor?
         }
         
-        
         void push(Change task){
             stack[index] = task;
             index++;

@@ -462,6 +462,7 @@ public class ArtStationApplication extends PApplet{
             swapElements(pad.listIndex, pad.listIndex-1);
             canvas.requestFocus();
         });
+        
         gui.btnDownArrow.setOnAction(event -> {
             if(pad.listIndex+1 < 0 || pad.listIndex+1 >= gui.shapes.size()){
                 canvas.requestFocus();
@@ -471,6 +472,7 @@ public class ArtStationApplication extends PApplet{
             swapElements(pad.listIndex, pad.listIndex+1);
             canvas.requestFocus();
         });
+        
         gui.btnDelete.setOnAction(event -> {
             if(gui.shapes.isEmpty()) return;
             Change currentChange = new Change(Transformation.DEL, pad.listIndex, 0);
@@ -479,10 +481,22 @@ public class ArtStationApplication extends PApplet{
             deleteShape();
             canvas.requestFocus();
         });
+        
         gui.btnReset.setOnAction(event -> {
-            if(!gui.shapes.isEmpty()) gui.shapes.get(pad.listIndex).reset();
+            if(!gui.shapes.isEmpty()) {
+                tasks.push(new Change(Transformation.RES, pad.listIndex, gui.shapes.get(pad.listIndex).getResetFloats()));
+                gui.shapes.get(pad.listIndex).reset();
+            }
+            canvas.requestFocus();
         });
-        gui.btnCopy.setOnAction(event -> copyShape());
+        
+        gui.btnCopy.setOnAction(event -> {
+            if(!gui.shapes.isEmpty()){
+                copyShape();
+                tasks.push(new Change(Transformation.COP, pad.listIndex, 0));
+            }
+            canvas.requestFocus();
+        });
         
         gui.selectionModel.selectedIndexProperty().addListener(new ChangeListener<Number>(){
             public void changed(ObservableValue<? extends Number> changed, Number oldVal, Number newVal){
@@ -491,8 +505,6 @@ public class ArtStationApplication extends PApplet{
                 pad.listIndex = (int)newVal;
             }
         });
-        
-
         
         //Key Events for full scene
         gui.rootNode.addEventFilter(KeyEvent.KEY_PRESSED, event ->{
@@ -562,7 +574,7 @@ public class ArtStationApplication extends PApplet{
     @Override 
     public void draw(){
         background(55,55,55);
-        drawCanvasArea();
+        generateCanvasArea();
         drawFrames();
         drawMouse();
         drawDialog();
@@ -575,8 +587,8 @@ public class ArtStationApplication extends PApplet{
         if(mouseButton == LEFT){
             if(mouseOverCanvas()){
               dialog = "";
-              if(pad.isDrawMode()){
-                pad.drawShape(canvasX, canvasY);
+              if(pad.isDrawMode()){ //creates new shape
+                pad.createShape(canvasX, canvasY);
               }
               else if(pad.isEditMode()){
                 pad.checkForTransformation(new PVector(canvasX, canvasY));
@@ -592,19 +604,26 @@ public class ArtStationApplication extends PApplet{
         if(activeButton == LEFT){
             if(pad.isDrawMode()){
                 if(pad.activeTool == ShapeType.POL){
-                    pad.completeVertex(canvasX, canvasY);
+                    if(pad.overOrigin(new PVector(canvasX, canvasY))){
+                        pad.completeShape();
+                        gui.editMode.setSelected(true);
+                    }
+                    else pad.completeVertex(canvasX, canvasY);
                 }
                 else{
                     pad.completeShape(); 
+                    gui.editMode.setSelected(true);
                 }
             }
         }
         else if(activeButton == RIGHT){
             if(pad.isDrawMode()){
                pad.completeShape();  
+               gui.editMode.setSelected(true);
            }
             else{  
                 pad.drawMode();
+                gui.drawMode.setSelected(true);
             }
         }
         if(pad.isEditMode()){
@@ -640,20 +659,25 @@ public class ArtStationApplication extends PApplet{
         }
     }
 
-        void undo(Change task){
-            switch(task.getOperation()){
-                case ROT: gui.shapes.get(task.getIndex()).setRotation(task.changedValues[0]);dialog = "Reverted rotation.";  break;
-                case TRA: gui.shapes.get(task.getIndex()).manipulate(task.changedValues[0],task.changedValues[1]); dialog = "Reverted translation.";  break;
-                case SCA: gui.shapes.get(task.getIndex()).setHandles(task.changedValues); dialog = "Reverted scaling."; break;
-                case DEL: gui.shapes.add(task.getClone()); dialog = "Reverted deletion.";  break;
-                case ORD: swapElements((int)task.changedValues[0], (int) task.changedValues[1]); dialog = "Reverted reordering."; break;
-                case ADD: deleteShape(task.getIndex()); dialog = "Reverted addition of new shape."; break;
-                case COP: break;
-                case FIL: gui.shapes.get(task.getIndex()).setFillColor((int) task.changedValues[0]); break;
-                case STF: gui.shapes.get(task.getIndex()).setStrokeColor((int) task.changedValues[0]); break;
-                case STW: gui.shapes.get(task.getIndex()).setStrokeWeight((int) task.changedValues[0]); break;   
-            }
+    //Uses change operation and stored information to revert shape back to previous state. 
+    void undo(Change task){
+        switch(task.getOperation()){
+            case ROT: gui.shapes.get(task.getIndex()).setRotation(task.changedValues[0]); dialog = "Reverted rotation.";  break;
+            case TRA: gui.shapes.get(task.getIndex()).manipulate(task.changedValues[0],task.changedValues[1]); dialog = "Reverted translation.";  break;
+            case SCA: gui.shapes.get(task.getIndex()).setHandles(task.changedValues); dialog = "Reverted scaling."; break;
+            case DEL: gui.shapes.add(task.getClone()); dialog = "Reverted deletion.";  break;
+            case ORD: swapElements((int)task.changedValues[0], (int) task.changedValues[1]); dialog = "Reverted reordering."; break;
+            case ADD: deleteShape(task.getIndex()); dialog = "Reverted addition of new shape."; break;
+            case COP: deleteShape(task.getIndex()); dialog = "Reverted copying of shape."; break;
+            case RES: 
+                gui.shapes.get(task.getIndex()).setHandles(task.changedValues); 
+                gui.shapes.get(task.getIndex()).setRotation(task.changedValues[task.changedValues.length-1]); 
+                break;
+            case FIL: gui.shapes.get(task.getIndex()).setFillColor((int) task.changedValues[0]); break;
+            case STF: gui.shapes.get(task.getIndex()).setStrokeColor((int) task.changedValues[0]); break;
+            case STW: gui.shapes.get(task.getIndex()).setStrokeWeight((int) task.changedValues[0]); break;   
         }
+    }
     
     void checkInput(){
         if((keys['z'] || keys['Z']) && pad.control){
@@ -699,7 +723,7 @@ public class ArtStationApplication extends PApplet{
         if(pad.isEditMode() && !gui.shapes.isEmpty()){
             gui.shapes.add(gui.shapes.get(pad.listIndex).copy(gui.shapes.size()));
             pad.listIndex++;
-            gui.shapes.get(pad.listIndex).finishShape();
+            gui.shapes.get(pad.listIndex).finishShape(); 
         }
     }
     
@@ -738,6 +762,7 @@ public class ArtStationApplication extends PApplet{
         return (canvasX >= 0 && canvasY >= 0 && canvasY <= pad.getHeight() && canvasX <= pad.getWidth());
     }
     
+    //TODO: Could add transformation designator here
     void drawMouse(){
         fill(155);
         switch(coordinateMode){
@@ -756,6 +781,7 @@ public class ArtStationApplication extends PApplet{
         text(dialog, width*horizontalPadding, height*verticalPadding - 4*gui.spacing);
     }
     
+    //Used to mask outside of canvas for shapes that are larger than canvas area.
     void drawFrames(){
         rectMode(CORNER);
         noStroke();
@@ -766,11 +792,12 @@ public class ArtStationApplication extends PApplet{
         rect( width*horizontalPadding + (pad.getWidth()*scaleFactor), 0, width, height);
       }
     
-    void drawCanvasArea(){
+    void generateCanvasArea(){
         pushMatrix();
           translate(width*horizontalPadding, height*verticalPadding);
           scale(scaleFactor,scaleFactor);
           pad.drawCanvas(canvasX, canvasY);
+          //Converts mouseX and mouseY to match canvas. (ie 0,0 mouse position is top left of canvas)
           canvasX = (mouseX - screenX(0,0))/scaleFactor;
           canvasY = (mouseY - screenY(0,0))/scaleFactor; 
         popMatrix();

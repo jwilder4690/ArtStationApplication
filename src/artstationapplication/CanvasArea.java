@@ -6,15 +6,6 @@
 package artstationapplication;
 
 import javafx.collections.ObservableList;
-import javafx.geometry.Orientation;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import processing.core.*;
 
 
@@ -132,6 +123,7 @@ import processing.core.*;
             return gridDensity;
         }
         
+        //Uses string information loaded from save file to recreate shapes
         void loadShape(String shapeType, String[] shapeInfo){
             switch(shapeType){
                 case "Circle": shapes.add(new Circle(sketch, shapeInfo)); break;
@@ -151,11 +143,14 @@ import processing.core.*;
             referenceOn = true;
         }
         
+        //Checks if mouse is over handles, over shape, or over nothing and sets 
+        //transformation accordingly. //TODO: Add cursor designator for scaling,
+        //rotating, and translating?
         void checkForTransformation(PVector mouse){
             if(shapes.isEmpty()) subMode =  Transformation.NON;
             else if(shapes.get(listIndex).checkHandles(mouse)){
                 shapes.get(listIndex).setShift(shift);
-                tasks.push(new Change(Transformation.SCA, listIndex, shapes.get(listIndex).getHandles()));
+                tasks.push(new Change(Transformation.SCA, listIndex, shapes.get(listIndex).getResetFloats()));
                 subMode = Transformation.SCA;
             }
             else if(shapes.get(listIndex).mouseOver(mouse)){
@@ -170,25 +165,22 @@ import processing.core.*;
             }
         }
 
-        void drawCanvas(float mx, float my) {
-            sketch.rectMode(sketch.CORNERS);
-            sketch.fill(backgroundColor);
-            sketch.noStroke();
-            sketch.rect(0, 0, canvasWidth, canvasHeight);
-            if(referenceOn && referenceImage != null) sketch.image(referenceImage, 0, 0);
+        //Draws canvas area, updates shapes based on mouse input, then draws shapes to screen.
+        void drawCanvas(float mouseX, float mouseY) {
+            drawBackground();
             if (sketch.mousePressed && shapes.size() > 0){
-                if(modifying){
-                    sketch.ellipse(mx, my, 10, 10);
+                if(modifying){ //draws dummy ellipse to represent polygon vertex. 
+                    sketch.ellipse(mouseX, mouseY, 10, 10);
                 }
                 else{
-                    update(new PVector(mx, my));
+                    update(new PVector(mouseX, mouseY));
                 }
             }
             if(!shapes.isEmpty()){
                 for (int i = 0; i < shapes.size(); i++) {
                     shapes.get(i).drawShape();
                 }
-                if(activeMode == Mode.EDIT){
+                if(activeMode == Mode.EDIT){ //draws selection highlight around current shape.
                     shapes.get(listIndex).drawSelected();
                 }
             }
@@ -196,7 +188,33 @@ import processing.core.*;
                 drawGrid();
             }
         }
-
+        
+        void drawBackground(){
+            sketch.rectMode(sketch.CORNERS);
+            sketch.fill(backgroundColor);
+            sketch.noStroke();
+            sketch.rect(0, 0, canvasWidth, canvasHeight);
+            if(referenceOn && referenceImage != null) sketch.image(referenceImage, 0, 0);
+        }
+        
+        void drawGrid() {
+            sketch.strokeWeight(1);
+            sketch.stroke(155, 155, 155);
+            for (int i = 1; i < gridDensity; i++) {
+                sketch.line(i * gridSpacing, 0, i * gridSpacing, canvasHeight);
+            }
+            int i = 1;
+            while (i * gridSpacing < canvasHeight) {
+                sketch.line(0, i * gridSpacing, canvasWidth, i * gridSpacing);
+                i++;
+            }
+        }
+                
+        /*
+            This method is only called when the mouse is being pressed. If draw mode
+            is active, the shape currently being draw is adjusted via modify. If edit
+            mode is active, the shape is updated based on the current transformation. 
+        */
         void update(PVector mouse) {
             switch (activeMode) {
                 case DRAW:
@@ -225,7 +243,8 @@ import processing.core.*;
             }
         }
 
-        void drawShape(float x, float y) {
+        //Adds new shape to shape list based on the currently active tool
+        void createShape(float x, float y) {
             if(!modifying){
                 listIndex = shapes.size();
                 tasks.push(new Change(Transformation.ADD, listIndex, 0));
@@ -258,6 +277,9 @@ import processing.core.*;
             }
         }
         
+        boolean overOrigin(PVector mouse){
+            return (mouse.dist(shapes.get(listIndex).origin) < 20);
+        }
         
         void completeVertex(float x, float y){
             if(gridOn && gridSnapOn){
@@ -305,19 +327,6 @@ import processing.core.*;
         
         PVector snapToGrid(PVector mouse){
             return new PVector(snapToGrid(mouse.x), snapToGrid(mouse.y));
-        }
-
-        void drawGrid() {
-            sketch.strokeWeight(1);
-            sketch.stroke(155, 155, 155);
-            for (int i = 1; i < gridDensity; i++) {
-                sketch.line(i * gridSpacing, 0, i * gridSpacing, canvasHeight);
-            }
-            int i = 1;
-            while (i * gridSpacing < canvasHeight) {
-                sketch.line(0, i * gridSpacing, canvasWidth, i * gridSpacing);
-                i++;
-            }
         }
         
         void drawMode(){

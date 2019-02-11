@@ -45,7 +45,7 @@ public class Bezier extends Shape{
       Used for creating an exact copy of base shape.
     */
     Bezier(Bezier base, int id){
-      this(base.app, base.fillColor, base.strokeColor, base.strokeWeight, base.pos.x, base.pos.y, id);
+      this(base.app, base.fillColor, base.strokeColor, base.strokeWeight, base.pos.x+base.COPY_OFFSET, base.pos.y+base.COPY_OFFSET, id);
       start = new VertexHandle(base.app, base.start.getPosition());
       end = new VertexHandle(base.app, base.end.getPosition());
       startController = new VertexHandle(base.app, base.startController.getPosition());
@@ -222,7 +222,7 @@ public class Bezier extends Shape{
     }
     
     @Override
-    float[] getHandles(){
+    float[] getResetFloats(){
         float[] points = {
             start.getPosition().x,
             start.getPosition().y,
@@ -231,7 +231,8 @@ public class Bezier extends Shape{
             end.getPosition().x,
             end.getPosition().y,
             endController.getPosition().x,
-            endController.getPosition().y
+            endController.getPosition().y,
+            rotation 
         };
         return points;
     }

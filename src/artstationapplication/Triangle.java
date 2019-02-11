@@ -198,8 +198,8 @@ import processing.core.*;
     }
     
         @Override
-    float[] getHandles(){
-        return new float[] {widthHandleL.getModifier(), widthHandleR.getModifier(), heightHandleT.getModifier()};
+    float[] getResetFloats(){
+        return new float[] {widthHandleL.getModifier(), widthHandleR.getModifier(), heightHandleT.getModifier(), rotation};
     }
     
     @Override

@@ -36,30 +36,17 @@ public class GUI {
     ListView<Shape> shapeViewer; //nn
     ObservableList<Shape> shapes;
     MenuBar mb;
-    MenuItem open;
-    MenuItem newDrawing;
-    MenuItem save;
-    MenuItem saveAs;
-    MenuItem exit;
+    MenuItem open, newDrawing, save, saveAs, exit, clipboardShapes, clipboardFile, imageFile, svgFile;
     CheckMenuItem gridOn;
     CheckMenuItem gridSnapOn;
     RadioMenuItem coordsOff;
     RadioMenuItem coordsMouse;
     RadioMenuItem coordsTop;
-    MenuItem clipboardShapes;
-    MenuItem clipboardFile;
-    MenuItem imageFile;
-    MenuItem svgFile;
     
     RadioButton drawMode;
     RadioButton editMode;
     
-    ToggleButton btnCircle;
-    ToggleButton btnRectangle;
-    ToggleButton btnTriangle;         
-    ToggleButton btnPoly;
-    ToggleButton btnCurve;
-    ToggleButton btnLine; 
+    ToggleButton btnCircle, btnRectangle, btnTriangle, btnPoly, btnCurve, btnLine; 
     
     TextField widthTextField;
     TextField heightTextField;
@@ -81,11 +68,7 @@ public class GUI {
     Slider weightSlider;
     TextField weightTextField;
     
-    Button btnUpArrow;
-    Button btnDownArrow;
-    Button btnDelete;
-    Button btnReset;
-    Button btnCopy;
+    Button btnUpArrow, btnDownArrow, btnDelete, btnReset, btnCopy;
     MultipleSelectionModel<Shape> selectionModel;
     
     GUI(){
@@ -108,7 +91,6 @@ public class GUI {
         
         fileMenu.getItems().addAll(open, newDrawing, save, saveAs, new SeparatorMenuItem(), exit);
 
-
         Menu optionsMenu = new Menu("Options");
 
         Menu gridOptions = new Menu("Grid Options");
@@ -120,7 +102,6 @@ public class GUI {
         gridSnapOn.setAccelerator(KeyCombination.keyCombination("shortcut+L"));
         gridOptions.getItems().addAll(gridOn, gridSnapOn);
         optionsMenu.getItems().add(gridOptions);
-        
 
         Menu mouseOptions = new Menu("Mouse Position");
         ToggleGroup tgMouse = new ToggleGroup();
@@ -133,19 +114,17 @@ public class GUI {
         coordsTop.setToggleGroup(tgMouse);
         mouseOptions.getItems().addAll(coordsOff, coordsMouse, coordsTop);
         optionsMenu.getItems().add(mouseOptions);
-        optionsMenu.getItems().add(new SeparatorMenuItem());
         
         Menu exportMenu = new Menu("Export");
         
-        clipboardShapes = new MenuItem("... Shapes to Clipboard");
-        clipboardFile = new MenuItem("... File to Clipboard");
-        imageFile = new MenuItem("...as Image");
+        clipboardShapes = new MenuItem("... Processing shapes to Clipboard");
+        clipboardFile = new MenuItem("... Processing file to Clipboard");
+        imageFile = new MenuItem("... as Image");
         svgFile = new MenuItem("... as SVG");
         exportMenu.getItems().addAll(clipboardFile, clipboardShapes, imageFile, svgFile);
 
         mb.getMenus().addAll(fileMenu, optionsMenu, exportMenu);
-          
-        
+
         //Mode buttons//////////////////////////////////////////////////////////
         modeGroup = new ToggleGroup();
         
@@ -155,8 +134,7 @@ public class GUI {
         editMode = new RadioButton("Edit");
         editMode.setToggleGroup(modeGroup); 
         drawMode.setSelected(true);
-        
-        
+
         //Tool Buttons//////////////////////////////////////////////////////////
         toolGroup = new ToggleGroup();
         
@@ -202,7 +180,7 @@ public class GUI {
         btnCurve.setToggleGroup(toolGroup);
         btnCurve.setTooltip(new Tooltip("Click for first point and drag to second point."));
         
-        
+
         //Canvas Menu///////////////////////////////////////////////////////////
         final HBox dimensionPane = new HBox(spacing);
         final MenuButton canvasMenuButton = new MenuButton("Canvas Options");
@@ -221,7 +199,6 @@ public class GUI {
         widthTextField.setPrefColumnCount(5);
         heightTextField.setPrefColumnCount(5);
                 
-        
         //Reference Image Button////////////////////////////////////////////////
         final HBox referencePane = new HBox(spacing);
         btnReferenceImage = new Button("Reference Image");
@@ -233,8 +210,6 @@ public class GUI {
         
         referencePane.getChildren().addAll(btnReferenceImage, cbReferenceImage);
         
-
-                
         //Grid Menu///////////////////////////////////////////////////////////
         final VBox gridPane = new VBox();
         final MenuButton gridMenuButton = new MenuButton("Grid Options");
@@ -313,8 +288,6 @@ public class GUI {
         lblNone.setUnderline(true);
         weightTextField.setPrefColumnCount(3);
 
-
-
         colorPane.setMaxWidth(controlBarWidth -7*spacing);
         colorPane.add(lblColor, 1,0);
         colorPane.add(lblNone, 2,0);
@@ -365,9 +338,6 @@ public class GUI {
         btnCopy.setTooltip(new Tooltip("Creates an identical copy of currently selected shape."));
         btnCopy.setMinWidth(toolBarWidth + spacing);
         
-
-
-        
         listControls.getChildren().addAll(btnUpArrow, btnDownArrow, strut, btnCopy, btnReset, btnDelete);
         listPanel.getChildren().addAll(listControls, shapeViewer);
         
@@ -376,24 +346,13 @@ public class GUI {
         listPanel.setMaxSize(controlBarWidth -7*spacing, controlBarWidth*3);
         shapeViewer.setPrefHeight(controlBarWidth*1.5);
         
-        
-
-        
         //Processing Canvas/////////////////////////////////////////////////////
-
-        
-        
         rootNode = new BorderPane();
         rootNode.setPadding(new Insets(0,8*spacing,0,0));
-        
-
-        
-        
-        
+         
         final VBox controls = new VBox(spacing);
         final VBox modes = new VBox(spacing);      
-        final TilePane toolPane = new TilePane();
-        
+        final TilePane toolPane = new TilePane();  
 
         controls.setPadding(new Insets(spacing, 2*spacing, spacing, spacing));
         controls.setMinWidth(controlBarWidth -4*spacing);
@@ -406,7 +365,6 @@ public class GUI {
         toolPane.setHgap(spacing);
         toolPane.setVgap(spacing);
         
-        //rootNode.setMargin(toolPane, new Insets(spacing));
         rootNode.setTop(mb);
         rootNode.setLeft(toolPane);
         rootNode.setRight(controls); 
