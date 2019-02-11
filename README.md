@@ -14,11 +14,7 @@ First commits are merges of code developed in my "ArtStation-Halted" repository.
 
 - [x] Initial launch with all basic functionality 
 - [x] Refactor
-- [ ] Add features (Arcs, polygon, curves)
-    - [ ] Groups
-    - [ ] Arcs
-- [ ] Improve usability (crtl z, shift, alt)
-    - [ ] Temporary modifiers (alt for snap) 
-    - [ ] Alternate drawing method for rectangles
+- [ ] Address Issues
+
 
 
