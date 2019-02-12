@@ -150,7 +150,7 @@ public class GUI {
         btnRectangle.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         btnRectangle.setStyle("-fx-padding:0");
         btnRectangle.setToggleGroup(toolGroup);
-        btnRectangle.setTooltip(new Tooltip("Click in center, drag to size. Hold SHIFT to snap rotation to 45 degree increments."));
+        btnRectangle.setTooltip(new Tooltip("Click in center, drag to size. Hold SHIFT to snap rotation to 45 degree increments. Hold ALT to draw from corner to corner."));
         
         Image imageTriangle = new Image(getClass().getResource("data/btnTriangle.png").toExternalForm());
         btnTriangle = new ToggleButton("Triangle", new ImageView(imageTriangle));
@@ -171,7 +171,7 @@ public class GUI {
         btnPoly.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         btnPoly.setStyle("-fx-padding:0");
         btnPoly.setToggleGroup(toolGroup);
-        btnPoly.setTooltip(new Tooltip("Single click for each vertex, SPACE or right click to complete."));
+        btnPoly.setTooltip(new Tooltip("Single click for each vertex, SPACE, right click, or click on first point to complete."));
         
         Image imageCurve = new Image(getClass().getResource("data/btnCurve.png").toExternalForm());
         btnCurve = new ToggleButton("Curve", new ImageView(imageCurve));

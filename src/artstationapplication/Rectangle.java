@@ -92,7 +92,8 @@ import processing.core.*;
         
       //Still uses corners drawing mode in order to enable assymetric scaling
       app.rectMode(CORNERS);
-      app.rect(-widthHandleL.getRadius(), -heightHandleT.getRadius(), widthHandleR.getRadius(), heightHandleB.getRadius());
+      if(alt) app.rect(0,0, widthHandleR.getRadius(), heightHandleB.getRadius());
+      else app.rect(-widthHandleL.getRadius(), -heightHandleT.getRadius(), widthHandleR.getRadius(), heightHandleB.getRadius());
       app.popMatrix();
     }
     
@@ -126,23 +127,27 @@ import processing.core.*;
         Used only during initial drawing to canvas.
     */
     void modify(PVector mouse){
-        float radius;
+        float radius = app.dist(mouse.x, mouse.y, pos.x, pos.y);
         //TODO: implement alt drawMode
-        if(true){
-            radius = app.dist(mouse.x, mouse.y, pos.x, pos.y);
+        if(alt){
+            rotation = 0;
+            widthHandleR.calculateModifier(mouse.x - pos.x);
+            heightHandleB.calculateModifier(mouse.y - pos.y);
+        }
+        else{
             widthHandleR.calculateModifier(radius);
             widthHandleL.calculateModifier(radius);
             heightHandleT.calculateModifier(radius);
             heightHandleB.calculateModifier(radius);
-        }
-        //else if(alt) corner.set(mouse.x, mouse.y);
-        rotation = app.atan2(mouse.y - pos.y, mouse.x - pos.x);
-        rotation += startingRotation;
         
-        if(shift){ //Snaps rotation to PI/4 increments if shift is held
-            float leftover = rotation % QUARTER_PI;
-            leftover = app.round(leftover);
-            rotation = app.floor(rotation/QUARTER_PI)*QUARTER_PI+(leftover*QUARTER_PI);
+            rotation = app.atan2(mouse.y - pos.y, mouse.x - pos.x);
+            rotation += startingRotation;
+
+            if(shift){ //Snaps rotation to PI/4 increments if shift is held
+                float leftover = rotation % QUARTER_PI;
+                leftover = app.round(leftover);
+                rotation = app.floor(rotation/QUARTER_PI)*QUARTER_PI+(leftover*QUARTER_PI);
+            }
         }
     }
     
@@ -210,10 +215,25 @@ import processing.core.*;
     @Override
     void finishShape(){
         super.finishShape();
+        if(alt){
+            //Moves the position from corner to center
+            float fullWidth = widthHandleR.getRadius();
+            float fullHeight = heightHandleB.getRadius();
+            setPosition(pos.x + fullWidth/2, pos.y + fullHeight/2);
+            
+            //Moves the handles to half the width and height
+            widthHandleL.calculateModifier(app.abs(fullWidth/2));
+            heightHandleT.calculateModifier(app.abs(fullHeight/2));
+            widthHandleR.calculateModifier(app.abs(fullWidth/2));
+            heightHandleB.calculateModifier(app.abs(fullHeight/2));
+            
+            alt = false;
+        }
         widthHandleL.setRadius();
         widthHandleR.setRadius();
         heightHandleT.setRadius();
         heightHandleB.setRadius();
+
     }
     
     @Override

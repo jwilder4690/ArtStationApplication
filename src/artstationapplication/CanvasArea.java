@@ -220,6 +220,7 @@ import processing.core.*;
                 case DRAW:
                     if(!shapes.get(shapes.size() - 1).getFinished()){
                         shapes.get(listIndex).setShift(shift);
+                        shapes.get(listIndex).setAlt(alt);
                         if(gridOn && gridSnapOn && activeTool == ShapeType.LIN) {
                             shapes.get(shapes.size() - 1).modify(snapToGrid(mouse));
                         }

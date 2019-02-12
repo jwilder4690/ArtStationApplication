@@ -30,6 +30,7 @@ abstract class Shape{
     float strokeWeight = 1;
     boolean completed = false;
     boolean shift = false;
+    boolean alt = false;
     String name = "shape";
     int index;
     
@@ -85,6 +86,10 @@ abstract class Shape{
     
     void setShift(boolean turn){
         shift = turn;
+    }
+    
+    void setAlt(boolean turn){
+        alt = turn;
     }
 
     void setStartingRotation(PVector mouse) {
