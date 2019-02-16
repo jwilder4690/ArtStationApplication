@@ -312,6 +312,7 @@ public class GUI {
         shapes = FXCollections.observableArrayList();   
         ObservableList<Shape> shapeTypes = shapes;
         shapeViewer = new ListView<>(shapeTypes);
+        shapeViewer.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         selectionModel = shapeViewer.getSelectionModel();
         
         Image imageUpArrow = new Image(getClass().getResource("data/btnUpArrow.png").toExternalForm());

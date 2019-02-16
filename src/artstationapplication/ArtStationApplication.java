@@ -34,10 +34,13 @@ import javafx.scene.layout.HBox;
  */
 public class ArtStationApplication extends PApplet{
     
-
+    final int ZOOM_UNIT = 80;
     enum Coordinates {OFF, MOUSE, TOP}
     Coordinates coordinateMode = Coordinates.TOP;
     float scaleFactor;
+    float zoomFactor = 1;
+    float focusX;
+    float focusY;
     float verticalPadding = 0.05f;
     float verticalScreenShare = 1 - 2*verticalPadding;
     float horizontalPadding = 0.05f;
@@ -517,8 +520,8 @@ public class ArtStationApplication extends PApplet{
                 case ALT: pad.setAlt(true); break;
                 case SHIFT: pad.setShift(true); break;
             }
-
         });
+        
         gui.rootNode.addEventFilter(KeyEvent.KEY_RELEASED, event->{
             switch(event.getCode()){
                 case DELETE: 
@@ -544,6 +547,19 @@ public class ArtStationApplication extends PApplet{
                         gui.drawMode.setSelected(true);
                         pad.drawMode();  
                     }break;
+            }
+        });
+        
+        //Mouse events for full scene
+        gui.rootNode.addEventFilter(ScrollEvent.ANY, event ->{
+            if(mouseOverCanvas()){
+                float delta = (float)event.getDeltaY(); //one scroll unit is 40
+                zoomFactor += delta/ZOOM_UNIT; 
+                if(zoomFactor < 1) zoomFactor = 1;
+            
+            //Focuses zoom on mouse for generation of canvas.
+                focusX = mouseX*(1-zoomFactor);
+                focusY = mouseY*(1-zoomFactor);
             }
         });
         
@@ -654,6 +670,8 @@ public class ArtStationApplication extends PApplet{
             keys[key] = false;
         }
     }
+    
+    
 
     //Uses change operation and stored information to revert shape back to previous state. 
     void undo(Change task){
@@ -790,12 +808,12 @@ public class ArtStationApplication extends PApplet{
     
     void generateCanvasArea(){
         pushMatrix();
-          translate(width*horizontalPadding, height*verticalPadding);
-          scale(scaleFactor,scaleFactor);
+          translate(width*horizontalPadding + focusX, height*verticalPadding + focusY);
+          scale(scaleFactor*zoomFactor,scaleFactor*zoomFactor);
           pad.drawCanvas(canvasX, canvasY);
           //Converts mouseX and mouseY to match canvas. (ie 0,0 mouse position is top left of canvas)
-          canvasX = (mouseX - screenX(0,0))/scaleFactor;
-          canvasY = (mouseY - screenY(0,0))/scaleFactor; 
+          canvasX = (mouseX - screenX(0,0))/(scaleFactor*zoomFactor);
+          canvasY = (mouseY - screenY(0,0))/(scaleFactor*zoomFactor); 
         popMatrix();
     }
     
