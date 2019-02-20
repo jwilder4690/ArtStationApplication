@@ -517,13 +517,21 @@ public class ArtStationApplication extends PApplet{
         //Key Events for full scene
         gui.rootNode.addEventFilter(KeyEvent.KEY_PRESSED, event ->{
             switch(event.getCode()){
-                case ESCAPE: pad.drawMode(); break; //doesn't seem to work
-                case CONTROL: pad.toggleGrid(true);
+                case ESCAPE:
+                    pad.drawMode();
+                    event.consume();    //consume so it does not trigger closing the application
+                    break;
+                case CONTROL:
+                    pad.toggleGrid(true);
                     pad.toggleSnap(true); 
                     dialog = "SNAP and GRID are on.";
                     break;
-                case ALT: pad.setAlt(true); break;
-                case SHIFT: pad.setShift(true); break;
+                case ALT:
+                    pad.setAlt(true);
+                    break;
+                case SHIFT:
+                    pad.setShift(true);
+                    break;
             }
         });
         
@@ -587,7 +595,7 @@ public class ArtStationApplication extends PApplet{
         stage.heightProperty().addListener((obs, oldVal, newVal) -> {
              scaleCanvas((float)(stage.getWidth()-gui.toolBarWidth - gui.controlBarWidth),(float)(stage.getHeight() - 2*gui.mb.getHeight()));
         });
-        
+
 
          pad = new CanvasArea(this,900,900, gui.shapes, tasks);
 
