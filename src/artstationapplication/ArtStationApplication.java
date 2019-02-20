@@ -522,6 +522,7 @@ public class ArtStationApplication extends PApplet{
                     event.consume();    //consume so it does not trigger closing the application
                     break;
                 case CONTROL:
+                    pad.setControl(true);
                     pad.toggleGrid(true);
                     pad.toggleSnap(true); 
                     dialog = "SNAP and GRID are on.";
@@ -545,6 +546,7 @@ public class ArtStationApplication extends PApplet{
                         deleteShape();
                     }break;
                 case CONTROL: 
+                    pad.setControl(false);
                     pad.toggleGrid(gui.cbGridOn.isSelected());
                     pad.toggleSnap(gui.cbGridSnap.isSelected()); 
                     dialog = "";
