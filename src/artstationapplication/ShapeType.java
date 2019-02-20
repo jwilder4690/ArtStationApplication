@@ -10,5 +10,5 @@ package artstationapplication;
  * @author wilder4690
  */
 public enum ShapeType {
-    CIR, REC, TRI, LIN, POL, CUR
+    CIR, REC, TRI, LIN, POL, CUR, PIC
 }

@@ -11,6 +11,7 @@ import javafx.geometry.*;
 import javafx.scene.layout.*;
 import javafx.scene.input.*;
 import javafx.scene.image.*;
+import javafx.scene.image.Image;
 import javafx.collections.*;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.paint.Color;
@@ -46,7 +47,7 @@ public class GUI {
     RadioButton drawMode;
     RadioButton editMode;
     
-    ToggleButton btnCircle, btnRectangle, btnTriangle, btnPoly, btnCurve, btnLine; 
+    ToggleButton btnCircle, btnRectangle, btnTriangle, btnPoly, btnCurve, btnLine, btnPicture; 
     
     TextField widthTextField;
     TextField heightTextField;
@@ -179,6 +180,13 @@ public class GUI {
         btnCurve.setStyle("-fx-padding:0");
         btnCurve.setToggleGroup(toolGroup);
         btnCurve.setTooltip(new Tooltip("Click for first point and drag to second point."));
+        
+        Image imagePicture = new Image(getClass().getResource("data/btnPicture.png").toExternalForm());
+        btnPicture = new ToggleButton("Picture", new ImageView(imagePicture));
+        btnPicture.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        btnPicture.setStyle("-fx-padding:0");
+        btnPicture.setToggleGroup(toolGroup);
+        btnPicture.setTooltip(new Tooltip("Select image to load from file."));
         
 
         //Canvas Menu///////////////////////////////////////////////////////////
@@ -361,7 +369,7 @@ public class GUI {
         modes.getChildren().addAll(drawMode, editMode, new Separator(Orientation.HORIZONTAL));
         modes.setPadding(new Insets(spacing, 0,0,0));
         toolPane.setPadding(new Insets(0,spacing,0,spacing));
-        toolPane.getChildren().addAll(modes, btnCircle, btnRectangle, btnTriangle, btnLine, btnPoly, btnCurve);
+        toolPane.getChildren().addAll(modes, btnCircle, btnRectangle, btnTriangle, btnLine, btnPoly, btnCurve, btnPicture);
         toolPane.setPrefColumns(1);
         toolPane.setHgap(spacing);
         toolPane.setVgap(spacing);

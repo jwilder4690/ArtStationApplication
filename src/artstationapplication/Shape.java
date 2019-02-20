@@ -153,5 +153,9 @@ abstract class Shape{
         //pass
     }
     
+    //Temporary, remove later or find real solution
+    boolean isPicture(){
+        return false;
+    }
 
 }

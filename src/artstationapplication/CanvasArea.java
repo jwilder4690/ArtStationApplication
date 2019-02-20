@@ -132,7 +132,7 @@ import processing.core.*;
                 case "Line": shapes.add(new Line(sketch, shapeInfo)); break;
                 case "Triangle": shapes.add(new Triangle(sketch, shapeInfo)); break;
                 case "Polygon": shapes.add(new Polygon(sketch, shapeInfo)); break;
-                default: outDialog = "Load error, please report issue at https://github.com/jwilder4690/ArtStationApplication/issues";
+                case "Picture": shapes.add(new Picture(sketch, shapeInfo)); break;
             }
             listIndex = shapes.size()-1;
             shapes.get(listIndex).finishShape();
@@ -276,6 +276,10 @@ import processing.core.*;
                     shapes.add(new Bezier(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex));
                     break;
             }
+        }
+        
+        void createPicture(String location){
+            shapes.add(new Picture(sketch, location, currentStrokeColor, currentStrokeWeight, 0, 0, listIndex));
         }
         
         boolean overOrigin(PVector mouse){
