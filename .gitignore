@@ -3,3 +3,6 @@
 *.class
 *.jar
 
+#Project files
+[Bb]uild/
+
