@@ -16,6 +16,9 @@ First commits are merges of code developed in my "ArtStation-Halted" repository.
 - [x] Refactor
 - [ ] Address Issues
 - [ ] Develop testing environment
+    - Unit Tests
+    - Behavior testing
+    - Output testing
 
 
 
