@@ -615,6 +615,7 @@ public class ArtStationApplication extends PApplet{
     FileChooser getImageFileChooser(){
             final FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Load Reference Image");
+            //TODO: is there a to show all at once for loading purposes?
             fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("PNG", "*.png"),
                 new FileChooser.ExtensionFilter("JPG", "*.jpg"),
