@@ -15,6 +15,7 @@ First commits are merges of code developed in my "ArtStation-Halted" repository.
 - [x] Initial launch with all basic functionality 
 - [x] Refactor
 - [ ] Address Issues
+- [ ] Develop testing environment
 
 
 
