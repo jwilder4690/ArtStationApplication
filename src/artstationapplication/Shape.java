@@ -92,6 +92,14 @@ abstract class Shape{
         alt = turn;
     }
 
+    public void setName(String name) {
+		this.name = name;
+	}
+	
+	public String getName() {
+		return this.name;
+	}
+
     void setStartingRotation(PVector mouse) {
         startingRotation = rotation - app.atan2(mouse.y - pos.y, mouse.x - pos.x);
     }
