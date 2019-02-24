@@ -6,11 +6,18 @@ This application is still in development, please report any issues.
 
 After more testing/feedback I plan to request this tool get added to the Processing tools. 
 
-## Dev Notes:
+## Contributor/Developer Notes:
 
-First commits are merges of code developed in my "ArtStation-Halted" repository. Reference that repository to see the development of that code base and the related commits. 
+Hello! Thanks for your interest in contributing to my project! You can get started with some different ways of contributing here.
 
-### Task List:
+### Project Directory Structure
+- src/ contains all the source code for the library, which is topically organized into separated modules. This is what you'll work on if you are changing p5.js.
+- tests/ contains unit tests which ensure the library continues to function correctly as changes are made.
+
+### How To Contribute
+Known bugs and intended new features are tracked using GitHub issues. Issue labels are used to sort issues into categories, such as those which are suitable for beginners. If you'd like to start working on an existing issue, comment on the issue that you plan to work on it so other contributors know it's being handled and can offer help. Once you have completed your work on this issue, submit a pull request (PR) against the p5.js master branch. In the description field of the PR, include "resolves #XXXX" tagging the issue you are fixing. If the PR addresses the issue but doesn't completely resolve it (ie the issue should remain open after your PR is merged), write "addresses #XXXX". Because this application is in active development, be sure that you are working from the most recent version when you submit your pull request. 
+
+## Task List:
 
 - [x] Initial launch with all basic functionality 
 - [x] Refactor
