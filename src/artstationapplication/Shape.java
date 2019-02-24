@@ -91,8 +91,17 @@ abstract class Shape{
     void setAlt(boolean turn){
         alt = turn;
     }
+    
 
-    void setStartingRotation(PVector mouse) {
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+	public String getName() {
+		return this.name;
+	}
+
+	void setStartingRotation(PVector mouse) {
         startingRotation = rotation - app.atan2(mouse.y - pos.y, mouse.x - pos.x);
     }
     
@@ -153,9 +162,5 @@ abstract class Shape{
         //pass
     }
     
-    //Temporary, remove later or find real solution
-    boolean isPicture(){
-        return false;
-    }
 
 }
