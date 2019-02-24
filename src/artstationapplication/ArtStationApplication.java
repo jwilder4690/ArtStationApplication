@@ -514,6 +514,39 @@ public class ArtStationApplication extends PApplet{
             }
         });
         
+		ContextMenu dropDown = new ContextMenu();
+
+		MenuItem rename = new MenuItem("Rename");
+		rename.setOnAction(new EventHandler<ActionEvent>() { //selecting rename on the drop down
+			@Override
+			public void handle(ActionEvent arg0) {
+				try {
+					TextInputDialog nameDialog = new TextInputDialog(gui.shapes.get(pad.listIndex).getName());
+					nameDialog.setTitle("Rename");
+					nameDialog.setHeaderText("Rename the shape");
+					nameDialog.setContentText("Enter new name");
+
+					Optional<String> result = nameDialog.showAndWait();
+					if (result.isPresent()) {
+						gui.shapes.get(gui.selectionModel.getSelectedIndex()).setName(result.get());
+						gui.shapeViewer.refresh();
+					}
+				} catch (ArrayIndexOutOfBoundsException e) {
+
+				}
+			}
+		});
+		//adding rename option to the dropdown menu .addAll can be used in future for multiple items
+		dropDown.getItems().add(rename); 
+		
+		gui.shapeViewer.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>() {
+			@Override
+			public void handle(ContextMenuEvent event) {
+				if (gui.shapes.size() > 0)
+					dropDown.show(gui.shapeViewer, event.getScreenX(), event.getScreenY());
+			}
+		});
+		
         //Key Events for full scene
         gui.rootNode.addEventFilter(KeyEvent.KEY_PRESSED, event ->{
             switch(event.getCode()){
