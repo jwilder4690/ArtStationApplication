@@ -100,9 +100,6 @@ abstract class Shape{
 		return this.name;
 	}
 
-    void setStartingRotation(PVector mouse) {
-        startingRotation = rotation - app.atan2(mouse.y - pos.y, mouse.x - pos.x);
-    }
     
     
     @Override
@@ -142,6 +139,11 @@ abstract class Shape{
     void manipulate(float x, float y){
         manipulate(new PVector(x,y));
     }
+    
+    
+    void setStartingRotation(PVector mouse) {
+        startingRotation = rotation - app.atan2(mouse.y - pos.y, mouse.x - pos.x);
+    }
 
     void changeRotation(PVector mouse) {         
           rotation = app.atan2(mouse.y - pos.y, mouse.x - pos.x);
@@ -158,7 +160,7 @@ abstract class Shape{
     }
     
     void reset(){
-        //pass
+        rotation = 0;
     }
     
     //Temporary, remove later or find real solution

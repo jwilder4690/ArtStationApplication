@@ -267,8 +267,8 @@ import processing.core.*;
     String save(){
         String output ="Triangle;";
         output += fillColor+","+strokeColor+","+pos.x+","+pos.y+","+startingRotation+","+rotation+","+strokeWeight+","+index+",";
-        output += widthHandleL.save()+",";
         output += widthHandleR.save()+",";
+        output += widthHandleL.save()+",";
         output += heightHandleT.save();
         return output;
     }

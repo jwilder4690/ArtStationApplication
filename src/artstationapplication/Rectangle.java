@@ -27,8 +27,8 @@ import processing.core.*;
         index = id;
         widthHandleR = new Handle(drawingSpace, this, new PVector(1,0));
         widthHandleL = new Handle(drawingSpace, this, new PVector(-1,0));
-        heightHandleB = new Handle(drawingSpace, this, new PVector(0,1));
         heightHandleT = new Handle(drawingSpace, this, new PVector(0,-1));
+        heightHandleB = new Handle(drawingSpace, this, new PVector(0,1));
         corner = new PVector(a+1,b+1); //default corner, will not be displayed 
     }
     
@@ -40,8 +40,8 @@ import processing.core.*;
       this(base.app, base.fillColor, base.strokeColor, base.strokeWeight, base.pos.x+base.COPY_OFFSET, base.pos.y+base.COPY_OFFSET, id);
       widthHandleR = new Handle(base.widthHandleR, this);
       widthHandleL = new Handle (base.widthHandleL, this);
-      heightHandleB = new Handle (base.heightHandleB, this);
       heightHandleT = new Handle (base.heightHandleT, this);
+      heightHandleB = new Handle (base.heightHandleB, this);
       rotation = base.rotation;
     }
     
@@ -307,8 +307,8 @@ import processing.core.*;
     String save(){
         String output ="Rectangle;";
         output += fillColor+","+strokeColor+","+pos.x+","+pos.y+","+startingRotation+","+rotation+","+strokeWeight+","+index+",";
-        output += widthHandleL.save()+",";
         output += widthHandleR.save()+",";
+        output += widthHandleL.save()+",";
         output += heightHandleT.save()+",";
         output += heightHandleB.save();
         return output;

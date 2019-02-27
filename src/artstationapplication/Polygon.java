@@ -319,13 +319,13 @@ public class Polygon extends Shape{
         ig.translate(pos.x, pos.y);
         ig.rotate(rotation);
         if(completed){
-            //this is causing a failure in exporting PGraphics in any later shape TODO: BUG - fix
             ig.beginShape();
             for(int i = 0; i < vertices.size(); i++){
                 ig.vertex(vertices.get(i).getPositionFloats());
             }
             ig.endShape(app.CLOSE);
         }
+        ig.popMatrix();
         return ig;
     }
     
