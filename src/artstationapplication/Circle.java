@@ -19,10 +19,9 @@ class Circle extends Shape{
     Handle[] activeHandle = new Handle[2];
     Handle[] inactiveHandle = new Handle[2];
 
-    Circle(PApplet drawingSpace, int paint, int outline, float thickness, float x, float y, int id){
-      super(drawingSpace,paint,outline,x,y);
+    Circle(PApplet drawingSpace, int paint, int outline, float thickness, float x, float y, int id, String name){
+      super(drawingSpace,paint,outline,x,y, name);
       strokeWeight = thickness;
-      name = "Circle";
       index = id;
       widthHandleR = new Handle(drawingSpace, this, new PVector(1,0));
       widthHandleL = new Handle(drawingSpace, this, new PVector(-1,0));
@@ -35,7 +34,7 @@ class Circle extends Shape{
       Used for creating an exact copy of base shape.
     */
     Circle(Circle base, int id){
-      this(base.app, base.fillColor, base.strokeColor, base.strokeWeight, base.pos.x+base.COPY_OFFSET, base.pos.y+base.COPY_OFFSET, id);
+      this(base.app, base.fillColor, base.strokeColor, base.strokeWeight, base.pos.x+base.COPY_OFFSET, base.pos.y+base.COPY_OFFSET, id, "Circle");//defaulting name for copy
       widthHandleR = new Handle(base.widthHandleR, this);
       widthHandleL = new Handle (base.widthHandleL, this);
       heightHandleB = new Handle (base.heightHandleB, this);
@@ -48,7 +47,7 @@ class Circle extends Shape{
       Used for creating shape from information stored in save file.
     */ 
     Circle(PApplet drawingSpace, String[] input){
-        this(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[6]), Float.valueOf(input[2]), Float.valueOf(input[3]), Integer.valueOf(input[7]));
+        this(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[6]), Float.valueOf(input[2]), Float.valueOf(input[3]), Integer.valueOf(input[7]), input[12]);
         startingRotation = Float.valueOf(input[4]);
         rotation = Float.valueOf(input[5]);
         widthHandleR = new Handle(drawingSpace, this, input[8].split("&"));
@@ -251,7 +250,8 @@ class Circle extends Shape{
         output += widthHandleL.save()+",";
         output += widthHandleR.save()+",";
         output += heightHandleT.save()+",";
-        output += heightHandleB.save();
+        output += heightHandleB.save()+",";
+        output += this.name;
         return output;
     }
  }

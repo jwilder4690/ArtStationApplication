@@ -15,12 +15,11 @@ public class Picture extends Shape{
     String imageLocation;
     VertexHandle cornerHandle;
     
-    Picture(PApplet drawingSpace, String location, int outline, float thickness, float a, float b, int id){ 
-        super(drawingSpace, -1 , outline, a,b);
+    Picture(PApplet drawingSpace, String location, int outline, float thickness, float a, float b, int id, String name){ 
+        super(drawingSpace, -1 , outline, a,b, name);
         imageLocation = location;
         img = app.loadImage(location);
         strokeWeight = thickness;
-        name = "Picture";
         index = id;
         cornerHandle = new VertexHandle(app, img.width, img.height);
     }
@@ -30,7 +29,7 @@ public class Picture extends Shape{
       Used for creating an exact copy of base shape.
     */
     Picture(Picture base, int id){
-      this(base.app, base.imageLocation, base.strokeColor, base.strokeWeight, base.pos.x+base.COPY_OFFSET, base.pos.y+base.COPY_OFFSET, id);
+      this(base.app, base.imageLocation, base.strokeColor, base.strokeWeight, base.pos.x+base.COPY_OFFSET, base.pos.y+base.COPY_OFFSET, id, "Picture");//defaulting name for copy
       rotation = base.rotation;
       cornerHandle = new VertexHandle(base.app, base.cornerHandle.getPosition());
     }
@@ -40,7 +39,7 @@ public class Picture extends Shape{
       Used for creating shape from information stored in save file.
     */ 
     Picture(PApplet drawingSpace, String[] input){
-        this(drawingSpace, input[0], Integer.valueOf(input[1]), Float.valueOf(input[6]),Float.valueOf(input[2]), Float.valueOf(input[3]), Integer.valueOf(input[7]));
+        this(drawingSpace, input[0], Integer.valueOf(input[1]), Float.valueOf(input[6]),Float.valueOf(input[2]), Float.valueOf(input[3]), Integer.valueOf(input[7]), input[9]);
         startingRotation = Float.valueOf(input[4]);
         rotation = Float.valueOf(input[5]);
     }
@@ -213,7 +212,8 @@ public class Picture extends Shape{
     String save(){
         String output ="Picture;";
         output += imageLocation+","+strokeColor+","+pos.x+","+pos.y+","+startingRotation+","+rotation+","+strokeWeight+","+index+",";
-        output += cornerHandle.save();
+        output += cornerHandle.save()+",";
+        output += this.name;
         return output;
     }
     

@@ -256,30 +256,30 @@ import processing.core.*;
             }
             switch (activeTool) {
                 case CIR:
-                    shapes.add(new Circle(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex));
+                    shapes.add(new Circle(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex, "Circle"));
                     break;
                 case REC:
-                    shapes.add(new Rectangle(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex));
+                    shapes.add(new Rectangle(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex, "Rectangle"));
                     break;
                 case TRI:
-                    shapes.add(new Triangle(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex));
+                    shapes.add(new Triangle(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex, "Triangle"));
                     break;
                 case LIN:
-                    shapes.add(new Line(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex));
+                    shapes.add(new Line(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex, "Line"));
                     break;
                 case POL:
                     if(!modifying){
                         modifying = true;
-                        shapes.add(new Polygon(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y,listIndex));
+                        shapes.add(new Polygon(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y,listIndex, "Polygon"));
                     }break;
                 case CUR: 
-                    shapes.add(new Bezier(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex));
+                    shapes.add(new Bezier(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex, "Bezier"));
                     break;
             }
         }
         
         void createPicture(String location){
-            shapes.add(new Picture(sketch, location, currentStrokeColor, currentStrokeWeight, 0, 0, listIndex));
+            shapes.add(new Picture(sketch, location, currentStrokeColor, currentStrokeWeight, 0, 0, listIndex, "Picture"));
         }
         
         boolean overOrigin(PVector mouse){

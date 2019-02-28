@@ -35,12 +35,13 @@ abstract class Shape{
     int index;
     
 
-    Shape(PApplet drawingSpace, int paint, int outline, float x, float y) {
+    Shape(PApplet drawingSpace, int paint, int outline, float x, float y, String name) {
         app = drawingSpace;
         pos = new PVector(x, y);
         fillColor = paint;
         strokeColor = outline;
         editColor = app.color(255, 255, 0);
+        this.name = name;
     }
     
     int getFillColor(){
