@@ -86,7 +86,6 @@ public class ArtStationApplication extends PApplet{
         gui.saveAs.setOnAction(event ->{
             final FileChooser fileChooser = new FileChooser();
             File initialDirectory = new File(".\\src\\artstationapplication\\data\\saveFiles");
-            System.out.print(initialDirectory.getAbsolutePath());
             fileChooser.setInitialDirectory(initialDirectory);
             fileChooser.setTitle("Save Drawing");
             fileChooser.getExtensionFilters().addAll(
