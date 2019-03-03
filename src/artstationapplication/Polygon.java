@@ -49,10 +49,10 @@ public class Polygon extends Shape{
         this(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[6]), Float.valueOf(input[2]), Float.valueOf(input[3]),Integer.valueOf(input[7]));
         startingRotation = Float.valueOf(input[4]);
         rotation = Float.valueOf(input[5]);
-        for(int i = 0; i < Integer.valueOf(input[8]); i++){
-            vertices.add(new VertexHandle(drawingSpace, input[9+i].split("&")));
+        name = input[8];
+        for(int i = 0; i < Integer.valueOf(input[9]); i++){
+            vertices.add(new VertexHandle(drawingSpace, input[10+i].split("&")));
         }
-        name = input[14];
     }
     
     /*
@@ -335,6 +335,7 @@ public class Polygon extends Shape{
     String save(){
         String output ="Polygon;";
         output += fillColor+","+strokeColor+","+pos.x+","+pos.y+","+startingRotation+","+rotation+","+strokeWeight+","+index+",";
+        output += this.name+",";
         output += vertices.size()+",";
         for(int i = 0; i < vertices.size(); i++){
             output += vertices.get(i).save();
@@ -342,8 +343,6 @@ public class Polygon extends Shape{
                 output += ",";
             }
         }
-        output += ",";
-        output += this.name;
         return output;
     }
 }
