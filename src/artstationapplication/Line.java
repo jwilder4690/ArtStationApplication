@@ -22,14 +22,15 @@ import processing.core.*;
     int padding = 15;
     float[] boundingBox = {0,0,0,0};
 
-    Line(PApplet drawingSpace, int paint, int outline, float thickness, float x, float y, int id, String name){
-      super(drawingSpace, paint, outline, x,y, name);
+    Line(PApplet drawingSpace, int paint, int outline, float thickness, float x, float y, int id){
+      super(drawingSpace, paint, outline, x,y);
       strokeWeight = thickness;
       index = id;
       start = new VertexHandle(drawingSpace, x,y);
       PVector point = new PVector(50,50);
       point.sub(new PVector(x,y));
       end = new VertexHandle(drawingSpace, point);
+      name = "Line";
     }
     
     /*
@@ -37,9 +38,10 @@ import processing.core.*;
       Used for creating an exact copy of base shape.
     */
     Line(Line base, int id){
-      this(base.app, base.fillColor, base.strokeColor, base.strokeWeight, base.pos.x+base.COPY_OFFSET, base.pos.y+base.COPY_OFFSET, id, "Line");//defaulting name for copy
+      this(base.app, base.fillColor, base.strokeColor, base.strokeWeight, base.pos.x+base.COPY_OFFSET, base.pos.y+base.COPY_OFFSET, id);
       start = new VertexHandle(base.app, base.start.getPosition());
       end = new VertexHandle(base.app, base.end.getPosition());
+      this.name = base.name;
     }
     
     /*
@@ -47,9 +49,10 @@ import processing.core.*;
       Used for creating shape from information stored in save file.
     */ 
     Line(PApplet drawingSpace, String[] input){
-        this(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[4]), Float.valueOf(input[2]), Float.valueOf(input[3]),Integer.valueOf(input[5]), input[8]);
+        this(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[4]), Float.valueOf(input[2]), Float.valueOf(input[3]),Integer.valueOf(input[5]));
         start = new VertexHandle(drawingSpace, input[6].split("&"));
         end = new VertexHandle(drawingSpace, input[7].split("&"));
+        name = input[8];
     }
 
     @Override

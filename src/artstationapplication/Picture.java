@@ -15,13 +15,14 @@ public class Picture extends Shape{
     String imageLocation;
     VertexHandle cornerHandle;
     
-    Picture(PApplet drawingSpace, String location, int outline, float thickness, float a, float b, int id, String name){ 
-        super(drawingSpace, -1 , outline, a,b, name);
+    Picture(PApplet drawingSpace, String location, int outline, float thickness, float a, float b, int id){ 
+        super(drawingSpace, -1 , outline, a,b);
         imageLocation = location;
         img = app.loadImage(location);
         strokeWeight = thickness;
         index = id;
         cornerHandle = new VertexHandle(app, img.width, img.height);
+        name = "Picture";
     }
     
     /*
@@ -29,9 +30,10 @@ public class Picture extends Shape{
       Used for creating an exact copy of base shape.
     */
     Picture(Picture base, int id){
-      this(base.app, base.imageLocation, base.strokeColor, base.strokeWeight, base.pos.x+base.COPY_OFFSET, base.pos.y+base.COPY_OFFSET, id, "Picture");//defaulting name for copy
+      this(base.app, base.imageLocation, base.strokeColor, base.strokeWeight, base.pos.x+base.COPY_OFFSET, base.pos.y+base.COPY_OFFSET, id);
       rotation = base.rotation;
       cornerHandle = new VertexHandle(base.app, base.cornerHandle.getPosition());
+      this.name = base.name;
     }
     
     /*
@@ -39,9 +41,10 @@ public class Picture extends Shape{
       Used for creating shape from information stored in save file.
     */ 
     Picture(PApplet drawingSpace, String[] input){
-        this(drawingSpace, input[0], Integer.valueOf(input[1]), Float.valueOf(input[6]),Float.valueOf(input[2]), Float.valueOf(input[3]), Integer.valueOf(input[7]), input[9]);
+        this(drawingSpace, input[0], Integer.valueOf(input[1]), Float.valueOf(input[6]),Float.valueOf(input[2]), Float.valueOf(input[3]), Integer.valueOf(input[7]));
         startingRotation = Float.valueOf(input[4]);
         rotation = Float.valueOf(input[5]);
+        name = input[9];
     }
        
     

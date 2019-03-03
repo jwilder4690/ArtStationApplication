@@ -20,8 +20,8 @@ import processing.core.*;
     Handle[] inactiveHandle = new Handle[3];
     PVector corner;
 
-    Rectangle(PApplet drawingSpace, int paint, int outline, float thickness, float a, float b, int id, String name){ 
-        super(drawingSpace, paint, outline, a,b, name);
+    Rectangle(PApplet drawingSpace, int paint, int outline, float thickness, float a, float b, int id){ 
+        super(drawingSpace, paint, outline, a,b);
         strokeWeight = thickness;
         index = id;
         widthHandleR = new Handle(drawingSpace, this, new PVector(1,0));
@@ -29,6 +29,7 @@ import processing.core.*;
         heightHandleT = new Handle(drawingSpace, this, new PVector(0,-1));
         heightHandleB = new Handle(drawingSpace, this, new PVector(0,1));
         corner = new PVector(a+1,b+1); //default corner, will not be displayed 
+        name = "Rectangle";
     }
     
     /*
@@ -36,12 +37,13 @@ import processing.core.*;
       Used for creating an exact copy of base shape.
     */
     Rectangle(Rectangle base, int id){
-      this(base.app, base.fillColor, base.strokeColor, base.strokeWeight, base.pos.x+base.COPY_OFFSET, base.pos.y+base.COPY_OFFSET, id, "Rectangle");//defaulting name for copy
+      this(base.app, base.fillColor, base.strokeColor, base.strokeWeight, base.pos.x+base.COPY_OFFSET, base.pos.y+base.COPY_OFFSET, id);
       widthHandleR = new Handle(base.widthHandleR, this);
       widthHandleL = new Handle (base.widthHandleL, this);
       heightHandleT = new Handle (base.heightHandleT, this);
       heightHandleB = new Handle (base.heightHandleB, this);
       rotation = base.rotation;
+      this.name = base.name;
     }
     
     /*
@@ -49,13 +51,14 @@ import processing.core.*;
       Used for creating shape from information stored in save file.
     */ 
     Rectangle(PApplet drawingSpace, String[] input){
-        this(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[6]),Float.valueOf(input[2]), Float.valueOf(input[3]), Integer.valueOf(input[7]), input[12]);
+        this(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[6]),Float.valueOf(input[2]), Float.valueOf(input[3]), Integer.valueOf(input[7]));
         startingRotation = Float.valueOf(input[4]);
         rotation = Float.valueOf(input[5]);
         widthHandleR = new Handle(drawingSpace, this, input[8].split("&"));
         widthHandleL = new Handle(drawingSpace, this, input[9].split("&"));
         heightHandleT = new Handle(drawingSpace, this, input[10].split("&"));
         heightHandleB = new Handle(drawingSpace, this, input[11].split("&"));
+        name = input[12];
     }
 
     @Override 

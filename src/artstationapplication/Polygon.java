@@ -21,10 +21,11 @@ public class Polygon extends Shape{
     float[] boundingBox = new float[4];  
 
     
-    Polygon(PApplet drawingSpace, int paint, int outline, float thickness, float x, float y, int id, String name){
-        super(drawingSpace, paint, outline, x,y, name);
+    Polygon(PApplet drawingSpace, int paint, int outline, float thickness, float x, float y, int id){
+        super(drawingSpace, paint, outline, x,y);
         strokeWeight = thickness;
         index = id;
+        name = "Polygon";
     }
     
     /*
@@ -32,11 +33,12 @@ public class Polygon extends Shape{
       Used for creating an exact copy of base shape.
     */
     Polygon(Polygon base, int id){
-      this(base.app, base.fillColor, base.strokeColor, base.strokeWeight, base.pos.x+base.COPY_OFFSET, base.pos.y+base.COPY_OFFSET, id, "Polygon");//defaulting name for copy
+      this(base.app, base.fillColor, base.strokeColor, base.strokeWeight, base.pos.x+base.COPY_OFFSET, base.pos.y+base.COPY_OFFSET, id);
       rotation = base.rotation;
       for(int i = 0; i < base.vertices.size(); i++){
           vertices.add(new VertexHandle(base.app, base.vertices.get(i).getPosition()));
       }
+      this.name = base.name;
     }
     
     /*
@@ -44,12 +46,13 @@ public class Polygon extends Shape{
       Used for creating shape from information stored in save file.
     */ 
     Polygon(PApplet drawingSpace, String[] input){
-        this(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[6]), Float.valueOf(input[2]), Float.valueOf(input[3]),Integer.valueOf(input[7]), input[12]);
+        this(drawingSpace, Integer.valueOf(input[0]), Integer.valueOf(input[1]), Float.valueOf(input[6]), Float.valueOf(input[2]), Float.valueOf(input[3]),Integer.valueOf(input[7]));
         startingRotation = Float.valueOf(input[4]);
         rotation = Float.valueOf(input[5]);
         for(int i = 0; i < Integer.valueOf(input[8]); i++){
             vertices.add(new VertexHandle(drawingSpace, input[9+i].split("&")));
         }
+        name = input[14];
     }
     
     /*
