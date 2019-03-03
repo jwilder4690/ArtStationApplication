@@ -298,6 +298,9 @@ public class ArtStationApplication extends PApplet{
                     resize.setOnAction(internalEvent -> {
                         pad.setHeight(loadedImage.height);
                         pad.setWidth(loadedImage.width);
+                        gui.widthTextField.setText(loadedImage.width+"");
+                        gui.heightTextField.setText(loadedImage.height+"");
+                        pad.calculateGridSpacing();
                         windowAlert.close();
                     });
             }
@@ -514,38 +517,38 @@ public class ArtStationApplication extends PApplet{
             }
         });
         
-		ContextMenu dropDown = new ContextMenu();
+        ContextMenu dropDown = new ContextMenu();
 
-		MenuItem rename = new MenuItem("Rename");
-		rename.setOnAction(new EventHandler<ActionEvent>() { //selecting rename on the drop down
-			@Override
-			public void handle(ActionEvent arg0) {
-				try {
-					TextInputDialog nameDialog = new TextInputDialog(gui.shapes.get(pad.listIndex).getName());
-					nameDialog.setTitle("Rename");
-					nameDialog.setHeaderText("Rename the shape");
-					nameDialog.setContentText("Enter new name");
+        MenuItem rename = new MenuItem("Rename");
+        rename.setOnAction(new EventHandler<ActionEvent>() { //selecting rename on the drop down
+            @Override
+            public void handle(ActionEvent arg0) {
+                try {
+                    TextInputDialog nameDialog = new TextInputDialog(gui.shapes.get(pad.listIndex).getName());
+                    nameDialog.setTitle("Rename");
+                    nameDialog.setHeaderText("Rename the shape");
+                    nameDialog.setContentText("Enter new name");
 
-					Optional<String> result = nameDialog.showAndWait();
-					if (result.isPresent()) {
-						gui.shapes.get(gui.selectionModel.getSelectedIndex()).setName(result.get());
-						gui.shapeViewer.refresh();
-					}
-				} catch (ArrayIndexOutOfBoundsException e) {
+                    Optional<String> result = nameDialog.showAndWait();
+                    if (result.isPresent()) {
+                        gui.shapes.get(gui.selectionModel.getSelectedIndex()).setName(result.get());
+                        gui.shapeViewer.refresh();
+                    }
+                } catch (ArrayIndexOutOfBoundsException e) {
 
-				}
-			}
-		});
-		//adding rename option to the dropdown menu .addAll can be used in future for multiple items
-		dropDown.getItems().add(rename); 
-		
-		gui.shapeViewer.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>() {
-			@Override
-			public void handle(ContextMenuEvent event) {
-				if (gui.shapes.size() > 0)
-					dropDown.show(gui.shapeViewer, event.getScreenX(), event.getScreenY());
-			}
-		});
+                }
+            }
+        });
+        //adding rename option to the dropdown menu .addAll can be used in future for multiple items
+        dropDown.getItems().add(rename); 
+
+        gui.shapeViewer.setOnContextMenuRequested(new EventHandler<ContextMenuEvent>() {
+            @Override
+            public void handle(ContextMenuEvent event) {
+                if (gui.shapes.size() > 0)
+                    dropDown.show(gui.shapeViewer, event.getScreenX(), event.getScreenY());
+                }
+        });
 		
         //Key Events for full scene
         gui.rootNode.addEventFilter(KeyEvent.KEY_PRESSED, event ->{
@@ -867,7 +870,7 @@ public class ArtStationApplication extends PApplet{
         fill(55,55,55);
         rect(0,0, width*horizontalPadding, height);
         rect(0,0, width, height*verticalPadding);
-        rect(0, height*verticalPadding + (pad.getHeight()*scaleFactor), width, height*verticalPadding);
+        rect(0, height*verticalPadding + (pad.getHeight()*scaleFactor), width, height);
         rect( width*horizontalPadding + (pad.getWidth()*scaleFactor), 0, width, height);
       }
     
