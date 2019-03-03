@@ -22,12 +22,12 @@ class Circle extends Shape{
     Circle(PApplet drawingSpace, int paint, int outline, float thickness, float x, float y, int id){
       super(drawingSpace,paint,outline,x,y);
       strokeWeight = thickness;
-      name = "Circle";
       index = id;
       widthHandleR = new Handle(drawingSpace, this, new PVector(1,0));
       widthHandleL = new Handle(drawingSpace, this, new PVector(-1,0));
       heightHandleB = new Handle(drawingSpace, this, new PVector(0,1));
       heightHandleT = new Handle(drawingSpace, this, new PVector(0,-1));
+      name = "Circle";
     }
         
     /*
@@ -41,6 +41,7 @@ class Circle extends Shape{
       heightHandleB = new Handle (base.heightHandleB, this);
       heightHandleT = new Handle (base.heightHandleT, this);
       rotation = base.rotation;
+      this.name = base.name;
     }
     
     /*
@@ -55,6 +56,7 @@ class Circle extends Shape{
         widthHandleL = new Handle(drawingSpace, this, input[9].split("&"));
         heightHandleT = new Handle(drawingSpace, this, input[10].split("&"));
         heightHandleB = new Handle(drawingSpace, this, input[11].split("&"));
+        name = input[12];
     }
 
     @Override 
@@ -251,7 +253,8 @@ class Circle extends Shape{
         output += widthHandleL.save()+",";
         output += widthHandleR.save()+",";
         output += heightHandleT.save()+",";
-        output += heightHandleB.save();
+        output += heightHandleB.save()+",";
+        output += this.name;
         return output;
     }
  }

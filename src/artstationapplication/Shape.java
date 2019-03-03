@@ -41,6 +41,7 @@ abstract class Shape{
         fillColor = paint;
         strokeColor = outline;
         editColor = app.color(255, 255, 0);
+        
     }
     
     int getFillColor(){

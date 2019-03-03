@@ -20,9 +20,9 @@ public class Picture extends Shape{
         imageLocation = location;
         img = app.loadImage(location);
         strokeWeight = thickness;
-        name = "Picture";
         index = id;
         cornerHandle = new VertexHandle(app, img.width, img.height);
+        name = "Picture";
     }
     
     /*
@@ -33,6 +33,7 @@ public class Picture extends Shape{
       this(base.app, base.imageLocation, base.strokeColor, base.strokeWeight, base.pos.x+base.COPY_OFFSET, base.pos.y+base.COPY_OFFSET, id);
       rotation = base.rotation;
       cornerHandle = new VertexHandle(base.app, base.cornerHandle.getPosition());
+      this.name = base.name;
     }
     
     /*
@@ -43,6 +44,7 @@ public class Picture extends Shape{
         this(drawingSpace, input[0], Integer.valueOf(input[1]), Float.valueOf(input[6]),Float.valueOf(input[2]), Float.valueOf(input[3]), Integer.valueOf(input[7]));
         startingRotation = Float.valueOf(input[4]);
         rotation = Float.valueOf(input[5]);
+        name = input[9];
     }
        
     
@@ -213,7 +215,8 @@ public class Picture extends Shape{
     String save(){
         String output ="Picture;";
         output += imageLocation+","+strokeColor+","+pos.x+","+pos.y+","+startingRotation+","+rotation+","+strokeWeight+","+index+",";
-        output += cornerHandle.save();
+        output += cornerHandle.save()+",";
+        output += this.name;
         return output;
     }
     

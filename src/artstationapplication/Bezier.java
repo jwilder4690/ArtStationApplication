@@ -25,12 +25,12 @@ public class Bezier extends Shape{
     final int GREATEST_Y = 3;
     int padding = 15;
     float[] boundingBox = {0,0,0,0}; // Index 0 is smallest x, 1 is smallest y, 2 is greatest x, 3 is greatest y
-
+    
+    
     
     Bezier(PApplet drawingSpace, int paint, int outline, float thickness, float x, float y, int id){
       super(drawingSpace, paint, outline, x,y);
       strokeWeight = thickness;
-      name = "Bezier";
       index = id;
       start = new VertexHandle(drawingSpace, x,y);
       PVector point = new PVector(50,50);
@@ -38,6 +38,7 @@ public class Bezier extends Shape{
       end = new VertexHandle(drawingSpace, point);
       startController = new VertexHandle(drawingSpace, x,y);
       endController = new VertexHandle(drawingSpace, point);
+      name = "Bezier";
     }
     
     /*
@@ -49,7 +50,8 @@ public class Bezier extends Shape{
       start = new VertexHandle(base.app, base.start.getPosition());
       end = new VertexHandle(base.app, base.end.getPosition());
       startController = new VertexHandle(base.app, base.startController.getPosition());
-      endController = new VertexHandle(base.app, base.endController.getPosition());      
+      endController = new VertexHandle(base.app, base.endController.getPosition());
+      this.name = base.name;
       completed = true; //must keep in order to not override vertex information when finishShape() is called
     }
     
@@ -63,6 +65,7 @@ public class Bezier extends Shape{
         startController = new VertexHandle(drawingSpace, input[7].split("&"));
         end = new VertexHandle(drawingSpace, input[8].split("&"));
         endController = new VertexHandle(drawingSpace, input[9].split("&"));
+        name = input[10];
         completed = true; //must keep in order to not override vertex information when finishShape() is called
     }
     
@@ -347,7 +350,8 @@ public class Bezier extends Shape{
         output += start.save()+",";
         output += startController.save()+",";
         output += end.save()+",";
-        output += endController.save();
+        output += endController.save()+",";
+        output += this.name;
         return output;
     }
 }

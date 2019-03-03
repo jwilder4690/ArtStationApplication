@@ -85,7 +85,7 @@ public class ArtStationApplication extends PApplet{
         gui.newDrawing.setOnAction(event -> clearScreen());
         gui.saveAs.setOnAction(event ->{
             final FileChooser fileChooser = new FileChooser();
-            File initialDirectory = new File("C:\\Users\\wilder4690\\Documents\\GitHub\\ArtStationApplication\\src\\artstationapplication\\data\\saveFiles");
+            File initialDirectory = new File(".\\src\\artstationapplication\\data\\saveFiles");
             fileChooser.setInitialDirectory(initialDirectory);
             fileChooser.setTitle("Save Drawing");
             fileChooser.getExtensionFilters().addAll(
@@ -107,7 +107,7 @@ public class ArtStationApplication extends PApplet{
         
         gui.open.setOnAction(event ->{
             final FileChooser fileChooser = new FileChooser();
-            File initialDirectory = new File("C:\\Users\\wilder4690\\Documents\\GitHub\\ArtStationApplication\\src\\artstationapplication\\data\\saveFiles");
+            File initialDirectory = new File(".\\src\\artstationapplication\\data\\saveFiles");
             fileChooser.setInitialDirectory(initialDirectory);
             fileChooser.setTitle("Open Drawing");
             fileChooser.getExtensionFilters().addAll(

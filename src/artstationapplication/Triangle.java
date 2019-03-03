@@ -20,11 +20,11 @@ import processing.core.*;
     Triangle(PApplet drawingSpace, int paint, int outline, float thickness, float x, float y, int id){
       super(drawingSpace, paint, outline, x,y);
       strokeWeight = thickness;
-      name = "Triangle";
       index = id;
       widthHandleR = new Handle(drawingSpace, this, new PVector(1,0));
       widthHandleL = new Handle(drawingSpace, this, new PVector(-1,0));
       heightHandleT = new Handle(drawingSpace, this, new PVector(0,-1));
+      name = "Triangle";
     }
     
     /*
@@ -37,6 +37,7 @@ import processing.core.*;
       widthHandleL = new Handle (base.widthHandleL, this);
       heightHandleT = new Handle (base.heightHandleT, this);
       rotation = base.rotation;
+      this.name = base.name;
     }
     
     /*
@@ -51,6 +52,7 @@ import processing.core.*;
         widthHandleR = new Handle(drawingSpace, this, input[8].split("&"));
         widthHandleL = new Handle(drawingSpace, this, input[9].split("&"));
         heightHandleT = new Handle(drawingSpace, this, input[10].split("&"));
+        name = input[11];
     }
     
 
@@ -269,7 +271,8 @@ import processing.core.*;
         output += fillColor+","+strokeColor+","+pos.x+","+pos.y+","+startingRotation+","+rotation+","+strokeWeight+","+index+",";
         output += widthHandleR.save()+",";
         output += widthHandleL.save()+",";
-        output += heightHandleT.save();
+        output += heightHandleT.save()+",";
+        output += this.name;
         return output;
     }
   }

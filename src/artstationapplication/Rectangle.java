@@ -23,13 +23,13 @@ import processing.core.*;
     Rectangle(PApplet drawingSpace, int paint, int outline, float thickness, float a, float b, int id){ 
         super(drawingSpace, paint, outline, a,b);
         strokeWeight = thickness;
-        name = "Rectangle";
         index = id;
         widthHandleR = new Handle(drawingSpace, this, new PVector(1,0));
         widthHandleL = new Handle(drawingSpace, this, new PVector(-1,0));
         heightHandleT = new Handle(drawingSpace, this, new PVector(0,-1));
         heightHandleB = new Handle(drawingSpace, this, new PVector(0,1));
         corner = new PVector(a+1,b+1); //default corner, will not be displayed 
+        name = "Rectangle";
     }
     
     /*
@@ -43,6 +43,7 @@ import processing.core.*;
       heightHandleT = new Handle (base.heightHandleT, this);
       heightHandleB = new Handle (base.heightHandleB, this);
       rotation = base.rotation;
+      this.name = base.name;
     }
     
     /*
@@ -57,6 +58,7 @@ import processing.core.*;
         widthHandleL = new Handle(drawingSpace, this, input[9].split("&"));
         heightHandleT = new Handle(drawingSpace, this, input[10].split("&"));
         heightHandleB = new Handle(drawingSpace, this, input[11].split("&"));
+        name = input[12];
     }
 
     @Override 
@@ -310,7 +312,8 @@ import processing.core.*;
         output += widthHandleR.save()+",";
         output += widthHandleL.save()+",";
         output += heightHandleT.save()+",";
-        output += heightHandleB.save();
+        output += heightHandleB.save()+",";
+        output += this.name;
         return output;
     }
   }
