@@ -256,7 +256,7 @@ public class ArtStationApplication extends PApplet{
                     pad.setHeight(newHeightVal);
                     scaleCanvas((float)(stage.getWidth()-gui.toolBarWidth - gui.controlBarWidth),(float)(stage.getHeight() - 2*gui.mb.getHeight()));
                     canvas.setWidth(stage.getWidth()-gui.toolBarWidth - gui.controlBarWidth);
-                    pad.setGridDensity();
+                    pad.calculateGridSpacing();
                     canvas.requestFocus();
                     for(int i = 0; i < gui.shapes.size(); i++){ 
                         gui.shapes.get(i).resizeHandles(20/scaleFactor);

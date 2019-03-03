@@ -39,8 +39,8 @@ import processing.core.*;
     */
     Line(Line base, int id){
       this(base.app, base.fillColor, base.strokeColor, base.strokeWeight, base.pos.x+base.COPY_OFFSET, base.pos.y+base.COPY_OFFSET, id);
-      start = new VertexHandle(base.app, base.start.getPosition());
-      end = new VertexHandle(base.app, base.end.getPosition());
+      start = new VertexHandle(base.app, base.start.getPosition().x+base.COPY_OFFSET, base.start.getPosition().y+base.COPY_OFFSET);
+      end = new VertexHandle(base.app, base.end.getPosition().x+base.COPY_OFFSET, base.end.getPosition().y+base.COPY_OFFSET);
       this.name = base.name;
     }
     

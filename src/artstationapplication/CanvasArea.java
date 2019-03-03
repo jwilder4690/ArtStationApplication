@@ -320,7 +320,7 @@ import processing.core.*;
             gridSpacing = canvasWidth / (float)gridDensity;
         }
         
-        void setGridDensity(){ //Use when width changed
+        void calculateGridSpacing(){ //Use when width changed
             gridSpacing = canvasWidth / (float)gridDensity;
         }
         

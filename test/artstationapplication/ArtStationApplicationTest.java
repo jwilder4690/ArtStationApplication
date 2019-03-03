@@ -39,7 +39,7 @@ public class ArtStationApplicationTest {
     @Test
     public void testConvertColorToInt() {
         System.out.println("convertColorToInt");
-        Color col = Color.BLACK;
+        Color col = Color.CADETBLUE;
         ArtStationApplication instance = new ArtStationApplication();
         int result = instance.convertColorToInt(col);
         System.out.println(result);
@@ -98,6 +98,7 @@ public class ArtStationApplicationTest {
         ArtStationApplication app = new ArtStationApplication();
         PApplet.runSketch(processingArgs, app); 
         
+        app.pad.setBackgroundColor(-10510688);
         app.pad.editMode();
         
         /////////////////////////////Circle Tests////////////////////////////////
@@ -306,8 +307,159 @@ public class ArtStationApplicationTest {
         app.pad.shapes.get(app.pad.listIndex).manipulate(200,row);
         app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(300, row-100));
         app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(300, row-50));
+        //skip test space for rotation, as lines cannot be rotated
+        app.pad.createShape(0, row);
+        app.pad.shapes.get(app.pad.listIndex).modify(new PVector(100,row-100));
+        app.pad.shapes.get(app.pad.listIndex).manipulate(400,row);
+        app.copyShape();
+        app.pad.createShape(0, row);
+        app.pad.shapes.get(app.pad.listIndex).modify(new PVector(100,row-100));
+        app.pad.shapes.get(app.pad.listIndex).manipulate(500,row);
+        app.deleteShape();
+        //skip test for reset, as reset does nothing to lines
+        app.pad.setCurrentStrokeColor(-16744448);
+        app.pad.createShape(0, row);
+        app.pad.shapes.get(app.pad.listIndex).modify(new PVector(100,row-100));
+        app.pad.shapes.get(app.pad.listIndex).manipulate(700,row);
+        app.pad.createShape(0, row);
+        app.pad.shapes.get(app.pad.listIndex).modify(new PVector(100,row-100));
+        app.pad.shapes.get(app.pad.listIndex).manipulate(800,row);
+        app.pad.shapes.get(app.pad.listIndex).setStrokeColor(-65536);
         
-        app.exportImageFile("./test/artstationapplication/testOutputs/test.png");
-        app.saveDrawing("./test/artstationapplication/testOutputs/testSaveFile/test.txt");
+        ////////////////////////////Bezier Tests//////////////////////////////////
+        app.pad.setActiveTool(ShapeType.CUR);
+        app.pad.setCurrentFillColor(-1);
+        app.pad.setCurrentStrokeColor(-16777216);
+        row += 100;
+        
+        app.pad.createShape(0, row);
+        app.pad.shapes.get(app.pad.listIndex).modify(new PVector(100,row));
+        app.pad.shapes.get(app.pad.listIndex).finishShape();
+        app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(40, row));
+        app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(25, row-70));
+        app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(60, row));
+        app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(75, row+70));
+        app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(100, row));
+        app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(100, row-100));
+        app.pad.createShape(0, row);
+        app.pad.shapes.get(app.pad.listIndex).modify(new PVector(100,row));
+        app.pad.shapes.get(app.pad.listIndex).finishShape();
+        app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(40, row));
+        app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(25, row-70));
+        app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(60, row));
+        app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(75, row+70));
+        app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(100, row));
+        app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(100, row-100));
+        app.pad.shapes.get(app.pad.listIndex).manipulate(100,row);
+        app.pad.createShape(0, row);
+        app.pad.shapes.get(app.pad.listIndex).modify(new PVector(100,row));
+        app.pad.shapes.get(app.pad.listIndex).finishShape();
+        app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(40, row));
+        app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(25, row-70));
+        app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(60, row));
+        app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(75, row+70));
+        app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(100, row));
+        app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(100, row-100));
+        app.pad.shapes.get(app.pad.listIndex).manipulate(200,row);
+        app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(300, row-100));
+        app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(300, row-50));
+        //skip test space for rotation, as bezier curves cannot be rotated
+        app.pad.createShape(0, row);
+        app.pad.shapes.get(app.pad.listIndex).modify(new PVector(100,row));
+        app.pad.shapes.get(app.pad.listIndex).finishShape();
+        app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(40, row));
+        app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(25, row-70));
+        app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(60, row));
+        app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(75, row+70));
+        app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(100, row));
+        app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(100, row-100));
+        app.pad.shapes.get(app.pad.listIndex).manipulate(400,row);
+        app.copyShape();
+        app.pad.createShape(0, row);
+        app.pad.shapes.get(app.pad.listIndex).modify(new PVector(100,row));
+        app.pad.shapes.get(app.pad.listIndex).finishShape();
+        app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(40, row));
+        app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(25, row-70));
+        app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(60, row));
+        app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(75, row+70));
+        app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(100, row));
+        app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(100, row-100));
+        app.pad.shapes.get(app.pad.listIndex).manipulate(500,row);
+        app.deleteShape();
+        //skip test for reset, as reset does nothing to bezier curves
+        app.pad.setCurrentFillColor(-65536);
+        app.pad.setCurrentStrokeColor(-16744448);
+        app.pad.createShape(0, row);
+        app.pad.shapes.get(app.pad.listIndex).modify(new PVector(100,row));
+        app.pad.shapes.get(app.pad.listIndex).finishShape();
+        app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(40, row));
+        app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(25, row-70));
+        app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(60, row));
+        app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(75, row+70));
+        app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(100, row));
+        app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(100, row-100));
+        app.pad.shapes.get(app.pad.listIndex).manipulate(700,row);
+        app.pad.createShape(0, row);
+        app.pad.shapes.get(app.pad.listIndex).modify(new PVector(100,row));
+        app.pad.shapes.get(app.pad.listIndex).finishShape();
+        app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(40, row));
+        app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(25, row-70));
+        app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(60, row));
+        app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(75, row+70));
+        app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(100, row));
+        app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(100, row-100));
+        app.pad.shapes.get(app.pad.listIndex).manipulate(800,row);
+        app.pad.shapes.get(app.pad.listIndex).setFillColor(-16744448);
+        app.pad.shapes.get(app.pad.listIndex).setStrokeColor(-65536);
+        
+        /////////////////////////////Picture Tests///////////////////////////////
+        app.pad.setActiveTool(ShapeType.PIC);
+        app.pad.setCurrentFillColor(-1);
+        app.pad.setCurrentStrokeColor(-16777216);
+        //row can stay the same because pictures draw from upper left
+        
+        app.pad.createPicture("./test/artstationapplication/assets/pup.png");
+        app.pad.completeShape();
+        app.pad.shapes.get(app.pad.listIndex).manipulate(0,row);
+        app.pad.createPicture("./test/artstationapplication/assets/pup.png");
+        app.pad.completeShape();
+        app.pad.shapes.get(app.pad.listIndex).manipulate(100,row);
+        app.pad.createPicture("./test/artstationapplication/assets/pup.png");
+        app.pad.completeShape();
+        app.pad.shapes.get(app.pad.listIndex).manipulate(200,row);
+        app.pad.shapes.get(app.pad.listIndex).checkHandles(new PVector(300,row+100));
+        app.pad.shapes.get(app.pad.listIndex).adjustActiveHandle(new PVector(275, row+75));
+        app.pad.createPicture("./test/artstationapplication/assets/pup.png");
+        app.pad.completeShape();
+        app.pad.shapes.get(app.pad.listIndex).manipulate(300,row);
+        app.pad.shapes.get(app.pad.listIndex).setStartingRotation(new PVector(400,row));
+        app.pad.shapes.get(app.pad.listIndex).changeRotation(new PVector(400, row+100));
+        app.pad.createPicture("./test/artstationapplication/assets/pup.png");
+        app.pad.completeShape();
+        app.pad.shapes.get(app.pad.listIndex).manipulate(400,row);
+        app.copyShape();
+        app.pad.createPicture("./test/artstationapplication/assets/pup.png");
+        app.pad.completeShape();
+        app.pad.shapes.get(app.pad.listIndex).manipulate(500,row);
+        app.pad.shapes.get(app.pad.listIndex).setRotation(PI/4);
+        app.pad.shapes.get(app.pad.listIndex).reset();
+        app.pad.shapes.get(app.pad.listIndex).manipulate(500,row); //have to move again becase reset also return picture to topleft as intended
+        app.pad.createPicture("./test/artstationapplication/assets/pup.png");
+        app.pad.completeShape();
+        app.pad.shapes.get(app.pad.listIndex).manipulate(600,row);
+        app.deleteShape();
+        app.pad.setCurrentFillColor(-65536);
+        app.pad.setCurrentStrokeColor(-16744448);
+        app.pad.createPicture("./test/artstationapplication/assets/pup.png");
+        app.pad.completeShape();
+        app.pad.shapes.get(app.pad.listIndex).manipulate(700,row);
+        app.pad.createPicture("./test/artstationapplication/assets/pup.png");
+        app.pad.completeShape();
+        app.pad.shapes.get(app.pad.listIndex).manipulate(800,row);
+        app.pad.shapes.get(app.pad.listIndex).setFillColor(-16744448);
+        app.pad.shapes.get(app.pad.listIndex).setStrokeColor(-65536);
+        
+        app.exportImageFile("./test/artstationapplication/testOutputs/output.png");
+        app.saveDrawing("./test/artstationapplication/testOutputs/testSaveFile/output.txt");
     }
 }
