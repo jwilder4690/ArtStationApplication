@@ -92,7 +92,7 @@ class Arc extends Shape{
       app.pushMatrix();
       app.translate(pos.x, pos.y);
       app.rotate(rotation);
-      app.arc(0,0, 2*widthHandleL.getRadius(), 2*heightHandleT.getRadius(), getAngle(start.getPosition()), getAngle(end.getPosition()));
+      app.arc(0,0, 2*widthHandleL.getRadius(), 2*heightHandleT.getRadius(), 0, 3*PI/2, app.PIE);
       app.popMatrix();
     }
     

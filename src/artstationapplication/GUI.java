@@ -47,7 +47,7 @@ public class GUI {
     RadioButton drawMode;
     RadioButton editMode;
     
-    ToggleButton btnCircle, btnRectangle, btnTriangle, btnPoly, btnCurve, btnLine, btnPicture; 
+    ToggleButton btnCircle, btnRectangle, btnTriangle, btnPoly, btnCurve, btnLine, btnPicture, btnArc; 
     
     TextField widthTextField;
     TextField heightTextField;
@@ -187,6 +187,13 @@ public class GUI {
         btnPicture.setStyle("-fx-padding:0");
         btnPicture.setToggleGroup(toolGroup);
         btnPicture.setTooltip(new Tooltip("Select image to load from file."));
+        
+        Image imageArc = new Image(getClass().getResource("data/btnArc.png").toExternalForm());
+        btnArc = new ToggleButton("Arc", new ImageView(imageArc));
+        btnArc.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        btnArc.setStyle("-fx-padding:0");
+        btnArc.setToggleGroup(toolGroup);
+        btnArc.setTooltip(new Tooltip("Click in center, drag to size. Then use handles to adjust start and end of arc."));
         
 
         //Canvas Menu///////////////////////////////////////////////////////////
@@ -369,7 +376,7 @@ public class GUI {
         modes.getChildren().addAll(drawMode, editMode, new Separator(Orientation.HORIZONTAL));
         modes.setPadding(new Insets(spacing, 0,0,0));
         toolPane.setPadding(new Insets(0,spacing,0,spacing));
-        toolPane.getChildren().addAll(modes, btnCircle, btnRectangle, btnTriangle, btnLine, btnPoly, btnCurve, btnPicture);
+        toolPane.getChildren().addAll(modes, btnCircle, btnRectangle, btnTriangle, btnArc, btnLine, btnCurve, btnPoly, btnPicture);
         toolPane.setPrefColumns(1);
         toolPane.setHgap(spacing);
         toolPane.setVgap(spacing);

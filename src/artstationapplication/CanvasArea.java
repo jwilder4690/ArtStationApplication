@@ -275,6 +275,9 @@ import processing.core.*;
                 case CUR: 
                     shapes.add(new Bezier(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex));
                     break;
+                case ARC:
+                    shapes.add(new Arc(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex));
+                    break;
             }
         }
         
