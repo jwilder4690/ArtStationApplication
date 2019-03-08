@@ -16,10 +16,11 @@ class Arc extends Shape{
     Handle widthHandleL;
     Handle heightHandleT;
     Handle heightHandleB;
-    VertexHandle start;
-    VertexHandle end;
+    Handle start;
+    Handle end;
     Handle[] activeHandle = new Handle[2];
     Handle[] inactiveHandle = new Handle[2];
+    float majorRadius = 50;
 
     Arc(PApplet drawingSpace, int paint, int outline, float thickness, float x, float y, int id){
       super(drawingSpace,paint,outline,x,y);
@@ -29,8 +30,8 @@ class Arc extends Shape{
       widthHandleL = new Handle(drawingSpace, this, new PVector(-1,0));
       heightHandleB = new Handle(drawingSpace, this, new PVector(0,1));
       heightHandleT = new Handle(drawingSpace, this, new PVector(0,-1));
-      start = new VertexHandle(drawingSpace, new PVector(0,-1));
-      end = new VertexHandle(drawingSpace, new PVector(1,0));
+      start = new Handle(drawingSpace, this, new PVector(0,-1));
+      end = new Handle(drawingSpace, this, new PVector(1,0));
       name = "Arc";
     }
         
@@ -44,8 +45,8 @@ class Arc extends Shape{
       widthHandleL = new Handle (base.widthHandleL, this);
       heightHandleB = new Handle (base.heightHandleB, this);
       heightHandleT = new Handle (base.heightHandleT, this);
-      start = new VertexHandle(base.app, base.start.getPosition());
-      end = new VertexHandle(base.app, base.end.getPosition());
+      start = new Handle(base.start, this);
+      end = new Handle(base.end, this);
       rotation = base.rotation;
       this.name = base.name;
     }
@@ -62,8 +63,8 @@ class Arc extends Shape{
         widthHandleL = new Handle(drawingSpace, this, input[9].split("&"));
         heightHandleT = new Handle(drawingSpace, this, input[10].split("&"));
         heightHandleB = new Handle(drawingSpace, this, input[11].split("&"));
-        start = new VertexHandle(drawingSpace, input[12].split("&"));
-        end = new VertexHandle(drawingSpace, input[13].split("&"));
+        start = new Handle(drawingSpace, this, input[12].split("&"));
+        end = new Handle(drawingSpace, this, input[13].split("&"));
         name = input[12];
     }
 
@@ -104,17 +105,17 @@ class Arc extends Shape{
         app.noFill();
         app.strokeWeight(3);
         app.stroke(editColor);
-        app.arc(0,0, 2*widthHandleL.getRadius(), 2*heightHandleT.getRadius(), getAngle(start.getPosition()), getAngle(end.getPosition()));
+        app.arc(0,0, 2*widthHandleL.getRadius(), 2*heightHandleT.getRadius(), start.getOffsetAngle(), end.getOffsetAngle());
         drawHandles();
         app.popMatrix();
     }
     
-    /*
-        Helper method to find the angle between a handle and the x-axis
-    */
-    float getAngle(PVector vec){
-        return PVector.angleBetween(vec, new PVector(1,0));
-    }
+//    /*
+//        Helper method to find the angle between a handle and the x-axis
+//    */
+//    float getAngle(PVector vec){
+//        return PVector.angleBetween(vec, new PVector(1,0));
+//    }
 
     void drawHandles(){   
         widthHandleL.drawHandle();
@@ -164,26 +165,43 @@ class Arc extends Shape{
             inactiveHandle[1] = widthHandleR;
             return true;
         }
+        else if( start.overHandle(mouse, rotation)){
+            activeHandle[0] = start;
+            return true;
+        }
+        else if( end.overHandle(mouse, rotation)){
+            activeHandle[0] = end;
+            return true;
+        }
         else return false;
     }    
     
     @Override
     void adjustActiveHandle(PVector mouse){
-        float ratio = inactiveHandle[0].getRadius()/activeHandle[0].getRadius();
-        float dist = app.dist(pos.x, pos.y, mouse.x, mouse.y);
-        if(shift){  
-            //If shift is held, inactive handles are scaled proportionally with the active controller.
-            //First calulates ratio between current handles, then scales handles accordingly
-            
-            activeHandle[0].calculateModifier(dist); 
-            activeHandle[1].calculateModifier(dist);
-            inactiveHandle[0].calculateModifier(dist * ratio);  
-            inactiveHandle[1].calculateModifier(dist * ratio);
+
+        //Handles for start and end of arc
+        if(activeHandle[0] == start || activeHandle[0] == end){
+            //activeHandle[0].setOffset(PVector.sub(mouse, pos));
+            activeHandle[0].setOffset(mouse);
         }
-        else{
-            activeHandle[0].calculateModifier(dist);  
-            activeHandle[1].calculateModifier(dist);
+        else{ //Handles for base ellipse 
+            float ratio = inactiveHandle[0].getRadius()/activeHandle[0].getRadius();
+            float dist = app.dist(pos.x, pos.y, mouse.x, mouse.y);
+            if(shift){  
+                //If shift is held, inactive handles are scaled proportionally with the active controller.
+                //First calulates ratio between current handles, then scales handles accordingly
+
+                activeHandle[0].calculateModifier(dist); 
+                activeHandle[1].calculateModifier(dist);
+                inactiveHandle[0].calculateModifier(dist * ratio);  
+                inactiveHandle[1].calculateModifier(dist * ratio);
+            }
+            else{
+                activeHandle[0].calculateModifier(dist);  
+                activeHandle[1].calculateModifier(dist);
+            }
         }
+        calculateMajorRadius();
     }
     
     @Override
@@ -192,7 +210,16 @@ class Arc extends Shape{
         widthHandleL.setRadius();
         widthHandleR.setRadius();
         heightHandleT.setRadius();
-        heightHandleB.setRadius();
+        heightHandleB.setRadius();     
+        calculateMajorRadius();
+
+    }
+    
+    void calculateMajorRadius(){
+        if(widthHandleL.getRadius() > heightHandleT.getRadius()) majorRadius = widthHandleL.getRadius();
+        else majorRadius = heightHandleT.getRadius();
+        start.calculateModifier(1.5f*majorRadius);
+        end.calculateModifier(1.5f*majorRadius);
     }
     
     @Override
