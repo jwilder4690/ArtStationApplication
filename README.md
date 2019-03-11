@@ -26,6 +26,7 @@ I am currently working on developing a testing suite for this project. There are
 
 - [x] Initial launch with all basic functionality 
 - [x] Refactor
+- [ ] Prepare for Integration as Processing tool
 - [ ] Address Issues
 - [ ] Develop testing environment
     - Unit Tests
