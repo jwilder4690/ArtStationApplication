@@ -65,7 +65,7 @@ class Arc extends Shape{
         heightHandleB = new Handle(drawingSpace, this, input[11].split("&"));
         start = new Handle(drawingSpace, this, input[12].split("&"));
         end = new Handle(drawingSpace, this, input[13].split("&"));
-        name = input[12];
+        name = input[14];
     }
 
     @Override 
@@ -93,7 +93,8 @@ class Arc extends Shape{
       app.pushMatrix();
       app.translate(pos.x, pos.y);
       app.rotate(rotation);
-      app.arc(0,0, 2*widthHandleL.getRadius(), 2*heightHandleT.getRadius(), 0, 3*PI/2, app.PIE);
+      if(start.getOffset() < end.getOffset()) app.arc(0,0, 2*widthHandleL.getRadius(), 2*heightHandleT.getRadius(),start.getOffset(), end.getOffset(), app.PIE);
+      else app.arc(0,0, 2*widthHandleL.getRadius(), 2*heightHandleT.getRadius(), start.getOffset(), end.getOffset() + 2*PI, app.PIE);
       app.popMatrix();
     }
     
@@ -105,17 +106,12 @@ class Arc extends Shape{
         app.noFill();
         app.strokeWeight(3);
         app.stroke(editColor);
-        app.arc(0,0, 2*widthHandleL.getRadius(), 2*heightHandleT.getRadius(), start.getOffsetAngle(), end.getOffsetAngle());
+        if(start.getOffset() < end.getOffset()) app.arc(0,0, 2*widthHandleL.getRadius(), 2*heightHandleT.getRadius(),start.getOffset(), end.getOffset(), app.PIE);
+        else app.arc(0,0, 2*widthHandleL.getRadius(), 2*heightHandleT.getRadius(), start.getOffset(), end.getOffset() + 2*PI, app.PIE);
         drawHandles();
         app.popMatrix();
     }
     
-//    /*
-//        Helper method to find the angle between a handle and the x-axis
-//    */
-//    float getAngle(PVector vec){
-//        return PVector.angleBetween(vec, new PVector(1,0));
-//    }
 
     void drawHandles(){   
         widthHandleL.drawHandle();
@@ -212,7 +208,6 @@ class Arc extends Shape{
         heightHandleT.setRadius();
         heightHandleB.setRadius();     
         calculateMajorRadius();
-
     }
     
     void calculateMajorRadius(){
@@ -242,6 +237,7 @@ class Arc extends Shape{
         widthHandleR.reset();
         heightHandleT.reset();
         heightHandleB.reset();
+        calculateMajorRadius();
     }
     
     Shape copy(int id){
@@ -261,7 +257,8 @@ class Arc extends Shape{
         output += "\tpushMatrix();\n";
         output += "\ttranslate("+pos.x+", "+pos.y+");\n";
         output += "\trotate("+rotation+");\n";
-        output += "\tellipse(0,0,"+2*widthHandleL.getRadius()+", "+2*heightHandleT.getRadius()+");\n";
+        if(start.getOffset() < end.getOffset()) output += "\tarc(0,0,"+2*widthHandleL.getRadius()+", "+2*heightHandleT.getRadius()+", "+start.getOffset()+", "+end.getOffset()+", PIE);\n";
+        else output += "\tarc(0,0,"+2*widthHandleL.getRadius()+", "+2*heightHandleT.getRadius()+", "+start.getOffset()+", "+(end.getOffset()+2*PI)+", PIE);\n";       
         output += "\tpopMatrix();\n\n";
         
         return output;
@@ -285,7 +282,8 @@ class Arc extends Shape{
       ig.pushMatrix();
       ig.translate(pos.x, pos.y);
       ig.rotate(rotation);
-      ig.ellipse(0,0, 2*widthHandleL.getRadius(), 2*heightHandleT.getRadius());
+      if(start.getOffset() < end.getOffset()) ig.arc(0,0, 2*widthHandleL.getRadius(), 2*heightHandleT.getRadius(),start.getOffset(), end.getOffset(), app.PIE);
+      else ig.arc(0,0, 2*widthHandleL.getRadius(), 2*heightHandleT.getRadius(), start.getOffset(), end.getOffset() + 2*PI, app.PIE);
       ig.popMatrix();
       return ig;
     }

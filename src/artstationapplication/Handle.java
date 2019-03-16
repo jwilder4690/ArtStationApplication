@@ -30,7 +30,7 @@ import processing.core.*;
           Used for creating an exact copy of base Handle.
         */
          Handle(Handle base, Shape parent){
-             this(base.app, parent, base.offset);
+             this(base.app, parent, base.offset.copy());
              radius = base.radius;
              modifier = base.modifier;
          }
@@ -67,8 +67,9 @@ import processing.core.*;
             offset.set(rotatedMouse);
          }
          
-         float getOffsetAngle(){
-             return PVector.angleBetween(offset, new PVector(1,0));
+         float getOffset(){
+             float angle = app.atan2(offset.y,offset.x); 
+             return angle;
          }
          
          void calculateModifier(float r){
