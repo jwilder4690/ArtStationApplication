@@ -227,6 +227,7 @@ public class ArtStationApplication extends PApplet{
                             pad.completeShape();
                         }
                         break;
+                    case "Arc": pad.setActiveTool(ShapeType.ARC); break;
                 }
 
                 canvas.requestFocus(); 
@@ -240,6 +241,7 @@ public class ArtStationApplication extends PApplet{
         gui.btnPoly.setOnAction(ToolHandler);
         gui.btnCurve.setOnAction(ToolHandler);
         gui.btnPicture.setOnAction(ToolHandler);
+        gui.btnArc.setOnAction(ToolHandler);
         
         EventHandler<ActionEvent> textHandler = new EventHandler<ActionEvent>(){
             public void handle(ActionEvent ae){

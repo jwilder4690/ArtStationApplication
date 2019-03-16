@@ -30,7 +30,7 @@ import processing.core.*;
           Used for creating an exact copy of base Handle.
         */
          Handle(Handle base, Shape parent){
-             this(base.app, parent, base.offset);
+             this(base.app, parent, base.offset.copy());
              radius = base.radius;
              modifier = base.modifier;
          }
@@ -54,6 +54,22 @@ import processing.core.*;
              float pointX = modifier*radius*offset.x;
              float pointY = modifier*radius*offset.y;
              return new PVector(parent.getPosition().x + pointX * app.cos(rot) - pointY*app.sin(rot), parent.getPosition().y + pointX*app.sin(rot) + pointY*app.cos(rot));
+         }
+         
+         void setOffset(PVector mouse){
+           float rotation = parent.rotation;
+            float deltaX = mouse.x - parent.pos.x;
+            float deltaY = mouse.y - parent.pos.y;
+            float rotX = deltaX*app.cos(-rotation) - deltaY*app.sin(-rotation);
+            float rotY = deltaY*app.cos(-rotation) + deltaX*app.sin(-rotation);
+            PVector rotatedMouse = new PVector(rotX, rotY);
+            rotatedMouse.normalize(); //must be length of 1 in order to scale correctly based on radius and modifier
+            offset.set(rotatedMouse);
+         }
+         
+         float getOffset(){
+             float angle = app.atan2(offset.y,offset.x); 
+             return angle;
          }
          
          void calculateModifier(float r){

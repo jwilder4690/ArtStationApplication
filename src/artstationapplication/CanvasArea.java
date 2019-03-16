@@ -133,6 +133,7 @@ import processing.core.*;
                 case "Triangle": shapes.add(new Triangle(sketch, shapeInfo)); break;
                 case "Polygon": shapes.add(new Polygon(sketch, shapeInfo)); break;
                 case "Picture": shapes.add(new Picture(sketch, shapeInfo)); break;
+                case "Arc": shapes.add(new Arc(sketch, shapeInfo)); break;
             }
             listIndex = shapes.size()-1;
             shapes.get(listIndex).finishShape();
@@ -274,6 +275,9 @@ import processing.core.*;
                     }break;
                 case CUR: 
                     shapes.add(new Bezier(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex));
+                    break;
+                case ARC:
+                    shapes.add(new Arc(sketch, currentFillColor, currentStrokeColor, currentStrokeWeight, x, y, listIndex));
                     break;
             }
         }
