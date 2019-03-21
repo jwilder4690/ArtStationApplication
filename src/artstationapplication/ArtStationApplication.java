@@ -78,45 +78,71 @@ public class ArtStationApplication extends PApplet{
           Dev note: I used both lambda expressions and EventHandler class creation
           for practice. Typically all expression handling should be consistent.
         */
-        gui.coordsOff.setOnAction(event -> coordinateMode = Coordinates.OFF); 
-        gui.coordsMouse.setOnAction(event -> coordinateMode = Coordinates.MOUSE); 
-        gui.coordsTop.setOnAction(event -> coordinateMode = Coordinates.TOP); 
+        gui.coordsOff.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent ae){
+               coordinateMode = Coordinates.OFF;
+            }
+        });   
+
+        gui.coordsMouse.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent ae){
+              coordinateMode = Coordinates.MOUSE;
+            }
+        }); 
         
-        gui.newDrawing.setOnAction(event -> clearScreen());
-        gui.saveAs.setOnAction(event ->{
-            final FileChooser fileChooser = new FileChooser();
-            File initialDirectory = new File(".\\src\\artstationapplication\\data\\saveFiles");
-            fileChooser.setInitialDirectory(initialDirectory);
-            fileChooser.setTitle("Save Drawing");
-            fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("ASF", "*.txt")
-            );
-            File file = fileChooser.showSaveDialog(stage); //arg here is a Window that input will be blocked to until dialog complete (can be null)
-            if(file != null){ 
-                String location = file.getAbsolutePath();
-                saveDrawing(location);
+        gui.coordsTop.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent ae){
+              coordinateMode = Coordinates.TOP;
+            }
+        }); 
+        
+        gui.newDrawing.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent ae){
+              clearScreen();
             }
         });
-       
-        gui.save.setOnAction(event -> {
-            if(fileLocation.equals("noFile")){
-                gui.saveAs.fire();
+        
+        
+        gui.saveAs.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent ae){
+                final FileChooser fileChooser = new FileChooser();
+                File initialDirectory = new File(".\\src\\artstationapplication\\data\\saveFiles");
+                fileChooser.setInitialDirectory(initialDirectory);
+                fileChooser.setTitle("Save Drawing");
+                fileChooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("ASF", "*.txt")
+                );
+                File file = fileChooser.showSaveDialog(stage); //arg here is a Window that input will be blocked to until dialog complete (can be null)
+                if(file != null){ 
+                    String location = file.getAbsolutePath();
+                    saveDrawing(location);
+                }
             }
-            else saveDrawing(fileLocation);
+        });
+
+        gui.save.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent ae){
+                if(fileLocation.equals("noFile")){
+                    gui.saveAs.fire();
+                }
+                else saveDrawing(fileLocation);
+            }
         });
         
-        gui.open.setOnAction(event ->{
-            final FileChooser fileChooser = new FileChooser();
-            File initialDirectory = new File(".\\src\\artstationapplication\\data\\saveFiles");
-            fileChooser.setInitialDirectory(initialDirectory);
-            fileChooser.setTitle("Open Drawing");
-            fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("ASF", "*.txt")
-            );
-            File file = fileChooser.showOpenDialog(stage); //arg here is a Window that input will be blocked to until dialog complete (can be null)
-            if(file != null){ 
-                String location = file.getAbsolutePath();
-                loadDrawing(location);
+        gui.open.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent ae){
+                final FileChooser fileChooser = new FileChooser();
+                File initialDirectory = new File(".\\src\\artstationapplication\\data\\saveFiles");
+                fileChooser.setInitialDirectory(initialDirectory);
+                fileChooser.setTitle("Open Drawing");
+                fileChooser.getExtensionFilters().addAll(
+                    new FileChooser.ExtensionFilter("ASF", "*.txt")
+                );
+                File file = fileChooser.showOpenDialog(stage); //arg here is a Window that input will be blocked to until dialog complete (can be null)
+                if(file != null){ 
+                    String location = file.getAbsolutePath();
+                    loadDrawing(location);
+                }
             }
         });
 
@@ -270,50 +296,60 @@ public class ArtStationApplication extends PApplet{
         gui.widthTextField.setOnAction(textHandler);
         gui.heightTextField.setOnAction(textHandler);
         
-        gui.btnReferenceImage.setOnAction(event ->{
-            final FileChooser fileChooser = getImageFileChooser();
-            File file = fileChooser.showOpenDialog(stage); //arg here is a Window that input will be blocked to until dialog complete (can be null)
-            if(file != null){ 
-                PImage loadedImage = loadImage(file.getAbsolutePath());
-                
-                //Popup to handle resize////////////////////////////////////////////
-                if(loadedImage.width > pad.getWidth() || loadedImage.height > pad.getHeight()){
-                    final Stage windowAlert = new Stage();
-                    windowAlert.initModality(Modality.APPLICATION_MODAL);
+        gui.btnReferenceImage.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent ae){
+                final FileChooser fileChooser = getImageFileChooser();
+                File file = fileChooser.showOpenDialog(stage); //arg here is a Window that input will be blocked to until dialog complete (can be null)
+                if(file != null){ 
+                    PImage loadedImage = loadImage(file.getAbsolutePath());
 
-                    final FlowPane dialogBox = new FlowPane(Orientation.VERTICAL, spacing, 2*spacing);
-                    final HBox options = new HBox(spacing);
-                    final Button maintain = new Button("Maintain Canvas");
-                    final Button resize = new Button("Resize Canvas");
-                    final Label text = new Label("The reference image is larger than the canvas.\nHow would you like to resolve this?");
+                    //Popup to handle resize////////////////////////////////////////////
+                    if(loadedImage.width > pad.getWidth() || loadedImage.height > pad.getHeight()){
+                        final Stage windowAlert = new Stage();
+                        windowAlert.initModality(Modality.APPLICATION_MODAL);
 
-                    text.setWrapText(true);
-                    dialogBox.setAlignment(Pos.CENTER);
+                        final FlowPane dialogBox = new FlowPane(Orientation.VERTICAL, spacing, 2*spacing);
+                        final HBox options = new HBox(spacing);
+                        final Button maintain = new Button("Maintain Canvas");
+                        final Button resize = new Button("Resize Canvas");
+                        final Label text = new Label("The reference image is larger than the canvas.\nHow would you like to resolve this?");
 
-                    options.getChildren().addAll(maintain, resize);
-                    dialogBox.getChildren().addAll(text, options);
-                    Scene dialogScene = new Scene(dialogBox, 400, 200);
-                    windowAlert.setScene(dialogScene);
-                    windowAlert.show();
+                        text.setWrapText(true);
+                        dialogBox.setAlignment(Pos.CENTER);
 
-                    maintain.setOnAction(internalEvent -> windowAlert.close());
-                    resize.setOnAction(internalEvent -> {
-                        pad.setHeight(loadedImage.height);
-                        pad.setWidth(loadedImage.width);
-                        gui.widthTextField.setText(loadedImage.width+"");
-                        gui.heightTextField.setText(loadedImage.height+"");
-                        pad.calculateGridSpacing();
-                        windowAlert.close();
-                    });
-            }
-                
-                pad.loadReferenceImage(loadedImage);
-                gui.cbReferenceImage.setSelected(true);
+                        options.getChildren().addAll(maintain, resize);
+                        dialogBox.getChildren().addAll(text, options);
+                        Scene dialogScene = new Scene(dialogBox, 400, 200);
+                        windowAlert.setScene(dialogScene);
+                        windowAlert.show();
+
+                        maintain.setOnAction(new EventHandler<ActionEvent>(){
+                            public void handle(ActionEvent ae){
+                                windowAlert.close();
+                            }
+                        });
+                                   
+                        resize.setOnAction(new EventHandler<ActionEvent>(){
+                            public void handle(ActionEvent ae){
+                                pad.setHeight(loadedImage.height);
+                                pad.setWidth(loadedImage.width);
+                                gui.widthTextField.setText(loadedImage.width+"");
+                                gui.heightTextField.setText(loadedImage.height+"");
+                                pad.calculateGridSpacing();
+                                windowAlert.close();
+                            }
+                        });
+                }
+                    pad.loadReferenceImage(loadedImage);
+                    gui.cbReferenceImage.setSelected(true);
+                }
             }
         });
         
-        gui.cbReferenceImage.setOnAction(event ->{
-            pad.toggleReferenceImage(gui.cbReferenceImage.isSelected());
+        gui.cbReferenceImage.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent ae){
+                pad.toggleReferenceImage(gui.cbReferenceImage.isSelected());
+            }
         });
         
         gui.gridSlider.valueProperty().addListener(new ChangeListener<Number>(){
@@ -466,49 +502,59 @@ public class ArtStationApplication extends PApplet{
             }
         });
         
-        gui.btnUpArrow.setOnAction(event -> {
-            if(pad.listIndex-1 < 0 || pad.listIndex-1 == gui.shapes.size()) {
+        gui.btnUpArrow.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent ae){
+                if(pad.listIndex-1 < 0 || pad.listIndex-1 == gui.shapes.size()) {
+                    canvas.requestFocus();
+                    return;
+                }
+                tasks.push(new Change(Transformation.ORD, pad.listIndex, new float[]{pad.listIndex-1, pad.listIndex}));
+                swapElements(pad.listIndex, pad.listIndex-1);
                 canvas.requestFocus();
-                return;
             }
-            tasks.push(new Change(Transformation.ORD, pad.listIndex, new float[]{pad.listIndex-1, pad.listIndex}));
-            swapElements(pad.listIndex, pad.listIndex-1);
-            canvas.requestFocus();
         });
         
-        gui.btnDownArrow.setOnAction(event -> {
-            if(pad.listIndex+1 < 0 || pad.listIndex+1 >= gui.shapes.size()){
+        gui.btnDownArrow.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent ae){
+                if(pad.listIndex+1 < 0 || pad.listIndex+1 >= gui.shapes.size()){
+                    canvas.requestFocus();
+                    return;
+                }
+                tasks.push(new Change(Transformation.ORD, pad.listIndex, new float[]{pad.listIndex+1, pad.listIndex}));
+                swapElements(pad.listIndex, pad.listIndex+1);
                 canvas.requestFocus();
-                return;
             }
-            tasks.push(new Change(Transformation.ORD, pad.listIndex, new float[]{pad.listIndex+1, pad.listIndex}));
-            swapElements(pad.listIndex, pad.listIndex+1);
-            canvas.requestFocus();
         });
         
-        gui.btnDelete.setOnAction(event -> {
-            if(gui.shapes.isEmpty()) return;
-            Change currentChange = new Change(Transformation.DEL, pad.listIndex, 0);
-            currentChange.createClone(gui.shapes.get(pad.listIndex));
-            tasks.push(currentChange);
-            deleteShape();
-            canvas.requestFocus();
+        gui.btnDelete.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent ae){
+                if(gui.shapes.isEmpty()) return;
+                Change currentChange = new Change(Transformation.DEL, pad.listIndex, 0);
+                currentChange.createClone(gui.shapes.get(pad.listIndex));
+                tasks.push(currentChange);
+                deleteShape();
+                canvas.requestFocus();
+            }
         });
         
-        gui.btnReset.setOnAction(event -> {
-            if(!gui.shapes.isEmpty()) {
-                tasks.push(new Change(Transformation.RES, pad.listIndex, gui.shapes.get(pad.listIndex).getResetFloats()));
-                gui.shapes.get(pad.listIndex).reset();
+        gui.btnReset.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent ae){
+                if(!gui.shapes.isEmpty()) {
+                    tasks.push(new Change(Transformation.RES, pad.listIndex, gui.shapes.get(pad.listIndex).getResetFloats()));
+                    gui.shapes.get(pad.listIndex).reset();
+                }
+                canvas.requestFocus();
             }
-            canvas.requestFocus();
         });
         
-        gui.btnCopy.setOnAction(event -> {
-            if(!gui.shapes.isEmpty()){
-                copyShape();
-                tasks.push(new Change(Transformation.COP, pad.listIndex, 0));
+        gui.btnCopy.setOnAction(new EventHandler<ActionEvent>(){
+            public void handle(ActionEvent ae){
+                if(!gui.shapes.isEmpty()){
+                    copyShape();
+                    tasks.push(new Change(Transformation.COP, pad.listIndex, 0));
+                }
+                canvas.requestFocus();
             }
-            canvas.requestFocus();
         });
         
         gui.selectionModel.selectedIndexProperty().addListener(new ChangeListener<Number>(){
@@ -553,66 +599,72 @@ public class ArtStationApplication extends PApplet{
         });
 		
         //Key Events for full scene
-        gui.rootNode.addEventFilter(KeyEvent.KEY_PRESSED, event ->{
-            switch(event.getCode()){
-                case ESCAPE:
-                    pad.drawMode();
-                    event.consume();    //consume so it does not trigger closing the application
-                    break;
-                case CONTROL:
-                    pad.setControl(true);
-                    pad.toggleGrid(true);
-                    pad.toggleSnap(true); 
-                    dialog = "SNAP and GRID are on.";
-                    break;
-                case ALT:
-                    pad.setAlt(true);
-                    break;
-                case SHIFT:
-                    pad.setShift(true);
-                    break;
+        gui.rootNode.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>(){
+            public void handle(KeyEvent event){
+                switch(event.getCode()){
+                    case ESCAPE:
+                        pad.drawMode();
+                        event.consume();    //consume so it does not trigger closing the application
+                        break;
+                    case CONTROL:
+                        pad.setControl(true);
+                        pad.toggleGrid(true);
+                        pad.toggleSnap(true); 
+                        dialog = "SNAP and GRID are on.";
+                        break;
+                    case ALT:
+                        pad.setAlt(true);
+                        break;
+                    case SHIFT:
+                        pad.setShift(true);
+                        break;
+                }
             }
         });
         
-        gui.rootNode.addEventFilter(KeyEvent.KEY_RELEASED, event->{
-            switch(event.getCode()){
-                case DELETE: 
-                    if(!gui.shapes.isEmpty()){
-                        Change currentChange = new Change(Transformation.DEL, pad.listIndex, 0);
-                        currentChange.createClone(gui.shapes.get(pad.listIndex));
-                        tasks.push(currentChange);
-                        deleteShape();
-                    }break;
-                case CONTROL: 
-                    pad.setControl(false);
-                    pad.toggleGrid(gui.cbGridOn.isSelected());
-                    pad.toggleSnap(gui.cbGridSnap.isSelected()); 
-                    dialog = "";
-                    break;
-                case ALT: pad.setAlt(false); break;
-                case SHIFT: pad.setShift(false); break;
-                case SPACE:
-                    if(pad.isDrawMode()){
-                        gui.editMode.setSelected(true);
-                        pad.completeShape();  
-                    }
-                    else{
-                        gui.drawMode.setSelected(true);
-                        pad.drawMode();  
-                    }break;
+        gui.rootNode.addEventFilter(KeyEvent.KEY_RELEASED, new EventHandler<KeyEvent>(){
+            public void handle(KeyEvent event){
+                switch(event.getCode()){
+                    case DELETE: 
+                        if(!gui.shapes.isEmpty()){
+                            Change currentChange = new Change(Transformation.DEL, pad.listIndex, 0);
+                            currentChange.createClone(gui.shapes.get(pad.listIndex));
+                            tasks.push(currentChange);
+                            deleteShape();
+                        }break;
+                    case CONTROL: 
+                        pad.setControl(false);
+                        pad.toggleGrid(gui.cbGridOn.isSelected());
+                        pad.toggleSnap(gui.cbGridSnap.isSelected()); 
+                        dialog = "";
+                        break;
+                    case ALT: pad.setAlt(false); break;
+                    case SHIFT: pad.setShift(false); break;
+                    case SPACE:
+                        if(pad.isDrawMode()){
+                            gui.editMode.setSelected(true);
+                            pad.completeShape();  
+                        }
+                        else{
+                            gui.drawMode.setSelected(true);
+                            pad.drawMode();  
+                        }break;
+                }
             }
         });
         
         //Mouse events for full scene
-        gui.rootNode.addEventFilter(ScrollEvent.ANY, event ->{
-            if(mouseOverCanvas()){
-                float delta = (float)event.getDeltaY(); //one scroll unit is 40
-                zoomFactor += delta/ZOOM_UNIT; 
-                if(zoomFactor < 1) zoomFactor = 1;
-            
-            //Focuses zoom on mouse for generation of canvas.
-                focusX = mouseX*(1-zoomFactor);
-                focusY = mouseY*(1-zoomFactor);
+        gui.rootNode.addEventFilter(ScrollEvent.ANY, new EventHandler<ScrollEvent>(){
+            public void handle(ScrollEvent event){
+                if(mouseOverCanvas()){
+                    float delta = (float)event.getDeltaY(); //one scroll unit is 40
+                    zoomFactor += delta/ZOOM_UNIT; 
+                    if(zoomFactor < 1) zoomFactor = 1;
+
+                //Focuses zoom on mouse for generation of canvas.
+                    focusX = mouseX*(1-zoomFactor);
+                    focusY = mouseY*(1-zoomFactor);
+                }
             }
         });
         
@@ -627,13 +679,17 @@ public class ArtStationApplication extends PApplet{
         stage.setMaximized(true);
         stage.setMinWidth(gui.controlBarWidth + gui.toolBarWidth);
 
-        stage.widthProperty().addListener((obs, oldVal, newVal) -> {
-            scaleCanvas((float)(stage.getWidth()-gui.toolBarWidth - gui.controlBarWidth),(float)(stage.getHeight() - 2*gui.mb.getHeight()));
-            canvas.setWidth(stage.getWidth()-gui.toolBarWidth - gui.controlBarWidth);
+        stage.widthProperty().addListener(new ChangeListener<Number>(){
+            public void changed(ObservableValue<? extends Number> changed, Number oldVal, Number newVal){
+                scaleCanvas((float)(stage.getWidth()-gui.toolBarWidth - gui.controlBarWidth),(float)(stage.getHeight() - 2*gui.mb.getHeight()));
+                canvas.setWidth(stage.getWidth()-gui.toolBarWidth - gui.controlBarWidth);
+            }
         });
 
-        stage.heightProperty().addListener((obs, oldVal, newVal) -> {
-             scaleCanvas((float)(stage.getWidth()-gui.toolBarWidth - gui.controlBarWidth),(float)(stage.getHeight() - 2*gui.mb.getHeight()));
+        stage.heightProperty().addListener(new ChangeListener<Number>(){
+            public void changed(ObservableValue<? extends Number> changed, Number oldVal, Number newVal){
+                scaleCanvas((float)(stage.getWidth()-gui.toolBarWidth - gui.controlBarWidth),(float)(stage.getHeight() - 2*gui.mb.getHeight()));
+            }
         });
 
 
