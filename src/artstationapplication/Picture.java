@@ -44,6 +44,7 @@ public class Picture extends Shape{
         this(drawingSpace, input[0], Integer.valueOf(input[1]), Float.valueOf(input[6]),Float.valueOf(input[2]), Float.valueOf(input[3]), Integer.valueOf(input[7]));
         startingRotation = Float.valueOf(input[4]);
         rotation = Float.valueOf(input[5]);
+        cornerHandle = new VertexHandle(drawingSpace, input[8].split("&"));
         name = input[9];
     }
        

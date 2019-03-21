@@ -74,10 +74,7 @@ public class ArtStationApplication extends PApplet{
         gui.initializeGUI();
         
         //Event Handling for all GUI elements///////////////////////////////////
-        /*
-          Dev note: I used both lambda expressions and EventHandler class creation
-          for practice. Typically all expression handling should be consistent.
-        */
+
         gui.coordsOff.setOnAction(new EventHandler<ActionEvent>(){
             public void handle(ActionEvent ae){
                coordinateMode = Coordinates.OFF;
@@ -579,7 +576,8 @@ public class ArtStationApplication extends PApplet{
 
                     Optional<String> result = nameDialog.showAndWait();
                     if (result.isPresent()) {
-                        gui.shapes.get(gui.selectionModel.getSelectedIndex()).setName(result.get());
+                        String cleanedInput = cleanseUserInput(result.get());
+                        gui.shapes.get(gui.selectionModel.getSelectedIndex()).setName(cleanedInput);
                         gui.shapeViewer.refresh();
                     }
                 } catch (ArrayIndexOutOfBoundsException e) {
@@ -890,6 +888,13 @@ public class ArtStationApplication extends PApplet{
             result = -1;
         }
         return result; 
+    }
+    
+    String cleanseUserInput(String input){
+        input = input.replace(",", " ");
+        input = input.replace("&", "+");
+        input = input.replace(";", " ");
+        return input;
     }
     
     String cleanseFilePath(String path){
