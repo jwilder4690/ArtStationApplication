@@ -75,7 +75,7 @@ public class ArtStationApplication extends PApplet{
         gui.initializeGUI();
         
         //Event Handling for all GUI elements///////////////////////////////////
-        
+
         gui.coordsOff.setOnAction(new EventHandler<ActionEvent>(){
             public void handle(ActionEvent ae){
                coordinateMode = Coordinates.OFF;
@@ -301,6 +301,7 @@ public class ArtStationApplication extends PApplet{
                 if(file != null){ 
                     PImage loadedImage = loadImage(file.getAbsolutePath());
                     refLocation = file.getAbsolutePath();
+
 
                     //Popup to handle resize////////////////////////////////////////////
                     if(loadedImage.width > pad.getWidth() || loadedImage.height > pad.getHeight()){
