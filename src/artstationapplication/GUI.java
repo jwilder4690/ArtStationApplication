@@ -15,6 +15,7 @@ import javafx.scene.image.Image;
 import javafx.collections.*;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.paint.Color;
+import javafx.beans.binding.Bindings;
 
 /**
  *
@@ -140,56 +141,112 @@ public class GUI {
         toolGroup = new ToggleGroup();
         
         Image imageCircle = new Image(getClass().getResource("data/btnCircle.png").toExternalForm());
-        btnCircle = new ToggleButton("Circle", new ImageView(imageCircle));
+        Image imageCirclePressed = new Image(getClass().getResource("data/btnCirclePressed.png").toExternalForm());
+        final ImageView circleView = new ImageView();
+        btnCircle = new ToggleButton("Circle", circleView);
+        circleView.imageProperty().bind(Bindings
+                .when(btnCircle.selectedProperty())
+                .then(imageCirclePressed)
+                .otherwise(imageCircle)
+        );
         btnCircle.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         btnCircle.setStyle("-fx-padding:0; ");
         btnCircle.setToggleGroup(toolGroup);
         btnCircle.setTooltip(new Tooltip("Click in center, drag to size."));
         
-        Image imageSquare = new Image(getClass().getResource("data/btnRectangle.png").toExternalForm());
-        btnRectangle = new ToggleButton("Rectangle", new ImageView(imageSquare));
+        Image imageRectangle = new Image(getClass().getResource("data/btnRectangle.png").toExternalForm());
+        Image imageRectanglePressed = new Image(getClass().getResource("data/btnRectanglePressed.png").toExternalForm());
+        final ImageView rectangleView = new ImageView();
+        btnRectangle = new ToggleButton("Rectangle", rectangleView);
+        rectangleView.imageProperty().bind(Bindings
+                .when(btnRectangle.selectedProperty())
+                .then(imageRectanglePressed)
+                .otherwise(imageRectangle)
+        );
         btnRectangle.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         btnRectangle.setStyle("-fx-padding:0");
         btnRectangle.setToggleGroup(toolGroup);
         btnRectangle.setTooltip(new Tooltip("Click in center, drag to size. Hold SHIFT to snap rotation to 45 degree increments. Hold ALT to draw from corner to corner."));
         
         Image imageTriangle = new Image(getClass().getResource("data/btnTriangle.png").toExternalForm());
-        btnTriangle = new ToggleButton("Triangle", new ImageView(imageTriangle));
+        Image imageTrianglePressed = new Image(getClass().getResource("data/btnTrianglePressed.png").toExternalForm());
+        final ImageView triangleView = new ImageView();
+        btnTriangle = new ToggleButton("Triangle", triangleView);
+        triangleView.imageProperty().bind(Bindings
+                .when(btnTriangle.selectedProperty())
+                .then(imageTrianglePressed)
+                .otherwise(imageTriangle)
+        );
         btnTriangle.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         btnTriangle.setStyle("-fx-padding:0");
         btnTriangle.setToggleGroup(toolGroup);
         btnTriangle.setTooltip(new Tooltip("Click in center, drag to size. Hold SHIFT to snap rotation to 30 degree increments."));
         
         Image imageLine = new Image(getClass().getResource("data/btnLine.png").toExternalForm());
-        btnLine = new ToggleButton("Line", new ImageView(imageLine));
+        Image imageLinePressed = new Image(getClass().getResource("data/btnLinePressed.png").toExternalForm());
+        final ImageView lineView = new ImageView();
+        btnLine = new ToggleButton("Line", lineView);
+        lineView.imageProperty().bind(Bindings
+                .when(btnLine.selectedProperty())
+                .then(imageLinePressed)
+                .otherwise(imageLine)
+        );
         btnLine.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         btnLine.setStyle("-fx-padding:0");
         btnLine.setToggleGroup(toolGroup);
         btnLine.setTooltip(new Tooltip("Click for first point and drag to second point."));
         
         Image imagePoly = new Image(getClass().getResource("data/btnPoly.png").toExternalForm());
-        btnPoly = new ToggleButton("Poly", new ImageView(imagePoly));
+        Image imagePolyPressed = new Image(getClass().getResource("data/btnPolyPressed.png").toExternalForm());
+        final ImageView polyView = new ImageView();
+        btnPoly = new ToggleButton("Poly", polyView);
+        polyView.imageProperty().bind(Bindings
+                .when(btnPoly.selectedProperty())
+                .then(imagePolyPressed)
+                .otherwise(imagePoly)
+        );
         btnPoly.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         btnPoly.setStyle("-fx-padding:0");
         btnPoly.setToggleGroup(toolGroup);
         btnPoly.setTooltip(new Tooltip("Single click for each vertex, SPACE, right click, or click on first point to complete."));
         
         Image imageCurve = new Image(getClass().getResource("data/btnCurve.png").toExternalForm());
-        btnCurve = new ToggleButton("Curve", new ImageView(imageCurve));
+        Image imageCurvePressed = new Image(getClass().getResource("data/btnCurvePressed.png").toExternalForm());
+        final ImageView curveView = new ImageView();
+        btnCurve = new ToggleButton("Curve", curveView);
+        curveView.imageProperty().bind(Bindings
+                .when(btnCurve.selectedProperty())
+                .then(imageCurvePressed)
+                .otherwise(imageCurve)
+        );
         btnCurve.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         btnCurve.setStyle("-fx-padding:0");
         btnCurve.setToggleGroup(toolGroup);
         btnCurve.setTooltip(new Tooltip("Click for first point and drag to second point."));
         
         Image imagePicture = new Image(getClass().getResource("data/btnPicture.png").toExternalForm());
-        btnPicture = new ToggleButton("Picture", new ImageView(imagePicture));
+        Image imagePicturePressed = new Image(getClass().getResource("data/btnPicturePressed.png").toExternalForm());
+        final ImageView pictureView = new ImageView();
+        btnPicture = new ToggleButton("Picture", pictureView);
+        pictureView.imageProperty().bind(Bindings
+                .when(btnPicture.selectedProperty())
+                .then(imagePicturePressed)
+                .otherwise(imagePicture)
+        );
         btnPicture.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         btnPicture.setStyle("-fx-padding:0");
         btnPicture.setToggleGroup(toolGroup);
         btnPicture.setTooltip(new Tooltip("Select image to load from file."));
         
         Image imageArc = new Image(getClass().getResource("data/btnArc.png").toExternalForm());
-        btnArc = new ToggleButton("Arc", new ImageView(imageArc));
+        Image imageArcPressed = new Image(getClass().getResource("data/btnArcPressed.png").toExternalForm());
+        final ImageView arcView = new ImageView();
+        btnArc = new ToggleButton("Arc", arcView);
+        arcView.imageProperty().bind(Bindings
+                .when(btnArc.selectedProperty())
+                .then(imageArcPressed)
+                .otherwise(imageArc)
+        );
         btnArc.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         btnArc.setStyle("-fx-padding:0");
         btnArc.setToggleGroup(toolGroup);

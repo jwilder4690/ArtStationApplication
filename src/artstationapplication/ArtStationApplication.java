@@ -48,6 +48,7 @@ public class ArtStationApplication extends PApplet{
     int spacing = 5;
     String dialog = "";
     String fileLocation = "noFile";
+    String refLocation = "noFile";
     boolean[] keys = new boolean[255];
     float canvasX;
     float canvasY;
@@ -299,6 +300,8 @@ public class ArtStationApplication extends PApplet{
                 File file = fileChooser.showOpenDialog(stage); //arg here is a Window that input will be blocked to until dialog complete (can be null)
                 if(file != null){ 
                     PImage loadedImage = loadImage(file.getAbsolutePath());
+                    refLocation = file.getAbsolutePath();
+
 
                     //Popup to handle resize////////////////////////////////////////////
                     if(loadedImage.width > pad.getWidth() || loadedImage.height > pad.getHeight()){
@@ -854,7 +857,7 @@ public class ArtStationApplication extends PApplet{
     void copyShape() {
         if(pad.isEditMode() && !gui.shapes.isEmpty()){
             gui.shapes.add(gui.shapes.get(pad.listIndex).copy(gui.shapes.size()));
-            pad.listIndex++;
+            pad.listIndex = gui.shapes.size()-1;
             gui.shapes.get(pad.listIndex).finishShape(); 
         }
     }
@@ -1034,6 +1037,10 @@ public class ArtStationApplication extends PApplet{
             pad.setHeight(Integer.valueOf(pieces[1]));
             pad.setBackgroundColor(Integer.valueOf(pieces[2]));
             pad.setGridDensity(Integer.valueOf(pieces[3]));
+            if(!pieces[4].equals("noFile")){
+                pad.loadReferenceImage(loadImage(pieces[4]));
+                gui.cbReferenceImage.setSelected(true);
+            }
             
             //Creates shapes with load constructor//////////////////////////////
             while((line = reader.readLine()) != null){
@@ -1060,7 +1067,7 @@ public class ArtStationApplication extends PApplet{
         }
         try{
             output = new PrintWriter(file);
-            output.println(pad.getWidth()+","+pad.getHeight()+","+pad.getBackgroundColor()+","+pad.getGridDensity()); 
+            output.println(pad.getWidth()+","+pad.getHeight()+","+pad.getBackgroundColor()+","+pad.getGridDensity()+","+refLocation); 
             for(int i = 0; i < gui.shapes.size(); i++){
                 output.println(gui.shapes.get(i).save());
             }
