@@ -164,7 +164,7 @@ abstract class Shape{
         rotation = 0;
     }
     
-    //Temporary, remove later or find real solution
+    //TODO: Temporary, remove later or find real solution
     boolean isPicture(){
         return false;
     }
