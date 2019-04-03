@@ -25,8 +25,6 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 
 
-//import java.awt.Toolkit;
-
 
 /**
  *
@@ -57,8 +55,8 @@ public class ArtStationApplication extends PApplet{
     CanvasArea pad;
     GUI gui = new GUI();
     ChangeList tasks = new ChangeList();
-
-
+    Stage stage;
+    
     @Override
     public void settings(){
         size(displayWidth - gui.toolBarWidth - gui.controlBarWidth,displayHeight, FX2D);
@@ -67,15 +65,15 @@ public class ArtStationApplication extends PApplet{
     @Override
     protected PSurface initSurface(){
         PSurface mySurface = super.initSurface();
-
+        
         final PSurfaceFX FXSurface = (PSurfaceFX) mySurface;
         final Canvas canvas = (Canvas) FXSurface.getNative(); // canvas is the processing drawing
-        final Stage stage = (Stage) canvas.getScene().getWindow(); // stage is the window
+        stage = (Stage) canvas.getScene().getWindow(); // stage is the window
+        Platform.setImplicitExit(false);
         
         gui.initializeGUI();
         
         //Event Handling for all GUI elements///////////////////////////////////
-
         gui.coordsOff.setOnAction(new EventHandler<ActionEvent>(){
             public void handle(ActionEvent ae){
                coordinateMode = Coordinates.OFF;
@@ -148,7 +146,8 @@ public class ArtStationApplication extends PApplet{
             public void handle(ActionEvent ae){ 
                 String name = ((MenuItem)ae.getTarget()).getText();
                 MenuItem target = (MenuItem)ae.getTarget();
-                if(name.equals("Exit")) Platform.exit();
+                //TODO: create window asking user if they want to exit or hide
+                if(name.equals("Exit")) stage.hide(); 
                 else if(target == gui.clipboardFile) exportProcessingFileToClipboard(); 
                 else if(target == gui.clipboardShapes) exportProcessingShapesToClipboard(); 
                 else if(target == gui.imageFile){
@@ -301,7 +300,6 @@ public class ArtStationApplication extends PApplet{
                 if(file != null){ 
                     PImage loadedImage = loadImage(file.getAbsolutePath());
                     refLocation = file.getAbsolutePath();
-
 
                     //Popup to handle resize////////////////////////////////////////////
                     if(loadedImage.width > pad.getWidth() || loadedImage.height > pad.getHeight()){
@@ -703,6 +701,7 @@ public class ArtStationApplication extends PApplet{
                 stage.setScene(newscene); // Replace the stage's scene with our new one.
             }
         });
+        
         canvas.requestFocus(); //needed?
         return mySurface; 
     }
@@ -1077,6 +1076,10 @@ public class ArtStationApplication extends PApplet{
         catch(FileNotFoundException e){
             dialog = "File not found.";
         }
+    }
+    
+    public Stage getWindow(){
+        return stage;
     }
     
     public static void main(String[] args) {
