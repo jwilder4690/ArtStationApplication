@@ -74,7 +74,6 @@ public class ArtStationApplication extends PApplet{
         gui.initializeGUI();
         
         //Event Handling for all GUI elements///////////////////////////////////
-        
         gui.coordsOff.setOnAction(new EventHandler<ActionEvent>(){
             public void handle(ActionEvent ae){
                coordinateMode = Coordinates.OFF;

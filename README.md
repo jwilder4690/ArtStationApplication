@@ -27,11 +27,14 @@ I am currently working on developing a testing suite for this project. There are
 - [x] Initial launch with all basic functionality 
 - [x] Refactor
 - [ ] Prepare for Integration as Processing tool
-- [ ] Address Issues
-- [ ] Develop testing environment
-    - Unit Tests
-    - Behavior testing
-    - Output testing
+  - [ ] Drop new release
+  - [ ] Complete Requirements listed at https://github.com/processing/processing/wiki/Tool-Guidelines
+  - [ ] Submit for approval 
+- [x] Address major Issues
+- [ ] Prepare for final feature drop
+  - [ ] Groups 
+  - [ ] Final bugs
+- [ ] Update Testing Environment
 
 
 
