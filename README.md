@@ -6,7 +6,7 @@ This application was created as a developer tool to aid in the creation of Proce
 
 The export option can be used output the processing code to your clipboard or to create an image or SVG file. The JAR file is available above in the ArtStation.zip. This application is still in development, please report any issues. 
 
-Working on finishing up the webpage to host the tool, then I will submit to get added to the Processing tools. 
+Submitted for approval!
 
 ## Contributor/Developer Notes:
 
@@ -28,10 +28,10 @@ I am currently working on developing a testing suite for this project. There are
 
 - [x] Initial launch with all basic functionality 
 - [x] Refactor
-- [ ] Prepare for Integration as Processing tool
-  - [ ] Drop new release
-  - [ ] Complete Requirements listed at https://github.com/processing/processing/wiki/Tool-Guidelines
-  - [ ] Submit for approval 
+- [x] Prepare for Integration as Processing tool
+  - [x] Drop new release
+  - [x] Complete Requirements listed at https://github.com/processing/processing/wiki/Tool-Guidelines
+  - [x] Submit for approval 
 - [x] Address major Issues
 - [ ] Prepare for final feature drop
   - [ ] Groups 
