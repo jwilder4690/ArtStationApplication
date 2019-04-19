@@ -59,6 +59,29 @@ public class ArtStationApplication extends PApplet{
     ChangeList tasks = new ChangeList();
     Stage stage;
     
+    private void exitMenu() {
+    	Alert exitDialog = new Alert(AlertType.CONFIRMATION);
+    	exitDialog.setTitle("Exit?") ;
+    	exitDialog.setHeaderText("If you close this window, the Processing IDE will be "
+    			+ "unable to open it again.\nWould you like to hide or close?");
+    	exitDialog.setContentText("Choose your option.");
+
+    	ButtonType hideButton = new ButtonType("Hide");
+    	ButtonType closeButton = new ButtonType("Close");
+    	ButtonType cancelButton = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+
+    	exitDialog.getButtonTypes().setAll(hideButton, closeButton, cancelButton);
+
+    	Optional<ButtonType> result = exitDialog.showAndWait();
+    	if (result.get() == hideButton){ //hide
+    	   stage.setIconified(true); //minimize app
+    	} else if (result.get() == closeButton) { //close
+    	    stage.close();
+    	} else { //cancel
+    	    //resume app
+    	}
+    }
+    
     @Override
     public void settings(){
         size(displayWidth - gui.toolBarWidth - gui.controlBarWidth,displayHeight, FX2D);
@@ -75,26 +98,8 @@ public class ArtStationApplication extends PApplet{
         
         stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             public void handle(WindowEvent we) {
-            	Alert exitDialog = new Alert(AlertType.CONFIRMATION);
-            	exitDialog.setTitle("Exit?");
-            	exitDialog.setHeaderText("If you close this window, the Processing IDE will be unable to open it again.\nWould you like to hide or close?");
-            	exitDialog.setContentText("Choose your option.");
-
-            	ButtonType hideButton = new ButtonType("Hide");
-            	ButtonType closeButton = new ButtonType("Close");
-            	ButtonType cancelButton = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
-
-            	exitDialog.getButtonTypes().setAll(hideButton, closeButton, cancelButton);
-
-            	Optional<ButtonType> result = exitDialog.showAndWait();
-            	if (result.get() == hideButton){ //hide
-            	   we.consume(); //stop exit event
-            	   stage.setIconified(true); //minimize app
-            	} else if (result.get() == closeButton) { //close
-            	    // this is already a exit event, do nothing
-            	} else { //cancel
-            	    we.consume(); //stop exit event and resume app
-            	}
+            	we.consume();
+            	exitMenu();
             }
         }); 
         
@@ -174,7 +179,7 @@ public class ArtStationApplication extends PApplet{
                 String name = ((MenuItem)ae.getTarget()).getText();
                 MenuItem target = (MenuItem)ae.getTarget();
                 //TODO: create window asking user if they want to exit or hide
-                if(name.equals("Exit")) stage.hide(); 
+                if(name.equals("Exit")) exitMenu(); 
                 else if(target == gui.clipboardFile) exportProcessingFileToClipboard(); 
                 else if(target == gui.clipboardShapes) exportProcessingShapesToClipboard(); 
                 else if(target == gui.imageFile){
