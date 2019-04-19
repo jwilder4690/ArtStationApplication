@@ -8,6 +8,8 @@ import javafx.application.*;
 import javafx.scene.*;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.stage.*;
 import javafx.event.*;
 import javafx.scene.input.*;
@@ -70,6 +72,31 @@ public class ArtStationApplication extends PApplet{
         final Canvas canvas = (Canvas) FXSurface.getNative(); // canvas is the processing drawing
         stage = (Stage) canvas.getScene().getWindow(); // stage is the window
         Platform.setImplicitExit(false);
+        
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            public void handle(WindowEvent we) {
+            	Alert exitDialog = new Alert(AlertType.CONFIRMATION);
+            	exitDialog.setTitle("Exit?");
+            	exitDialog.setHeaderText("If you close this window, the Processing IDE will be unable to open it again.\nWould you like to hide or close?");
+            	exitDialog.setContentText("Choose your option.");
+
+            	ButtonType buttonTypeOne = new ButtonType("Hide");
+            	ButtonType buttonTypeTwo = new ButtonType("Close");
+            	ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+
+            	exitDialog.getButtonTypes().setAll(buttonTypeOne, buttonTypeTwo, buttonTypeCancel);
+
+            	Optional<ButtonType> result = exitDialog.showAndWait();
+            	if (result.get() == buttonTypeOne){ //hide
+            	   we.consume();
+            	   stage.setIconified(true);
+            	} else if (result.get() == buttonTypeTwo) { //close
+            	    // this is already a exit event, do nothing
+            	} else { //cancel
+            	    we.consume(); //stop exit event and resume app
+            	}
+            }
+        }); 
         
         gui.initializeGUI();
         
