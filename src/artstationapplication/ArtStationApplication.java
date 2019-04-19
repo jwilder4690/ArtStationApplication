@@ -88,8 +88,8 @@ public class ArtStationApplication extends PApplet{
 
             	Optional<ButtonType> result = exitDialog.showAndWait();
             	if (result.get() == hideButton){ //hide
-            	   we.consume();
-            	   stage.setIconified(true);
+            	   we.consume(); //stop exit event
+            	   stage.setIconified(true); //minimize app
             	} else if (result.get() == closeButton) { //close
             	    // this is already a exit event, do nothing
             	} else { //cancel
