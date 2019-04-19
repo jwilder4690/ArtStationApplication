@@ -80,17 +80,17 @@ public class ArtStationApplication extends PApplet{
             	exitDialog.setHeaderText("If you close this window, the Processing IDE will be unable to open it again.\nWould you like to hide or close?");
             	exitDialog.setContentText("Choose your option.");
 
-            	ButtonType buttonTypeOne = new ButtonType("Hide");
-            	ButtonType buttonTypeTwo = new ButtonType("Close");
-            	ButtonType buttonTypeCancel = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
+            	ButtonType hideButton = new ButtonType("Hide");
+            	ButtonType closeButton = new ButtonType("Close");
+            	ButtonType cancelButton = new ButtonType("Cancel", ButtonData.CANCEL_CLOSE);
 
-            	exitDialog.getButtonTypes().setAll(buttonTypeOne, buttonTypeTwo, buttonTypeCancel);
+            	exitDialog.getButtonTypes().setAll(hideButton, closeButton, cancelButton);
 
             	Optional<ButtonType> result = exitDialog.showAndWait();
-            	if (result.get() == buttonTypeOne){ //hide
+            	if (result.get() == hideButton){ //hide
             	   we.consume();
             	   stage.setIconified(true);
-            	} else if (result.get() == buttonTypeTwo) { //close
+            	} else if (result.get() == closeButton) { //close
             	    // this is already a exit event, do nothing
             	} else { //cancel
             	    we.consume(); //stop exit event and resume app
